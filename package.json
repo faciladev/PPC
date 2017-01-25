@@ -10,11 +10,18 @@
     "all": "npm run build && npm run test"
   },
   "dependencies": {
+    "body-parser": "^1.16.0",
     "construx": "^1.0.0",
     "construx-copier": "^1.0.0",
+    "cookie-parser": "^1.4.3",
     "eslint": "^1.10.3",
     "express": "^4.12.2",
-    "kraken-js": "^2.0.0"
+    "kraken-js": "^2.0.0",
+    "morgan": "^1.7.0",
+    "mysql": "^2.13.0",
+    "promise": "^7.1.1",
+    "querystring": "^0.2.0",
+    "request": "^2.79.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
