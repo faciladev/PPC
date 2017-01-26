@@ -1,3 +1,2 @@
-.editorconfig
-.eslintrc
-node_modules
+node_modules/
+config/development.json
