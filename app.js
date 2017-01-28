@@ -4,7 +4,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
+var search = require('./routes/search');
 
 var app = express();
 
@@ -22,8 +22,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
 
 
-//Public requests
-app.use('/', index);
+//Search Module
+//Searches sponsored ads and daily deals
+app.use('/api/search', search);
+
 
 
 // catch 404 and forward to error handler
@@ -41,6 +43,7 @@ app.use(function(err, req, res, next) {
     res.status(404);
     res.json({error: err});
   }
+
   else if(req.app.get('env') === 'production'){
     //Error in production environment
     res.status(err.status || 500);
@@ -48,6 +51,7 @@ app.use(function(err, req, res, next) {
   }
   else{
     //Error in non-production environment
+    console.log(err);
     res.status(err.status || 500);
     res.json({error: err});
   }
