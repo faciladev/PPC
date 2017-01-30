@@ -42,7 +42,26 @@ module.exports = {
             });
         });
     },
-    getMicrosite: function(ad_id) {
+
+    getAdLocations: function(ad_id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('SELECT * from ppc_ad_locations where ad_id = ?', [ad_id],
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    getAdMicrosite: function(ad_id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
                 connection.query('SELECT * FROM ppc_ad_microsites where ad_id = ? LIMIT 1', [ad_id],
@@ -60,6 +79,44 @@ module.exports = {
             });
         });
     },
+    getAdKeywords: function(ad_id) {
+      return new Promise(function(resolve, reject) {
+         DbHelper.getConnection().then(function(connection) {
+            connection.query('SELECT * from ppc_ads_keywords where ad_id = ?', [ad_id],
+                function(err, rows, fields) {
+                    connection.release();
+                    if(err) {
+                        reject(err);
+                    }
+                    resolve(rows);
+                }
+            );
+         }, function(error) {
+             if(error)
+                reject(new Error('Connection error'));
+         });
+      });
+    },
+    getAdSubpages: function(ad_id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('SELECT * from ppc_ads_subpages where ad_id = ?', [ad_id],
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+
+
     saveAd: function(ad) {
         console.log(ad);
         return new Promise(function(resolve, reject) {
