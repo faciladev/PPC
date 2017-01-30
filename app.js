@@ -3,10 +3,16 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var userAgent = require('useragent');
 
 var search = require('./routes/search');
+var click = require('./routes/click');
 
 var app = express();
+
+//keeps RegExp library to be up to date to match with agent the 
+//widest range of useragent
+userAgent(true);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -22,10 +28,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
 
 
-//Search Module
+
 //Searches sponsored ads and daily deals
 app.use('/api/search', search);
 
+//Track clicks for sponsored ads and daily deals
+app.use('/api/click', click);
 
 
 // catch 404 and forward to error handler

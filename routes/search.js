@@ -31,16 +31,17 @@ router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
 					var ip = Util.getClientIp(req);
 
 					//Log impression
-					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userId).then(
+					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
 						function(response){
-
+							
+							res.json(searchData);
 						}, 
 						function(error){
 							next(error);
 						}
 					);
 
-					res.json(searchData);
+					
 					
 				}, 
 				function(error){
@@ -66,16 +67,16 @@ router.get('/deal/:keyword', function(req, res, next) {
 			var ip = Util.getClientIp(req);
 
 			//Log impression
-			ppcModel.trackDailyDealImpression(searchData, ip, userId).then(
+			ppcModel.trackDailyDealImpression(searchData, ip, userAgent, userId).then(
 				function(response){
-
+					res.json(searchData);
 				}, 
 				function(error){
 					next(error);
 				}
 			);
 
-			res.json(searchData);
+			
 		}, 
 		function(error){			
 			next(error);

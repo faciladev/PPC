@@ -13,6 +13,11 @@ const ACTOR_ADVERTISER = 2;
 const ACTOR_NON_MEMBER = 3;
 const ACTOR_ADMIN = 4;
 
+const WEEKLY_BUDGET_PERIOD = 'weekly';
+const DAILY_BUDGET_PERIOD = 'daily';
+const MONTHLY_BUDGET_PERIOD = 'monthly';
+
+
 var ppcModel = {
 
     findSponsoredAds : function(keyword, location, subpage){
@@ -100,13 +105,14 @@ var ppcModel = {
                 for (var i = 0; i < searchData.length; i++) {
                     query += 'INSERT INTO ppc_ad_searches (ad_id, keyword_id, ' + 
                     'keyword_category_id, ad_location_id, ad_subpage_id, price, ' +
-                    'url, title, address, lat, lng, phone_no, ad_text) ' +
+                    'url, title, address, lat, lng, phone_no, ad_text, ad_keyword_id) ' +
                     'VALUES ('+ searchData[i].ad_id +', '+ searchData[i].keyword_id +
                     ', '+ searchData[i].keyword_category_id +', '+ 
                     searchData[i].ad_location_id +','+ searchData[i].ad_subpage_id +','+ 
                     searchData[i].price +', '+ searchData[i].url +', '+ searchData[i].title + 
                     ','+ searchData[i].address +', '+ searchData[i].lat +', '+ searchData[i].lng + 
-                    ','+ searchData[i].phone_no +','+ searchData[i].ad_text +');';
+                    ','+ searchData[i].phone_no +','+ searchData[i].ad_text +',' + 
+                    searchData[i].ad_keyword_id +');';
                 }
 
                 //Run multiple statement query
@@ -123,7 +129,7 @@ var ppcModel = {
         });
     },
 
-    trackSponsoredAdImpression : function(savedSearchIds, ip, userId){
+    trackSponsoredAdImpression : function(savedSearchIds, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
 
@@ -135,10 +141,10 @@ var ppcModel = {
                         var query = '';
                         for(var i = 0; i<savedSearchIds.length; i++){
                             query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
-                            'actor_type_id, item_id, actor_id, ip_address) ' +
+                            'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
                             'VALUES ('+ ITEM_SPONSORED_AD +', '+ ACTIVITY_IMPRESSION +
-                            ', '+ actor_type_id +', '+ savedSearchIds[i].insertedId +
-                            ', '+ userId +','+ ip +');';
+                            ', '+ actor_type_id +', '+ savedSearchIds[i].insertId +
+                            ', '+ userId +','+ ip +','+ userAgent.user_agent +','+ userAgent.device_version +');';
                         }
 
                         connection.query(query, function(err, results, fields){
@@ -205,7 +211,7 @@ var ppcModel = {
         });
     },
 
-    trackDailyDealImpression : function(savedSearchIds, ip, userId){
+    trackDailyDealImpression : function(savedSearchIds, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
 
@@ -217,10 +223,10 @@ var ppcModel = {
                         var query = '';
                         for(var i = 0; i<searchData.length; i++){
                             query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
-                            'actor_type_id, item_id, actor_id, ip_address) ' +
+                            'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
                             'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
                             ', '+ actor_type_id +', '+ searchData[i].deal_id +
-                            ', '+ userId +','+ ip +');';
+                            ', '+ userId +','+ ip +','+ userAgent.user_agent +','+ userAgent.device_version +');';
                         }
 
                         connection.query(query, function(err, results, fields){
@@ -245,7 +251,206 @@ var ppcModel = {
         });
     },
 
-    
+    getAdSearchById : function(searchId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                var query = 'SELECT * FROM ppc_ad_searches WHERE id = ? LIMIT 1';
+                connection.query(query, [searchId], function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        reject(err);
+
+                    resolve(results.length > 0 ? results[0] : []);
+                });
+
+                
+                
+            },function(error){
+                next(error);
+            });
+        });
+    },
+
+    requestMeetsClickPolicy: function(ip, userAgent){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                var query = 'SELECT COUNT(id) FROM one_hour_analytics '+
+                'WHERE ip_address = ? AND user_agent = ? AND device_version = ?';
+                connection.query(query, 
+                    [ip, userAgent.user_agent, userAgent.device_version], 
+                    function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        reject(err);
+
+                    resolve(results > 0 ? true : false);
+                });
+
+                
+                
+            },function(error){
+                next(error);
+            });
+        });
+    },
+
+    saveFraudClick: function(ip, userAgent, userId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                var query = 'INSERT INTO fraud_clicks SET ?';
+                userId = (undefined === userId ? null : userId);
+
+                connection.query(query, 
+                    {
+                        ip_address: ip_address, 
+                        user_agent: user_agent,
+                        device_version: device_version,
+                        user_id: userId
+                    }, 
+                    function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        reject(err);
+
+                    resolve(results.insertId);
+                });
+
+                
+                
+            },function(error){
+                next(error);
+            });
+        });
+    },
+
+    adBudgetLimitCheck: function(searchData){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                var query = 'SELECT ' + 
+                '(COUNT(ppc_analytics.id) * ?) + ? <= ppc_ads.budget_limit AS has_passed ' +
+                'FROM ppc_ad_searches JOIN available_ad_keywords ON ' +
+                'available_ad_keywords.ad_keyword_id = ppc_ad_searches.ad_keyword_id JOIN ppc_ads ON ' +
+                'available_ad_keywords.ad_id = ppc_ads.id JOIN ppc_analytics ON ' +
+                'ppc_ad_searches.id = ppc_analytics.item_id '+
+                'WHERE ' +
+                'ppc_ad_searches.id = ? AND ' +
+                'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_date BETWEEN ' +
+                'CURRENT_DATE() AND CURRENT_DATE(), ' +
+                'ppc_analytics.activity_date BETWEEN ? AND ?)';
+
+
+                connection.query(query, 
+                    [
+                        searchData.price, 
+                        searchData.price, 
+                        searchData.id, 
+                        Util.firstDay(), 
+                        Util.lastDay()
+                    ], 
+                    function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        reject(err);
+
+                    if(results.length > 0 && results[0].has_passed !== 0){
+                        resolve(true);
+                    }
+
+                    resolve(false);
+                });
+
+                
+                
+            },function(error){
+                next(error);
+            });
+        });
+
+    },
+
+    postponeAdAvailability: function(ad_id, budget_period){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                var query = 'UPDATE ppc_ads SET available_since = ? WHERE ppc_ads.id = ?';
+                var queryParams;
+                switch(budget_period){
+                    case DAILY_BUDGET_PERIOD:
+                        queryParams = 'DATE_ADD(available_since,INTERVAL 1 DAY)';
+                        break;
+                    case WEEKLY_BUDGET_PERIOD:
+                        queryParams = 'DATE_ADD(available_since,INTERVAL 7 DAY)';
+                        break;
+                    case MONTHLY_BUDGET_PERIOD:
+                        queryParams = 'DATE_ADD(available_since,INTERVAL 30 DAY)';
+                        break;
+                    default:
+                        break;
+                }
+
+                connection.query(query, 
+                    [queryParams], 
+                    function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        reject(err);
+
+                    resolve(results.affectedRows);
+                });
+
+                
+                
+            },function(error){
+                next(error);
+            });
+        });
+    }, 
+
+    trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+
+                Util.getUserGroup(userId).then(
+                    function(response){
+
+                        var actor_type_id = getActorType(userId);
+                      
+                        var query = 'INSERT INTO ppc_analytics SET ?';
+
+
+                        connection.query(query, 
+                            {
+                                actor_type_id: actor_type_id,
+                                item_id: searchData.id,
+                                actor_id: userId,
+                                ip_address: ip,
+                                user_agent: userAgent.user_agent,
+                                device_version: userAgent.device_version
+                            }, 
+                            function(err, results, fields){
+                            connection.release();
+
+                            if(err)
+                                reject(err);
+
+                            resolve(results.insertId);
+                        });
+                    }, 
+                    function(error){
+
+                    }
+                );
+
+                
+                
+            },function(error){
+                next(error);
+            });
+        });
 
 
     
@@ -265,6 +470,8 @@ var getActorType = function(userId){
     }
     return actor_type_id;
 }
+
+
 
 
 module.exports = ppcModel;
