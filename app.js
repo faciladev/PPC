@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
+var ads = require('./routes/ads');
 
 var app = express();
 
@@ -24,6 +25,7 @@ app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
 
 //Public requests
 app.use('/', index);
+app.use('/api/', ads);
 
 
 // catch 404 and forward to error handler
