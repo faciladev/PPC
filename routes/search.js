@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var searchModel = require('../models/searchModel');
+var ppcModel = require('../models/ppcModel');
+var Util = require('../lib/util');
 
 
 router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
@@ -9,10 +10,13 @@ router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
 	var subpage = req.params.subpage;
 	var userId; //get user from cookie
 
-	searchModel.findSponsoredAds(keyword, location, subpage).then(
+	ppcModel.findSponsoredAds(keyword, location, subpage).then(
 		function(searchData){
+			if(searchData.length <= 0)
+				return res.json(searchData);
+
 			//Save searches
-			searchModel.saveSponsoredAdSearch(searchData).then(
+			ppcModel.saveSponsoredAdSearch(searchData).then(
 				function(savedSearchIds){
 					
 
@@ -24,8 +28,10 @@ router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
 					for(var i = 0; i<searchData.length; i++)
 						searchData[i].search_id = savedSearchIds[i].insertId;
 
+					var ip = Util.getClientIp(req);
+
 					//Log impression
-					searchModel.trackSponsoredAdImpression(savedSearchIds, userId).then(
+					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userId).then(
 						function(response){
 
 						}, 
@@ -41,13 +47,42 @@ router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
 					next(error);
 				}
 			);
-
-			res.json(response);
 		}, 
 		function(error){			
 			next(error);
 		}
 	)
 });
+
+router.get('/deal/:keyword', function(req, res, next) {
+	var keyword = req.params.keyword;
+	var userId; //get user from cookie
+
+	ppcModel.findDailyDeals(keyword).then(
+		function(searchData){
+			if(searchData.length <= 0)
+				return res.json(searchData);
+
+			var ip = Util.getClientIp(req);
+
+			//Log impression
+			ppcModel.trackDailyDealImpression(searchData, ip, userId).then(
+				function(response){
+
+				}, 
+				function(error){
+					next(error);
+				}
+			);
+
+			res.json(searchData);
+		}, 
+		function(error){			
+			next(error);
+		}
+	)
+});
+
+
 
 module.exports = router;
