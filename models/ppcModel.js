@@ -18,6 +18,7 @@ const DAILY_BUDGET_PERIOD = 'daily';
 const MONTHLY_BUDGET_PERIOD = 'monthly';
 
 
+
 var ppcModel = {
 
     findSponsoredAds : function(keyword, location, subpage){
@@ -451,25 +452,26 @@ var ppcModel = {
                 next(error);
             });
         });
+    },
 
-
+    getActorType : function(userId){
+        var actor_type_id;
+        if(response.group_id === 1){
+            actor_type_id = ACTOR_ADMIN;
+        }
+        else if(response.group_id === 2){
+            actor_type_id = ACTOR_CONSUMER;
+        } else if(response.group_id === 3){
+            actor_type_id = ACTOR_ADVERTISER;
+        } else {
+            actor_type_id = ACTOR_NON_MEMBER;
+        }
+        return actor_type_id;
+    }
     
 }
 
-var getActorType = function(userId){
-    var actor_type_id;
-    if(response.group_id === 1){
-        actor_type_id = ACTOR_ADMIN;
-    }
-    else if(response.group_id === 2){
-        actor_type_id = ACTOR_CONSUMER;
-    } else if(response.group_id === 3){
-        actor_type_id = ACTOR_ADVERTISER;
-    } else {
-        actor_type_id = ACTOR_NON_MEMBER;
-    }
-    return actor_type_id;
-}
+
 
 
 
