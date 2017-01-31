@@ -3,7 +3,9 @@ var Promise = require('promise');
 var DbHelper = require('../lib/DbHelper');
 var Util = require('../lib/util');
 
+const ACTIVITY_CLICK = 1;
 const ACTIVITY_IMPRESSION = 2;
+const ACTIVITY_DOWNLOAD = 3;
 
 const ITEM_SPONSORED_AD = 1;
 const ITEM_DAILY_DEAL = 2;
@@ -176,14 +178,15 @@ var ppcModel = {
             DbHelper.getConnection().then(function(connection){
                 //set default argument value
                 var subpage = (undefined === subpage) ? false : subpage;
-
+                //TODO
+                //Check deal availability
                 var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.name, m.company_name, m.what_you_get, m.location,' +
                     'm.end_date, m.discount_daily_description, m.discount_type, m.discount_percentage, m.discount_description, ' +
                     'm.regular_price, m.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
                     'm.discount_description, m.daily_deal_description, m.approved_category FROM daily_deal AS dd LEFT JOIN daily_deal_microsite ' +
                     'AS m ON dd.daily_deal_microsite_id=m.id ' +
                     'WHERE m.is_deleted=0 AND m.is_approved=1 AND m.is_complete=1 ' + 
-                    'AND dd.available_since <= CURDATE() AND m.name LIKE ?';
+                    'AND m.name LIKE ?';
 
                 var queryParams = ['%' + keyword + '%'];
 
@@ -277,16 +280,26 @@ var ppcModel = {
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
                 var query = 'SELECT COUNT(id) FROM one_hour_analytics '+
-                'WHERE ip_address = ? AND user_agent = ? AND device_version = ?';
+                'WHERE ip_address = ? AND user_agent = ? AND device_version = ? '
+                'AND ((activity_type_id = ? AND item_type_id = ?) OR '
+                'activity_type_id = ? AND item_type_id = ?)';
                 connection.query(query, 
-                    [ip, userAgent.user_agent, userAgent.device_version], 
+                    [
+                        ip, 
+                        userAgent.user_agent, 
+                        userAgent.device_version, 
+                        ACTIVITY_CLICK,
+                        ITEM_SPONSORED_AD,
+                        ACTIVITY_DOWNLOAD,
+                        ITEM_DAILY_DEAL
+                    ], 
                     function(err, results, fields){
                     connection.release();
 
                     if(err)
                         reject(err);
 
-                    resolve(results > 0 ? true : false);
+                    resolve(results < 6 ? true : false);
                 });
 
                 
@@ -467,6 +480,46 @@ var ppcModel = {
             actor_type_id = ACTOR_NON_MEMBER;
         }
         return actor_type_id;
+    },
+
+    getDealById : function(dealId){
+
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+
+                //TODO
+                //Check deal availability
+                var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.name, m.company_name, m.what_you_get, m.location,' +
+                    'm.end_date, m.discount_daily_description, m.discount_type, m.discount_percentage, m.discount_description, ' +
+                    'm.regular_price, m.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
+                    'm.discount_description, m.daily_deal_description, m.approved_category FROM daily_deal AS dd LEFT JOIN daily_deal_microsite ' +
+                    'AS m ON dd.daily_deal_microsite_id=m.id ' +
+                    'WHERE m.is_deleted=0 AND m.is_approved=1 AND m.is_complete=1 ' + 
+                    'AND dd.id = ?';
+
+                connection.query(
+                    query, 
+                    [dealId],
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            reject(err);
+                        }
+
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(error);
+            });
+
+            
+        });
     }
     
 }
