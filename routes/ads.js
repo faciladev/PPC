@@ -64,4 +64,29 @@ router.post('/ads/', function(req, res, next) {
     );
 });
 
+router.post('/ads/:id/keywords', function(req, res, next) {
+    ads.saveAdKeywords(req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
+router.post('/ads/:id/subpages', function(req, res, next) {
+    ads.saveAdSubPages(req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
+router.post('/ads/:id/locations', function(req, res, next) {
+    ads.saveAdLocations(req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
+
 module.exports = router;

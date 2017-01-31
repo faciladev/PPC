@@ -118,7 +118,6 @@ module.exports = {
 
 
     saveAd: function(ad) {
-        console.log(ad);
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
                 if(ad.id == 0 ) {
@@ -151,6 +150,65 @@ module.exports = {
                     reject(new Error('Connection error'));
             });
         });
+    },
+    saveAdKeywords: function(ad_keywords) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                for(var i=0; i< ad_keywords.length; i++) {
+                    connection.query('INSERT INTO ppc_ads_keywords SET ?', [ad_keywords[i]],
+                        function (err, rows, fields) {
+                            if(err){
+                                reject(err);
+                            }
+                            resolve(rows);
+                        }
+                    );
+                }
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    saveAdSubPages: function(ad_subPages) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                for(var i=0; i< ad_subPages.length; i++) {
+                    connection.query('INSERT INTO ppc_ads_subpages SET ?', [ad_subPages[i]],
+                        function (err, rows, fields) {
+                            if(err){
+                                reject(err);
+                            }
+                            resolve(rows);
+                        }
+                    );
+                }
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    saveAdLocations: function(ad_locations) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                for(var i=0; i< ad_locations.length; i++) {
+                    connection.query('INSERT INTO ppc_ad_locations SET ?', [ad_locations[i]],
+                        function (err, rows, fields) {
+                            if(err){
+                                reject(err);
+                            }
+                            resolve(rows);
+                        }
+                    );
+                }
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
     }
-
 }
