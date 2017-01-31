@@ -151,9 +151,29 @@ module.exports = {
             });
         });
     },
-    saveAdKeywords: function(ad_keywords) {
+    saveAdMicrosite: function(ad_id, ad_microsite) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
+                connection.query('DELETE FROM ppc_ad_microsites WHERE ad_id = ?', [ad_id]);
+                connection.query('INSERT INTO ppc_ad_microsites SET ?', [ad_microsite],
+                    function (err, rows, fields) {
+                        if(err){
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    saveAdKeywords: function(ad_id, ad_keywords) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                connection.query('DELETE FROM ppc_ads_keywords WHERE ad_id = ?', [ad_id]);
                 for(var i=0; i< ad_keywords.length; i++) {
                     connection.query('INSERT INTO ppc_ads_keywords SET ?', [ad_keywords[i]],
                         function (err, rows, fields) {
@@ -171,9 +191,10 @@ module.exports = {
             });
         });
     },
-    saveAdSubPages: function(ad_subPages) {
+    saveAdSubPages: function(ad_id,ad_subPages) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
+                connection.query('DELETE FROM ppc_ads_subpages WHERE ad_id = ?', [ad_id]);
                 for(var i=0; i< ad_subPages.length; i++) {
                     connection.query('INSERT INTO ppc_ads_subpages SET ?', [ad_subPages[i]],
                         function (err, rows, fields) {
@@ -191,9 +212,10 @@ module.exports = {
             });
         });
     },
-    saveAdLocations: function(ad_locations) {
+    saveAdLocations: function(ad_id,ad_locations) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
+                connection.query('DELETE FROM ppc_ad_locations WHERE ad_id = ?', [ad_id]);
                 for(var i=0; i< ad_locations.length; i++) {
                     connection.query('INSERT INTO ppc_ad_locations SET ?', [ad_locations[i]],
                         function (err, rows, fields) {
