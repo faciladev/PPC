@@ -18,7 +18,7 @@ module.exports = {
         NODE_ENV: "production",
         PORT: "3000"
       },
-      env_production : {
+      env_dev_remote : {
         NODE_ENV: "dev_remote",
         PORT: "8000"
       }
