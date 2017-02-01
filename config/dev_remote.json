@@ -1,0 +1,8 @@
+{
+	"db" : {
+        "host"     : "52.9.240.117",
+        "user"     : "ziphub_dev",
+        "password" : "password2017",
+        "database" : "ziphub_dev"
+    }
+}
