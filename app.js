@@ -6,6 +6,9 @@ var bodyParser = require('body-parser');
 var userAgent = require('useragent');
 var expressValidator = require('express-validator')
 
+
+var ads = require('./routes/ads');
+
 var search = require('./routes/search');
 var click = require('./routes/click');
 var deal = require('./routes/deal');
@@ -32,7 +35,7 @@ app.use(cookieParser());
 //Used to serve image assets and directory is outside project root
 app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
 
-
+app.use('/api/', ads);
 
 //Searches sponsored ads and daily deals
 app.use('/api/search', search);
@@ -42,7 +45,6 @@ app.use('/api/click', click);
 
 //Daily Deals
 app.use('/api/deals', deal);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
