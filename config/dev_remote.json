@@ -4,5 +4,8 @@
         "user"     : "ziphub_dev",
         "password" : "password2017",
         "database" : "ziphub_dev"
-    }
+    },
+
+    "project_url" : "http://52.53.177.10:8081",
+    "upload_path" : "/var/www/PPC_ASSETS"
 }
