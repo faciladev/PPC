@@ -6,6 +6,7 @@ var router = express.Router();
 
 var dealModel = require('../models/dealModel');
 var Util = require('../lib/util');
+var UploadHelper = require('../lib/UploadHelper');
 
 //Create Daily Deal
 router.post('/', function(req, res, next){
@@ -76,51 +77,37 @@ router.get('/:dealId', function(req, res, next){
 });
 
 router.post('/upload', function(req, res, next){
-	var uploadFile;
-
-	if(!req.files)
-		next(new Error('No file was uploaded.'));
-
 	var uploadType = req.query.type;
-	if(!uploadType)
-		next(new Error('Upload type not set.'));
 
-	var uploadDir = config.get('upload_path');
-	var project_url = config.get('project_url');
+	if(Object.keys(req.files).length === 0)
+		return next(new Error('No file was uploaded.'));
+
+	if(!uploadType)
+		return next(new Error('Upload type not set.'));
+
+	var subDir;
 
 	switch(uploadType){
 		case 'deal':
-			var newFile = req.files.couponImage;
-			var newFileName = Date.now() + '.' + mime.extension(req.files.couponImage.mimetype);
-			var newFileWebUrl = project_url + '/deals/' + newFileName;
-
-			var newFileSavedLocation = uploadDir + '/deals/' + newFileName
-			newFile.mv(uploadDir + newFileName, function(err) {
-			    if (err) {
-			      next(err);
-			    }
-			    else {
-			    	var banner_code = "<a href='#' rel='nofollow' alt='Target' title='Target'>"+
-                    "<img border='0' src='"+ newFileWebUrl +"' /></a>";
-
-
-                	res.json({banner_code: banner_code, banner_image_link: newFileWebUrl});
-			    }
-		  	}
-		  	);
+			subDir = uploadType;
 			break;
 		case 'microsite':
-			uploadDir = 'dealmicrosites';
+			subDir = uploadType;
 			break;
 		case 'coupon':
-			uploadDir = 'dealcoupons';
+			subDir = uploadType;
 			break;
 		default:
-			next(new Error('Invalid upload type.'));
-			break;
+			return next(new Error('Invalid upload type.'));
 	}
 
 
+	UploadHelper.uploadFiles(req.files, subDir).then(function(response){
+		res.json(response.length === 1 ? response[0] : response);
+	}, function(error){
+		console.log(error);
+		res.json(error);
+	});
 
 });
 
