@@ -73,8 +73,23 @@ router.post('/ads/', function(req, res, next) {
     );
 });
 router.post('/ads/:id/microsite', function(req, res, next) {
-    ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
-        res.json(response);
+    var micrositeImage;
+    if(!req.files){
+        res.send('No files were uploaded');
+        return;
+    }
+    //The name of the input file (i.e micrositeImageFile) is used to retrieve the uploaded image
+    micrositeImage = req.files.micrositeImageFile;
+
+    ads.saveAdMicrosite(req.params.id, req.body.data).then(function(response){
+        //use the mv() method to place the file somewhere on your server
+        micrositeImage.mv('/PPC_ASSETS/microsite/' + response.insertId + "_" + micrositeImage.name, function(err) {
+            if(err) {
+                res.status(500).send(err);
+            } else {
+                res.json(response);
+            }
+        });
     }, function(error) {
         error.message = 'Error';
         next(error);

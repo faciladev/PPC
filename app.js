@@ -4,7 +4,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var userAgent = require('useragent');
-var expressValidator = require('express-validator')
+var expressValidator = require('express-validator');
+var fileupload = require("express-fileupload");
 
 
 var ads = require('./routes/ads');
@@ -34,6 +35,8 @@ app.use(cookieParser());
 
 //Used to serve image assets and directory is outside project root
 app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
+
+app.use(fileupload());
 
 app.use('/api/', ads);
 
