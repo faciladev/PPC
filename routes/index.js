@@ -19,8 +19,8 @@ router.get('/subpages', function(req, res, next){
 
 router.get('/usastates', function(req, res, next){
 	usaStateModel.getSubPages().then(
-		function(subPages){
-			res.json(subPages);
+		function(usaStates){
+			res.json(usaStates);
 		}, 
 		function(error){
 			next(error);

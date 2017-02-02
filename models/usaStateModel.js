@@ -10,7 +10,7 @@ var usaStateModel = {
             DbHelper.getConnection().then(function(connection){
 
                 connection.query(
-                    'SELECT * FROM sub_page', 
+                    'SELECT * FROM usa_states', 
                     function (err, rows, fields) {
 
                         //release connection

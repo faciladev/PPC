@@ -74,17 +74,6 @@ router.get('/:dealId', function(req, res, next){
 
 });
 
-router.get('/subpages', function(req, res, next){
-	dealModel.getSubPages().then(
-		function(subPages){
-			res.json(subPages);
-		}, 
-		function(error){
-			next(error);
-		}
-	);
-});
-
 router.post('/upload', function(req, res, next){
 	var uploadFile;
 

@@ -8,7 +8,6 @@ var expressValidator = require('express-validator')
 
 
 var ads = require('./routes/ads');
-
 var search = require('./routes/search');
 var click = require('./routes/click');
 var deal = require('./routes/deal');
