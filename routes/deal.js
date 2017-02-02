@@ -85,7 +85,7 @@ router.post('/upload', function(req, res, next){
 	if(!uploadType)
 		next(new Error('Upload type not set.'));
 
-	var uploadDir = __dirname + '/../PPC_ASSETS';
+	var uploadDir = config.get('upload_path');
 	var project_url = config.get('project_url');
 
 	switch(uploadType){
@@ -95,7 +95,7 @@ router.post('/upload', function(req, res, next){
 			var newFileWebUrl = project_url + '/deals/' + newFileName;
 
 			var newFileSavedLocation = uploadDir + '/deals/' + newFileName
-			newFile.mv(uploadPath + newFileName, function(err) {
+			newFile.mv(uploadDir + newFileName, function(err) {
 			    if (err) {
 			      next(err);
 			    }
