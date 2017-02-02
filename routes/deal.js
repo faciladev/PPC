@@ -84,13 +84,29 @@ router.post('/upload', function(req, res, next){
 	if(!uploadType)
 		next(new Error('Upload type not set.'));
 
-	var uploadDir;
-	var newFileName;
+	var uploadDir = __dirname + '/../PPC_ASSETS';
+	var project_url = config.get('project_url');
 
 	switch(uploadType){
 		case 'deal':
-			uploadDir = 'deals';
+			var newFile = req.files.couponImage;
+			var newFileName = Date.now() + '.' + mime.extension(req.files.couponImage.mimetype);
+			var newFileWebUrl = project_url + '/deals/' + newFileName;
 
+			var newFileSavedLocation = uploadDir + '/deals/' + newFileName
+			newFile.mv(uploadPath + newFileName, function(err) {
+			    if (err) {
+			      next(err);
+			    }
+			    else {
+			    	var banner_code = "<a href='#' rel='nofollow' alt='Target' title='Target'>"+
+                    "<img border='0' src='"+ newFileWebUrl +"' /></a>";
+
+
+                	res.json({banner_code: banner_code, banner_image_link: newFileWebUrl});
+			    }
+		  	}
+		  	);
 			break;
 		case 'microsite':
 			uploadDir = 'dealmicrosites';
@@ -104,7 +120,6 @@ router.post('/upload', function(req, res, next){
 	}
 
 
-	// var newFileName = Date.now() + '.' + mime.extension(req.files.bannerImage[0].mimetype);
 
 });
 
