@@ -4,7 +4,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var userAgent = require('useragent');
-var expressValidator = require('express-validator')
+var expressValidator = require('express-validator');
+var fileUpload = require('express-fileupload');
 
 
 var ads = require('./routes/ads');
@@ -27,6 +28,7 @@ app.use(function(req, res, next) {
   next();
 });
 app.use(logger('dev'));
+app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(expressValidator());
