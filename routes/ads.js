@@ -52,6 +52,15 @@ router.get('/ads/:id/subpages', function(req, res, next) {
     });
 });
 
+//Gets category keywords
+router.get('/ads/keywords/:categoryId', function(req, res, next) {
+    ads.getCategoryKeywords(req.params.categoryId).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
 
 //Ads POST requests
 router.post('/ads/', function(req, res, next) {
@@ -89,6 +98,16 @@ router.post('/ads/:id/subpages', function(req, res, next) {
 });
 router.post('/ads/:id/locations', function(req, res, next) {
     ads.saveAdLocations(req.params.id, req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
+
+//Save keyword and keyword category
+router.post('/ads/keywords/:categoryId', function(req, res, next) {
+    ads.saveKeywords(req.params.categoryId, req.body).then(function(response){
         res.json(response);
     }, function(error) {
         error.message = 'Error';

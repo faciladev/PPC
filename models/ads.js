@@ -116,6 +116,26 @@ module.exports = {
         });
     },
 
+    //Gets Category Keywords
+    getCategoryKeywords: function(category_id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('Select * from ppc_keywords_categories INNER JOIN ppc_keywords ON ppc_keywords_categories.keyword_id = ppc_keywords.id WHERE ppc_keywords_categories.category_id = ?', [category_id],
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+
 
     saveAd: function(ad) {
         return new Promise(function(resolve, reject) {
@@ -232,5 +252,48 @@ module.exports = {
                     reject(new Error('Connection error'));
             });
         });
+    },
+
+    saveKeywords: function(category_id, keywords) {
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                if(keywords != null){
+                    for(var i=0;i<keywords.length;i++){
+                        var post = {keyword: keywords[i].keyword, price: keywords[i].price, created_by: keywords[i].created_by};
+                        connection.query("SELECT id FROM ppc_keywords WHERE keyword = ?", [post.keyword], function(err, rows, fields){
+                            if(err) throw err;
+                            if(typeof rows == 'undefined' || rows.length <= 0 || rows[0].id == null){
+                                (function(category_id){
+                                    connection.query('INSERT INTO ppc_keywords SET ?', [post], function(err, result) {
+                                        if(err) throw err;
+                                        post.id = result.insertId;
+                                        if(category_id != null){
+                                            connection.query("INSERT INTO ppc_keywords_categories SET ?",[{category_id: category_id, keyword_id: post.id}],
+                                                function (err, rows, fields) {
+                                                    if(err){
+                                                        reject(err);
+                                                    }
+                                                    resolve(rows);
+                                                })
+                                        }else{
+                                            resolve(post);
+                                        }
+
+                                    });
+                                })(category_id)
+                            } else {
+                                resolve({status: false, message: 'Duplicate Keyword',id: rows[0].id});
+                            }
+                        });
+                    }
+                }
+
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+
     }
 }
