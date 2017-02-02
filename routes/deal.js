@@ -1,5 +1,6 @@
 var express = require('express');
 var mime  = require('mime');
+var config  = require('config');
 
 var router = express.Router();
 
