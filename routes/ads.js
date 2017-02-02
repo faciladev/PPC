@@ -80,9 +80,10 @@ router.post('/ads/:id/microsite', function(req, res, next) {
     }
     //The name of the input file (i.e micrositeImageFile) is used to retrieve the uploaded image
     micrositeImage = req.files.micrositeImageFile;
+    req.body.image = req.params.id + "_" + micrositeImage.name;
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         //use the mv() method to place the file somewhere on your server
-        micrositeImage.mv('../PPC_ASSETS/microsite/' + response.insertId + "_" + micrositeImage.name, function(err) {
+        micrositeImage.mv('../PPC_ASSETS/microsite/' + req.params.id + "_" + micrositeImage.name, function(err) {
             if(err) {
                 res.status(500).send(err);
             } else {
