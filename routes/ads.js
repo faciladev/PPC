@@ -3,7 +3,7 @@ var router = express.Router();
 var ads = require('../models/ads');
 
 //Ads GET requests
-router.get('/ads/', function(req, res, next) {
+router.get('/', function(req, res, next) {
     ads.getAll().then(function(response){
         res.json(response);
     }, function(error){
@@ -11,7 +11,7 @@ router.get('/ads/', function(req, res, next) {
         next(error);
     });
 });
-router.get('/ads/:id/', function(req, res, next) {
+router.get('/:id/', function(req, res, next) {
     ads.get(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -19,7 +19,7 @@ router.get('/ads/:id/', function(req, res, next) {
         next(error);
     });
 });
-router.get('/ads/:id/locations', function(req, res, next) {
+router.get('/:id/locations', function(req, res, next) {
     ads.getAdLocations(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -27,7 +27,7 @@ router.get('/ads/:id/locations', function(req, res, next) {
         next(error);
     });
 });
-router.get('/ads/:id/microsite', function(req, res, next) {
+router.get('/:id/microsite', function(req, res, next) {
     ads.getAdMicrosite(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -35,7 +35,7 @@ router.get('/ads/:id/microsite', function(req, res, next) {
         next(error);
     });
 });
-router.get('/ads/:id/keywords', function(req, res, next) {
+router.get('/:id/keywords', function(req, res, next) {
     ads.getAdKeywords(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -43,7 +43,7 @@ router.get('/ads/:id/keywords', function(req, res, next) {
         next(error);
     });
 });
-router.get('/ads/:id/subpages', function(req, res, next) {
+router.get('/:id/subpages', function(req, res, next) {
     ads.getAdSubpages(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -53,7 +53,7 @@ router.get('/ads/:id/subpages', function(req, res, next) {
 });
 
 //Gets category keywords
-router.get('/ads/keywords/:categoryId', function(req, res, next) {
+router.get('/keywords/:categoryId', function(req, res, next) {
     ads.getCategoryKeywords(req.params.categoryId).then(function(response){
         res.json(response);
     }, function(error){
@@ -63,7 +63,7 @@ router.get('/ads/keywords/:categoryId', function(req, res, next) {
 });
 
 //Ads POST requests
-router.post('/ads/', function(req, res, next) {
+router.post('/', function(req, res, next) {
     ads.saveAd(req.body).then(function(response) {
             res.json(response);
         }, function(error) {
@@ -72,7 +72,7 @@ router.post('/ads/', function(req, res, next) {
         }
     );
 });
-router.post('/ads/:id/microsite', function(req, res, next) {
+router.post('/:id/microsite', function(req, res, next) {
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -80,7 +80,7 @@ router.post('/ads/:id/microsite', function(req, res, next) {
         next(error);
     });
 });
-router.post('/ads/:id/keywords', function(req, res, next) {
+router.post('/:id/keywords', function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -88,7 +88,7 @@ router.post('/ads/:id/keywords', function(req, res, next) {
         next(error);
     });
 });
-router.post('/ads/:id/subpages', function(req, res, next) {
+router.post('/:id/subpages', function(req, res, next) {
     ads.saveAdSubPages(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -96,7 +96,7 @@ router.post('/ads/:id/subpages', function(req, res, next) {
         next(error);
     });
 });
-router.post('/ads/:id/locations', function(req, res, next) {
+router.post('/:id/locations', function(req, res, next) {
     ads.saveAdLocations(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -106,7 +106,7 @@ router.post('/ads/:id/locations', function(req, res, next) {
 });
 
 //Save keyword and keyword category
-router.post('/ads/keywords/:categoryId', function(req, res, next) {
+router.post('/keywords/:categoryId', function(req, res, next) {
     ads.saveKeywords(req.params.categoryId, req.body).then(function(response){
         res.json(response);
     }, function(error) {

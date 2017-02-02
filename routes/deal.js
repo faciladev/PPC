@@ -1,5 +1,8 @@
 var express = require('express');
+var mime  = require('mime');
+
 var router = express.Router();
+
 var dealModel = require('../models/dealModel');
 var Util = require('../lib/util');
 
@@ -68,6 +71,51 @@ router.get('/:dealId', function(req, res, next){
 			next(error);
 		}
 	);
+
+});
+
+router.get('/subpages', function(req, res, next){
+	dealModel.getSubPages().then(
+		function(subPages){
+			res.json(subPages);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+});
+
+router.post('/upload', function(req, res, next){
+	var uploadFile;
+
+	if(!req.files)
+		next(new Error('No file was uploaded.'));
+
+	var uploadType = req.query.type;
+	if(!uploadType)
+		next(new Error('Upload type not set.'));
+
+	var uploadDir;
+	var newFileName;
+
+	switch(uploadType){
+		case 'deal':
+			uploadDir = 'deals';
+
+			break;
+		case 'microsite':
+			uploadDir = 'dealmicrosites';
+			break;
+		case 'coupon':
+			uploadDir = 'dealcoupons';
+			break;
+		default:
+			next(new Error('Invalid upload type.'));
+			break;
+	}
+
+
+	// var newFileName = Date.now() + '.' + mime.extension(req.files.bannerImage[0].mimetype);
 
 });
 
