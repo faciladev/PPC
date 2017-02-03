@@ -16,8 +16,6 @@ var index = require('./routes/index');
 
 var app = express();
 
-
-
 //keeps RegExp library to be up to date to match with agent the 
 //widest range of useragent
 userAgent(true);
@@ -36,10 +34,6 @@ app.use(cookieParser());
 
 //Used to serve image assets and directory is outside project root
 app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
-
-app.use(fileupload());
-
-//app.use('/api/', ads);
 
 //Sponsored ad api
 app.use('/api/ads', ads);
