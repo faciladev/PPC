@@ -111,7 +111,17 @@ router.post('/upload', function(req, res, next){
 
 
 	UploadHelper.uploadFiles(req.files, subDir).then(function(response){
-		res.json(response.length === 1 ? response[0] : response);
+		if(response.length === 1){
+			var webpath = config.get('project_url') + "/" + subDir + "/" + response[0];
+			var banner_code = "<a rel='nofollow' alt='Target' title='Target'>"+
+	            "<img border='0' src='"+ config.get('project_url') +
+	            "/" + subDir + "/" + response[0] + "' /></a>";
+
+            res.json({banner_code: banner_code, banner_image_link: webpath});
+		} else {
+			res.json(response);
+		}
+		
 	}, function(error){
 		console.log(error);
 		res.json(error);
