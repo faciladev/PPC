@@ -14,6 +14,7 @@ var dealModel = {
 				  	connection.release();
 				  	reject(err);
 				  }
+                  
 				  connection.query('INSERT INTO ppc_deal_microsites SET ?', [dealMicrosite], function (error, results, fields) {
 				    if (error) {
 				      return connection.rollback(function() {
