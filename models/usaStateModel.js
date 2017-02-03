@@ -5,7 +5,7 @@ var Util = require('../lib/util');
 
 var usaStateModel = {
 
-    getSubPages: function(){
+    getUsaStates: function(){
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
 
