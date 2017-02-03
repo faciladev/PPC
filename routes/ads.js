@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var ads = require('../models/ads');
+var UploadHelper = require('../lib/UploadHelper');
 
 //Ads GET requests
 router.get('/', function(req, res, next) {
@@ -73,12 +74,25 @@ router.post('/', function(req, res, next) {
     );
 });
 router.post('/:id/microsite', function(req, res, next) {
-    ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
-        res.json(response);
-    }, function(error) {
-        error.message = 'Error';
-        next(error);
+    var micrositeImage;
+    if(!req.files){
+        res.send('No files were uploaded');
+        return;
+    }
+
+    UploadHelper.uploadFiles(req.files, "microsite").then(function(response){
+        req.body.image = response.length === 1 ? response[0] : response;
+        ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
+            res.json(response);
+        }, function(error) {
+            error.message = 'Error';
+            next(error);
+        });
+    }, function(error){
+        res.json(error);
     });
+
+
 });
 router.post('/:id/keywords', function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
