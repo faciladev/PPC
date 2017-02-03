@@ -90,6 +90,7 @@ router.post('/', function(req, res, next) {
     );
 });
 router.post('/:id/microsite', function(req, res, next) {
+
     if(!req.files){
         res.send('No files were uploaded');
         return;
@@ -106,6 +107,8 @@ router.post('/:id/microsite', function(req, res, next) {
     }, function(error){
         res.json(error);
     });
+
+
 });
 router.post('/:id/keywords', function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
