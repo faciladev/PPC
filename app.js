@@ -5,14 +5,14 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var userAgent = require('useragent');
 var expressValidator = require('express-validator');
-var fileupload = require("express-fileupload");
+var fileUpload = require('express-fileupload');
 
 
 var ads = require('./routes/ads');
-
 var search = require('./routes/search');
 var click = require('./routes/click');
 var deal = require('./routes/deal');
+var index = require('./routes/index');
 
 var app = express();
 
@@ -28,6 +28,7 @@ app.use(function(req, res, next) {
   next();
 });
 app.use(logger('dev'));
+app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(expressValidator());
@@ -38,7 +39,10 @@ app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
 
 app.use(fileupload());
 
-app.use('/api/', ads);
+//app.use('/api/', ads);
+
+//Sponsored ad api
+app.use('/api/ads', ads);
 
 //Searches sponsored ads and daily deals
 app.use('/api/search', search);
@@ -48,6 +52,9 @@ app.use('/api/click', click);
 
 //Daily Deals
 app.use('/api/deals', deal);
+
+//Other miscellaneous api
+app.use('/api/', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

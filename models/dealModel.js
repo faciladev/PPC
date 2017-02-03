@@ -94,7 +94,7 @@ var dealModel = {
         });
     },
 
-    getAllDeals : function(dealId){
+    getAllDeals : function(){
 
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
@@ -108,6 +108,34 @@ var dealModel = {
 
                 connection.query(
                     query, 
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            reject(err);
+                        }
+
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(error);
+            });
+
+            
+        });
+    },
+
+    getSubPages: function(){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+
+                connection.query(
+                    'SELECT * FROM sub_page', 
                     function (err, rows, fields) {
 
                         //release connection
