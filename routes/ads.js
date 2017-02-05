@@ -79,6 +79,10 @@ router.get('/keywords/:categoryId', function(req, res, next) {
     });
 });
 
+
+/**
+ * POST Request section
+ */
 //Ads POST requests
 router.post('/', function(req, res, next) {
     ads.saveAd(req.body).then(function(response) {

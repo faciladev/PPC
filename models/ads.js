@@ -173,6 +173,25 @@ module.exports = {
             });
         });
     },
+    //Gets all categories
+    getCategories: function() {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('Select * from ppc_keyword_categories',
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
 
 
     saveAd: function(ad) {
