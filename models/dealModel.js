@@ -57,6 +57,36 @@ var dealModel = {
         });
 	},
 
+    getDealCategories: function(){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+
+                var query = 'SELECT category_id, category_name FROM ppc_daily_deal_categories';
+
+                connection.query(
+                    query,
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            reject(err);
+                        }
+
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(error);
+            });
+
+            
+        });
+    },
+
 	getDealById : function(dealId){
 
         return new Promise(function(resolve, reject) {
