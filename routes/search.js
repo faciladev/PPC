@@ -4,7 +4,7 @@ var ppcModel = require('../models/ppcModel');
 var Util = require('../lib/util');
 
 
-router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
+router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	var keyword = req.params.keyword;
 	var location = req.params.location;
 	var subpage = req.params.subpage;
@@ -55,7 +55,7 @@ router.get('/ad/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
-router.get('/deal/:keyword', function(req, res, next) {
+router.get('/deals/:keyword', function(req, res, next) {
 	var keyword = req.params.keyword;
 	var userId; //get user from cookie
 

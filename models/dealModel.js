@@ -13,14 +13,14 @@ var dealModel = {
             	connection.beginTransaction(function(err) {
 				  if (err) { 
 				  	connection.release();
-				  	reject(err);
+				  	return reject(err);
 				  }
 
 				  connection.query('INSERT INTO ppc_deal_microsites SET ?', [dealMicrosite], function (error, results, fields) {
 				    if (error) {
 				      return connection.rollback(function() {
 				  		connection.release();
-				        reject(error);
+				        return reject(error);
 				      });
 				    }
 
@@ -32,7 +32,7 @@ var dealModel = {
 				      if (error) {
 				        return connection.rollback(function() {
 				        	connection.release();
-				          	reject(error);
+				          	return reject(error);
 				        });
 				      }
 				      var dealId = results.insertId;
@@ -40,7 +40,7 @@ var dealModel = {
 				        if (err) {
 				          return connection.rollback(function() {
 				          	connection.release();
-				            reject(err);
+				            return reject(err);
 				          });
 				        }
 				        connection.release();
@@ -73,7 +73,7 @@ var dealModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -111,7 +111,7 @@ var dealModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -168,7 +168,7 @@ var dealModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -176,8 +176,7 @@ var dealModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             

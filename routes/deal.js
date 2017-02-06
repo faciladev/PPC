@@ -66,7 +66,7 @@ router.post('/upload', function(req, res, next){
 		case 'deal':
 			subDir = uploadType;
 			break;
-		case 'microsite':
+		case 'deal_microsite':
 			subDir = uploadType;
 			break;
 		case 'coupon':
