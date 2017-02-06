@@ -1,6 +1,7 @@
 var Promise = require('promise');
 
 var DbHelper = require('../lib/DbHelper');
+var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
 
 var dealModel = {
@@ -125,7 +126,7 @@ var dealModel = {
         });
     },
 
-    getAllDeals : function(){
+    getAllDeals : function(page){
 
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
@@ -136,21 +137,15 @@ var dealModel = {
                 'dd.daily_deal_microsite_id = mi.id ' +
                 'WHERE dd.is_deleted=0';
 
-                connection.query(
-                    query, 
-                    function (err, rows, fields) {
-
-                        //release connection
-                        connection.release();
-
-                        if(err){
-                            reject(err);
-                        }
-
-
-                        resolve(rows);
+                PaginationHelper.paginate(query, page).then(
+                    function(result){
+                        resolve(result);
+                    }, 
+                    function(error){
+                        reject(error);
                     }
                 );
+                
             }, function(error){
                 if(error)
                     reject(error);
