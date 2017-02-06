@@ -37,12 +37,12 @@ router.get('/', function(req, res, next){
 
 });
 
-//Get all daily deals
-router.get('/:dealId', function(req, res, next){
-	var dealId = req.params.dealId;
-	dealModel.getDealById(dealId).then(
-		function(deal){
-			res.json(deal);
+
+
+router.get('/categories', function(req, res, next){
+	dealModel.getDealCategories().then(
+		function(categories){
+			res.json(categories);
 		}, 
 		function(error){
 			next(error);
@@ -92,5 +92,21 @@ router.post('/upload', function(req, res, next){
 	});
 
 });
+
+//Get all daily deals
+router.get('/:dealId', function(req, res, next){
+	var dealId = req.params.dealId;
+	dealModel.getDealById(dealId).then(
+		function(deal){
+			res.json(deal);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+
+});
+
+
 
 module.exports = router;

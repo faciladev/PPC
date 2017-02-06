@@ -57,6 +57,36 @@ var dealModel = {
         });
 	},
 
+    getDealCategories: function(){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+
+                var query = 'SELECT category_id, category_name FROM ppc_daily_deal_categories';
+
+                connection.query(
+                    query,
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            reject(err);
+                        }
+
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(error);
+            });
+
+            
+        });
+    },
+
 	getDealById : function(dealId){
 
         return new Promise(function(resolve, reject) {
@@ -100,12 +130,11 @@ var dealModel = {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
 
-                var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.name, m.company_name, m.what_you_get, m.location,' +
-                    'm.end_date, m.discount_daily_description, m.discount_type, m.discount_percentage, m.discount_description, ' +
-                    'm.regular_price, m.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
-                    'm.discount_description, m.daily_deal_description, m.approved_category FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
-                    'AS m ON dd.daily_deal_microsite_id=m.id ' +
-                    'WHERE m.is_deleted=0';
+                var query = 'SELECT mi.image, mi.name, dd.approved_category_id, ' + 
+                'dd.download_price, dd.date_created, dd.is_approved ' +
+                'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
+                'dd.daily_deal_microsite_id = mi.id ' +
+                'WHERE dd.is_deleted=0';
 
                 connection.query(
                     query, 
