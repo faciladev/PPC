@@ -26,7 +26,7 @@ router.post('/', function(req, res, next){
 //Get all daily deals
 router.get('/', function(req, res, next){
 
-	dealModel.getAllDeals().then(
+	dealModel.getAllDeals(req.query.page).then(
 		function(deals){
 			res.json(deals);
 		}, 
