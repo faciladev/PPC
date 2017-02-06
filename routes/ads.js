@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var ads = require('../models/ads');
+var UploadHelper = require('../lib/UploadHelper');
 
 //Ads GET requests
 router.get('/', function(req, res, next) {
@@ -51,6 +52,22 @@ router.get('/:id/subpages', function(req, res, next) {
         next(error);
     });
 });
+router.get('/:id/offers', function(req, res, next) {
+    ads.getAdOffers(req.params.id).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
+router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
+    ads.getAdvertiserOffers(req.params.advertiserId).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
 
 //Gets category keywords
 router.get('/keywords/:categoryId', function(req, res, next) {
@@ -62,6 +79,10 @@ router.get('/keywords/:categoryId', function(req, res, next) {
     });
 });
 
+
+/**
+ * POST Request section
+ */
 //Ads POST requests
 router.post('/', function(req, res, next) {
     ads.saveAd(req.body).then(function(response) {
@@ -73,12 +94,25 @@ router.post('/', function(req, res, next) {
     );
 });
 router.post('/:id/microsite', function(req, res, next) {
-    ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
-        res.json(response);
-    }, function(error) {
-        error.message = 'Error';
-        next(error);
+
+    if(!req.files){
+        res.send('No files were uploaded');
+        return;
+    }
+
+    UploadHelper.uploadFiles(req.files, "microsite").then(function(response){
+        req.body.image = response.length === 1 ? response[0] : response;
+        ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
+            res.json(response);
+        }, function(error) {
+            error.message = 'Error';
+            next(error);
+        });
+    }, function(error){
+        res.json(error);
     });
+
+
 });
 router.post('/:id/keywords', function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
@@ -102,6 +136,36 @@ router.post('/:id/locations', function(req, res, next) {
     }, function(error) {
         error.message = 'Error';
         next(error);
+    });
+});
+
+//Creates Ad offers
+router.post('/:id/offers', function(req, res, next) {
+    ads.saveAdOffers(req.params.id, req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
+
+//Creates Advertiser offer
+router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
+    if(!req.files){
+        res.send('No files were uploaded');
+        return;
+    }
+
+    UploadHelper.uploadFiles(req.files, "offer").then(function(response){
+        req.body.image = response.length === 1 ? response[0] : response;
+        ads.saveAdvertiserOffer(req.params.advertiserId, req.body).then(function(response){
+            res.json(response);
+        }, function(error) {
+            error.message = 'Error';
+            next(error);
+        });
+    }, function(error){
+        res.json(error);
     });
 });
 
