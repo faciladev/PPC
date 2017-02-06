@@ -4,6 +4,7 @@ var router = express.Router();
 
 var subPageModel = require('../models/subPageModel');
 var usaStateModel = require('../models/usaStateModel');
+var advertiserModel = require('../models/advertiserModel');
 var Util = require('../lib/util');
 
 router.get('/subpages', function(req, res, next){
@@ -21,6 +22,18 @@ router.get('/usastates', function(req, res, next){
 	usaStateModel.getUsaStates().then(
 		function(usaStates){
 			res.json(usaStates);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+});
+
+
+router.get('/advertisers', function(req, res, next){
+	advertiserModel.getAdvertisers().then(
+		function(advertisers){
+			res.json(advertisers);
 		}, 
 		function(error){
 			next(error);
