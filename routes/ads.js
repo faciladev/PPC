@@ -5,7 +5,7 @@ var UploadHelper = require('../lib/UploadHelper');
 
 //Ads GET requests
 router.get('/', function(req, res, next) {
-    ads.getAll().then(function(response){
+    ads.getAll(req.query.page).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
