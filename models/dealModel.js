@@ -5,6 +5,28 @@ var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
 
 var dealModel = {
+    updateDeal: function(dealId, deal){
+        return new Promise(function(resolve, reject){
+            
+            DbHelper.getConnection().then(
+                function(connection){
+                    connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?',
+                        [deal, dealId],
+                        function(err, results, fields){
+                            if(err)
+                                return reject(err);
+
+                            resolve(results);
+                        }
+                    );
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+        });
+    },
+
 	saveDeal: function(deal, dealMicrosite){
 		return new Promise(function(resolve, reject) {
 

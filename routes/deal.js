@@ -107,6 +107,19 @@ router.get('/:dealId', function(req, res, next){
 
 });
 
+router.put('/:dealId/approve', function(req, res, next){
+
+	dealModel.updateDeal(req.params.dealId, {is_approved: 1}).then(
+		function(result){
+			response.json(result);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+
+});
+
 
 
 module.exports = router;
