@@ -8,15 +8,7 @@ var usaStateModel = {
 
     getUsaStates: function(page){
         return new Promise(function(resolve, reject) {
-            // var query = 'SELECT * FROM usa_states';
-            // PaginationHelper.paginate(query, page).then(
-            //     function(result){
-            //         resolve(result);
-            //     }, 
-            //     function(error){
-            //         reject(error);
-            //     }
-            // );
+          
             DbHelper.getConnection().then(function(connection){
 
                 connection.query(
@@ -27,7 +19,7 @@ var usaStateModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -35,8 +27,7 @@ var usaStateModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                return reject(error);
             });
 
             

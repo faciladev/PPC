@@ -17,7 +17,7 @@ var subPageModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -25,8 +25,7 @@ var subPageModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                return reject(error);
             });
 
             

@@ -66,7 +66,7 @@ router.post('/upload', function(req, res, next){
 		case 'deal':
 			subDir = uploadType;
 			break;
-		case 'microsite':
+		case 'deal_microsite':
 			subDir = uploadType;
 			break;
 		case 'coupon':
@@ -99,6 +99,19 @@ router.get('/:dealId', function(req, res, next){
 	dealModel.getDealById(dealId).then(
 		function(deal){
 			res.json(deal);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+
+});
+
+router.put('/:dealId/approve', function(req, res, next){
+
+	dealModel.updateDeal(req.params.dealId, {is_approved: 1}).then(
+		function(result){
+			response.json(result);
 		}, 
 		function(error){
 			next(error);

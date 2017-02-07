@@ -5,6 +5,28 @@ var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
 
 var dealModel = {
+    updateDeal: function(dealId, deal){
+        return new Promise(function(resolve, reject){
+            
+            DbHelper.getConnection().then(
+                function(connection){
+                    connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?',
+                        [deal, dealId],
+                        function(err, results, fields){
+                            if(err)
+                                return reject(err);
+
+                            resolve(results);
+                        }
+                    );
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+        });
+    },
+
 	saveDeal: function(deal, dealMicrosite){
 		return new Promise(function(resolve, reject) {
 
@@ -13,14 +35,14 @@ var dealModel = {
             	connection.beginTransaction(function(err) {
 				  if (err) { 
 				  	connection.release();
-				  	reject(err);
+				  	return reject(err);
 				  }
 
 				  connection.query('INSERT INTO ppc_deal_microsites SET ?', [dealMicrosite], function (error, results, fields) {
 				    if (error) {
 				      return connection.rollback(function() {
 				  		connection.release();
-				        reject(error);
+				        return reject(error);
 				      });
 				    }
 
@@ -32,7 +54,7 @@ var dealModel = {
 				      if (error) {
 				        return connection.rollback(function() {
 				        	connection.release();
-				          	reject(error);
+				          	return reject(error);
 				        });
 				      }
 				      var dealId = results.insertId;
@@ -40,7 +62,7 @@ var dealModel = {
 				        if (err) {
 				          return connection.rollback(function() {
 				          	connection.release();
-				            reject(err);
+				            return reject(err);
 				          });
 				        }
 				        connection.release();
@@ -73,7 +95,7 @@ var dealModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -111,7 +133,7 @@ var dealModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -168,7 +190,7 @@ var dealModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -176,8 +198,7 @@ var dealModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
