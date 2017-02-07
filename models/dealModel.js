@@ -73,8 +73,7 @@ var dealModel = {
 				});
                 
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
@@ -103,8 +102,7 @@ var dealModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
