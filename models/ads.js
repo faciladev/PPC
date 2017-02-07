@@ -194,7 +194,6 @@ module.exports = {
         });
     },
 
-
     saveAd: function(ad) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){

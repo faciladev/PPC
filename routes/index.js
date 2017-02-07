@@ -8,6 +8,7 @@ var advertiserModel = require('../models/advertiserModel');
 var ads = require('../models/ads');
 var Util = require('../lib/util');
 
+//router for all daily deal subpages
 router.get('/subpages', function(req, res, next){
 	subPageModel.getSubPages().then(
 		function(subPages){
@@ -18,6 +19,17 @@ router.get('/subpages', function(req, res, next){
 		}
 	);
 });
+
+//router for all ad subpages
+router.get('/adSubpages', function(req, res, next) {
+    subPageModel.getAdSubpages().then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
+
 
 router.get('/usastates', function(req, res, next){
 	usaStateModel.getUsaStates().then(
