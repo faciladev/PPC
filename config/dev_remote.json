@@ -11,6 +11,7 @@
     "numRowsPerPage" : 10,
     "cors_whitelist" : [
     	"http://ziphub.com", 
-    	"http://iziphub.com"
+    	"http://iziphub.com",
+    	"http://localhost"
     ]
 }
