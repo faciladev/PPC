@@ -213,6 +213,79 @@ var ppcModel = {
         });
     },
 
+    findAllDealCategories : function(){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function (connection) {
+
+                connection.query('SELECT category_id, category_name FROM ppc_daily_deal_categories',
+                    function (err, rows, fields) {
+                        connection.release();
+
+                        if(err)
+                            reject(err);
+
+
+                        resolve(rows);
+                    });
+            },
+            function(error){
+                reject(error);
+            });
+        });
+    },
+
+    getDealsFromEachCategory : function(limit){
+        
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function (connection) {
+
+                ppcModel.findAllDealCategories().then(function(response){
+                    console.log(response);
+                    if(response.length > 0){
+                        //Build Query
+                        var query = '';
+
+                        for(var i=0; i<response.length; i++){
+                            query += '(SELECT dd.id AS deal_id, m.id AS microsite_id, m.company_name, m.what_you_get, m.location,' +
+                                'dd.end_date, dd.start_date, m.discount_daily_description, m.discount_percentage, dd.discount_type, m.name, m.discount_description, ' +
+                                'dd.regular_price, dd.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
+                                'm.discount_description, m.daily_deal_description, dd.approved_category_id FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+                                'AS m ON dd.daily_deal_microsite_id=m.id ' +
+                                'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
+                                response[i].category_id + ' LIMIT ' + limit + ')';
+
+                            if(i < response.length - 1)
+                                query += 'UNION ALL';
+                        }
+
+                        //Run query
+                        connection.query(query,
+                            function (err, rows, fields) {
+                                connection.release();
+
+                                if(err)
+                                    return reject(err);
+
+                                
+                                resolve(rows);
+                            }
+                        );
+
+                    } else {
+                        reject(new Error());
+                    }
+
+                }, function(error){
+                    reject(error);
+                })
+
+            },
+            function(error){
+                reject(error);
+            });
+        });
+    },
+
     trackDailyDealImpression : function(savedSearchIds, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
