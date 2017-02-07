@@ -1,6 +1,7 @@
 var Promise = require('promise');
 
 var DbHelper = require('../lib/DbHelper');
+var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
 
 const ACTIVITY_CLICK = 1;
@@ -234,13 +235,39 @@ var ppcModel = {
         });
     },
 
-    getDealsFromEachCategory : function(limit){
+    getDealsByCategory : function(categoryId, page){
         
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function (connection) {
 
+                var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.company_name, m.what_you_get, m.location,' +
+                                'dd.end_date, dd.start_date, m.discount_daily_description, m.discount_percentage, dd.discount_type, m.name, m.discount_description, ' +
+                                'dd.regular_price, dd.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
+                                'm.discount_description, m.daily_deal_description, dd.approved_category_id FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+                                'AS m ON dd.daily_deal_microsite_id=m.id ' +
+                                'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
+                                categoryId ;
+                PaginationHelper.paginate(query, page).then(
+                    function(response){
+                        resolve(response);
+                    }, 
+                    function(error){
+                        reject(error);
+                    }
+                );
+            },
+            function(error){
+                reject(error);
+            });
+        });
+    },
+
+    getDealsFromEachCategory : function(limit){
+
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function (connection) {
+
                 ppcModel.findAllDealCategories().then(function(response){
-                    console.log(response);
                     if(response.length > 0){
                         //Build Query
                         var query = '';

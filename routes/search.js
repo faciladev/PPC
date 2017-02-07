@@ -86,8 +86,19 @@ router.get('/deals/:category/:keyword', function(req, res, next) {
 
 
 router.get('/deals', function(req, res, next) {
-	console.log('api hit')
 	ppcModel.getDealsFromEachCategory(8).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){
+		console.log(error)			
+			next(error);
+		}
+	)
+});
+
+router.get('/deals/:categoryId', function(req, res, next) {
+	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
 		function(deals){
 			res.json(deals);
 		}, 
