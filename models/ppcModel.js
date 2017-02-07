@@ -80,7 +80,7 @@ var ppcModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -88,8 +88,7 @@ var ppcModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                return reject(error);
             });
 
             
@@ -101,7 +100,7 @@ var ppcModel = {
             DbHelper.getConnection().then(function(connection){
 
                 if(searchData.length <= 0)
-                    reject(new Error('Cannot save empty search result.'));
+                    return reject(new Error('Cannot save empty search result.'));
 
                 var query = '';
 
@@ -121,13 +120,13 @@ var ppcModel = {
                 //Run multiple statement query
                 connection.query(query, function(err, results, fields){
                     if(err)
-                        reject(err);
+                        return reject(err);
 
                     resolve(results);
                 });
 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -154,7 +153,7 @@ var ppcModel = {
                             connection.release();
 
                             if(err)
-                                reject(err);
+                                return reject(err);
 
                             resolve(results);
                         });
@@ -167,7 +166,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -199,7 +198,7 @@ var ppcModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -207,8 +206,7 @@ var ppcModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
@@ -237,7 +235,7 @@ var ppcModel = {
                             connection.release();
 
                             if(err)
-                                reject(err);
+                                return reject(err);
 
                             resolve(results);
                         });
@@ -250,7 +248,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -263,7 +261,7 @@ var ppcModel = {
                     connection.release();
 
                     if(err)
-                        reject(err);
+                        return reject(err);
 
                     resolve(results.length > 0 ? results[0] : []);
                 });
@@ -271,7 +269,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -297,7 +295,7 @@ var ppcModel = {
                     connection.release();
 
                     if(err)
-                        reject(err);
+                        return reject(err);
 
                     resolve(results < 6 ? true : false);
                 });
@@ -305,7 +303,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -327,7 +325,7 @@ var ppcModel = {
                     connection.release();
 
                     if(err)
-                        reject(err);
+                        return reject(err);
 
                     resolve(results.insertId);
                 });
@@ -335,7 +333,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -368,7 +366,7 @@ var ppcModel = {
                     connection.release();
 
                     if(err)
-                        reject(err);
+                        return reject(err);
 
                     if(results.length > 0 && results[0].has_passed !== 0){
                         resolve(true);
@@ -380,10 +378,9 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
-
     },
 
     postponeAdAvailability: function(ad_id, budget_period){
@@ -411,7 +408,7 @@ var ppcModel = {
                     connection.release();
 
                     if(err)
-                        reject(err);
+                        return reject(err);
 
                     resolve(results.affectedRows);
                 });
@@ -419,7 +416,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     }, 
@@ -449,7 +446,7 @@ var ppcModel = {
                             connection.release();
 
                             if(err)
-                                reject(err);
+                                return reject(err);
 
                             resolve(results.insertId);
                         });
@@ -462,7 +459,7 @@ var ppcModel = {
                 
                 
             },function(error){
-                next(error);
+                return reject(error);
             });
         });
     },
@@ -506,7 +503,7 @@ var ppcModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -514,8 +511,7 @@ var ppcModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
