@@ -55,7 +55,7 @@ router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
-router.get('/deals/:keyword', function(req, res, next) {
+router.get('/deals/:category/:keyword', function(req, res, next) {
 	var keyword = req.params.keyword;
 	var userId; //get user from cookie
 
@@ -84,6 +84,30 @@ router.get('/deals/:keyword', function(req, res, next) {
 	)
 });
 
+
+router.get('/deals', function(req, res, next) {
+	ppcModel.getDealsFromEachCategory(8).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){
+		console.log(error)			
+			next(error);
+		}
+	)
+});
+
+router.get('/deals/:categoryId', function(req, res, next) {
+	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){
+		console.log(error)			
+			next(error);
+		}
+	)
+});
 
 
 module.exports = router;

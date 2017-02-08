@@ -73,8 +73,7 @@ var dealModel = {
 				});
                 
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
@@ -103,8 +102,7 @@ var dealModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
             });
 
             
@@ -152,27 +150,21 @@ var dealModel = {
     getAllDeals : function(page){
 
         return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function(connection){
 
-                var query = 'SELECT dd.id, mi.image, mi.name, dd.approved_category_id, ' + 
-                'dd.download_price, dd.date_created, dd.is_approved ' +
-                'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
-                'dd.daily_deal_microsite_id = mi.id ' +
-                'WHERE dd.is_deleted=0';
+            var query = 'SELECT dd.id, mi.image, mi.name, dd.approved_category_id, ' + 
+            'dd.download_price, dd.date_created, dd.is_approved ' +
+            'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
+            'dd.daily_deal_microsite_id = mi.id ' +
+            'WHERE dd.is_deleted=0';
 
-                PaginationHelper.paginate(query, page).then(
-                    function(result){
-                        resolve(result);
-                    }, 
-                    function(error){
-                        reject(error);
-                    }
-                );
-                
-            }, function(error){
-                if(error)
+            PaginationHelper.paginate(query, page).then(
+                function(result){
+                    resolve(result);
+                }, 
+                function(error){
                     reject(error);
-            });
+                }
+            );
 
             
         });
