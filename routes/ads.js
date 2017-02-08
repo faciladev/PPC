@@ -191,4 +191,24 @@ router.post('/keywords/:categoryId', function(req, res, next) {
     });
 });
 
+//Upload ad files
+router.post('/:id/uploadFiles', function(req, res, next) {
+    if(!req.files){
+        res.send('No files were uploaded');
+        return;
+    }
+
+    UploadHelper.uploadFiles(req.files, "ad_files").then(function(response){
+        req.body.file_name = response.length === 1 ? response[0] : response;
+        ads.saveAdFiles(req.params.id, req.body).then(function(response){
+            res.json(response);
+        }, function(error) {
+            error.message = 'Error';
+            next(error);
+        });
+    }, function(error){
+        res.json(error);
+    });
+});
+
 module.exports = router;

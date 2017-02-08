@@ -291,39 +291,36 @@ module.exports = {
         });
     },
     saveKeywords: function(category_id, keywords) {
+        var insertedData = [];
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
                 if(keywords != null){
-                    for(var i=0;i<keywords.length;i++){
-                        var post = {keyword: keywords[i].keyword, price: keywords[i].price, created_by: keywords[i].created_by};
+                    keywords.forEach(function(objKeyword, i){
+                        var post = {keyword: objKeyword.keyword, price: objKeyword.price, created_by: objKeyword.created_by};
                         connection.query("SELECT id FROM ppc_keywords WHERE keyword = ?", [post.keyword], function(err, rows, fields){
                             if(err) throw err;
                             if(typeof rows == 'undefined' || rows.length <= 0 || rows[0].id == null){
-                                (function(category_id){
-                                    connection.query('INSERT INTO ppc_keywords SET ?', [post], function(err, result) {
-                                        if(err) throw err;
-                                        post.id = result.insertId;
-                                        if(category_id != null){
-                                            connection.query("INSERT INTO ppc_keywords_categories SET ?",[{category_id: category_id, keyword_id: post.id}],
-                                                function (err, rows, fields) {
-                                                    if(err){
-                                                        reject(err);
-                                                    }
-                                                    resolve(rows);
-                                                })
-                                        }else{
-                                            resolve(post);
-                                        }
-
-                                    });
-                                })(category_id)
+                                connection.query('INSERT INTO ppc_keywords SET ?', [post], function(err, result) {
+                                    if(err) throw err;
+                                    post.id = result.insertId;
+                                    if(category_id != null){
+                                        connection.query("INSERT INTO ppc_keywords_categories SET ?",[{category_id: category_id, keyword_id: post.id}],
+                                            function (err, rows, fields) {
+                                            })
+                                    }
+                                    insertedData.push(post);
+                                    if(i== keywords.length -1) {
+                                        resolve(insertedData);
+                                    }
+                                });
                             } else {
-                                resolve({status: false, message: 'Duplicate Keyword',id: rows[0].id});
+                                if(i== keywords.length -1 && insertedData.length == 0) {
+                                    resolve({status: false, message: 'Duplicate Keyword'});
+                                }
                             }
                         });
-                    }
+                    });
                 }
-
                 connection.release();
             }, function(error){
                 if(error)
@@ -333,10 +330,28 @@ module.exports = {
 
     },
 
-    saveAdOffers: function(ad_id,ad_offers) {
+    saveAdOffers: function(ad_id,ad_offer) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('INSERT INTO ppc_ad_offers SET ?', [ad_offers],
+                connection.query('INSERT INTO ppc_ad_offers SET ?', [ad_offer],
+                    function (err, rows, fields) {
+                        if(err){
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    saveAdFiles: function(ad_id,ad_file) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                connection.query('INSERT INTO ppc_ad_files SET ?', [ad_file],
                     function (err, rows, fields) {
                         if(err){
                             reject(err);
