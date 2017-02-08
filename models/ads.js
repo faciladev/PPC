@@ -119,27 +119,7 @@ module.exports = {
     getAdOffers: function(ad_id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
-                connection.query('SELECT * FROM ppc_offers inner join ppc_ad_offers on ppc_offers.id = ppc_ad_offers.offer_id where ppc_ad_offers.ad_id = ?', [ad_id],
-                    function(err, rows, fields) {
-                        connection.release();
-                        if(err) {
-                            reject(err);
-                        }
-                        resolve(rows);
-                    }
-                );
-            }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
-            });
-        });
-    },
-
-    //Gets all advertisers offers
-    getAdvertiserOffers: function(advertiser_id) {
-        return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function(connection) {
-                connection.query('SELECT * FROM ppc_offers where advertizer_id = ?', [advertiser_id],
+                connection.query('SELECT * FROM ppc_ad_offers where ad_id = ?', [ad_id],
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
@@ -356,29 +336,7 @@ module.exports = {
     saveAdOffers: function(ad_id,ad_offers) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('DELETE FROM ppc_ad_offers WHERE ad_id = ?', [ad_id]);
-                console.log(ad_offers.length);
-                for(var i=0; i< ad_offers.length; i++) {
-                    connection.query('INSERT INTO ppc_ad_offers SET ?', [ad_offers[i]],
-                        function (err, rows, fields) {
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                }
-                connection.release();
-            }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
-            });
-        });
-    },
-    saveAdvertiserOffer: function(ad_id, advertiser_offer) {
-        return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function(connection){
-                connection.query('INSERT INTO ppc_offers SET ?', [advertiser_offer],
+                connection.query('INSERT INTO ppc_ad_offers SET ?', [ad_offers],
                     function (err, rows, fields) {
                         if(err){
                             reject(err);
@@ -392,5 +350,24 @@ module.exports = {
                     reject(new Error('Connection error'));
             });
         });
-    },
+    }
+//    ,
+//    saveAdvertiserOffer: function(ad_id, advertiser_offer) {
+//        return new Promise(function(resolve, reject) {
+//            DbHelper.getConnection().then(function(connection){
+//                connection.query('INSERT INTO ppc_offers SET ?', [advertiser_offer],
+//                    function (err, rows, fields) {
+//                        if(err){
+//                            reject(err);
+//                        }
+//                        resolve(rows);
+//                    }
+//                );
+//                connection.release();
+//            }, function(error){
+//                if(error)
+//                    reject(new Error('Connection error'));
+//            });
+//        });
+//    }
 }
