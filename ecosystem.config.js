@@ -9,6 +9,9 @@ module.exports = {
     {
       name      : "PPC",
       script    : "./bin/www",
+      watch     : true,
+      instances : 0,
+      exec_mode : "cluster",
       env: {
         COMMON_VARIABLE: "true",
         NODE_ENV: "development",
