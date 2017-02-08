@@ -3,6 +3,9 @@ var Promise = require('promise');
 var DbHelper = require('../lib/DbHelper');
 var Util = require('../lib/util');
 
+//Approved advertiser status code
+const STATUS_APPROVED = 4;
+
 var advertiserModel = {
 	
 
@@ -12,7 +15,7 @@ var advertiserModel = {
                 
                 connection.query(
                     'SELECT advertizer_id, advertizer_business_name FROM advertisers ' +
-                    'WHERE advertizer_deleted = 0 AND advertizer_approved = 1', 
+                    'WHERE advertizer_deleted = 0 AND advertizer_status = ' + STATUS_APPROVED, 
                     function (err, rows, fields) {
 
                         //release connection
