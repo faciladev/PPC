@@ -366,23 +366,4 @@ module.exports = {
             });
         });
     }
-//    ,
-//    saveAdvertiserOffer: function(ad_id, advertiser_offer) {
-//        return new Promise(function(resolve, reject) {
-//            DbHelper.getConnection().then(function(connection){
-//                connection.query('INSERT INTO ppc_offers SET ?', [advertiser_offer],
-//                    function (err, rows, fields) {
-//                        if(err){
-//                            reject(err);
-//                        }
-//                        resolve(rows);
-//                    }
-//                );
-//                connection.release();
-//            }, function(error){
-//                if(error)
-//                    reject(new Error('Connection error'));
-//            });
-//        });
-//    }
 }
