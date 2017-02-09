@@ -131,16 +131,6 @@ router.post('/:id/locations', function(req, res, next) {
     });
 });
 
-//Creates Ad offers
-//router.post('/:id/offers', function(req, res, next) {
-//    ads.saveAdOffers(req.params.id, req.body).then(function(response){
-//        res.json(response);
-//    }, function(error) {
-//        error.message = 'Error';
-//        next(error);
-//    });
-//});
-
 //Creates Advertiser offer
 router.post('/:id/offers', function(req, res, next) {
     if(!req.files){
@@ -160,26 +150,6 @@ router.post('/:id/offers', function(req, res, next) {
         res.json(error);
     });
 });
-
-
-//router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
-//    if(!req.files){
-//        res.send('No files were uploaded');
-//        return;
-//    }
-//
-//    UploadHelper.uploadFiles(req.files, "offer").then(function(response){
-//        req.body.image = response.length === 1 ? response[0] : response;
-//        ads.saveAdvertiserOffer(req.params.advertiserId, req.body).then(function(response){
-//            res.json(response);
-//        }, function(error) {
-//            error.message = 'Error';
-//            next(error);
-//        });
-//    }, function(error){
-//        res.json(error);
-//    });
-//});
 
 //Save keyword and keyword category
 router.post('/keywords/:categoryId', function(req, res, next) {
