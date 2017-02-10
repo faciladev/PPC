@@ -330,10 +330,37 @@ module.exports = {
 
     },
 
-    saveAdOffers: function(ad_id,ad_offer) {
+    saveAdOffers: function(ad_id,ad_offers) {
+        var insertedData = [];
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('INSERT INTO ppc_ad_offers SET ?', [ad_offer],
+                ad_offers.forEach(function(objOffer, i){
+                    var post = {ad_id: objOffer.ad_id, offer_id: objOffer.offer_id };
+
+                    connection.query('INSERT INTO ppc_ad_offers SET ?', [post],
+                        function (err, result) {
+                            if(err){
+                                reject(err);
+                            }
+                            post.id = result.insertId;
+                            insertedData.push(post);
+                            if(i== ad_offers.length -1) {
+                                resolve(insertedData);
+                            }
+                        }
+                    );
+                });
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    saveAdvertiserOffer: function(advertiser_id, advertiser_offer) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                connection.query('INSERT INTO ppc_offers SET ?', [advertiser_offer],
                     function (err, rows, fields) {
                         if(err){
                             reject(err);
