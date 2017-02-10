@@ -191,8 +191,8 @@ router.post('/keywords/:categoryId', function(req, res, next) {
     });
 });
 
-//Upload ad files
-router.post('/:id/uploadFiles', function(req, res, next) {
+//Creates Advertiser files
+router.post('/advertiserFiles/:advertiserId', function(req, res, next) {
     if(!req.files){
         res.send('No files were uploaded');
         return;
@@ -200,7 +200,7 @@ router.post('/:id/uploadFiles', function(req, res, next) {
 
     UploadHelper.uploadFiles(req.files, "ad_files").then(function(response){
         req.body.file_name = response.length === 1 ? response[0] : response;
-        ads.saveAdFiles(req.params.id, req.body).then(function(response){
+        ads.saveAdvertiserFile(req.params.advertiserId, req.body).then(function(response){
             res.json(response);
         }, function(error) {
             error.message = 'Error';
@@ -208,6 +208,16 @@ router.post('/:id/uploadFiles', function(req, res, next) {
         });
     }, function(error){
         res.json(error);
+    });
+});
+
+//Upload ad files
+router.post('/:id/adFiles', function(req, res, next) {
+    ads.saveAdFiles(req.params.id, req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
     });
 });
 
