@@ -131,8 +131,38 @@ router.post('/:id/locations', function(req, res, next) {
     });
 });
 
-//Creates Advertiser offer
+
+//router.post('/:id/offers', function(req, res, next) {
+//    if(!req.files){
+//        res.send('No files were uploaded');
+//        return;
+//    }
+//
+//    UploadHelper.uploadFiles(req.files, "offer").then(function(response){
+//        req.body.image = response.length === 1 ? response[0] : response;
+//        ads.saveAdOffers(req.params.id, req.body).then(function(response){
+//            res.json(response);
+//        }, function(error) {
+//            error.message = 'Error';
+//            next(error);
+//        });
+//    }, function(error){
+//        res.json(error);
+//    });
+//});
+
+//Creates Ad offers
 router.post('/:id/offers', function(req, res, next) {
+    ads.saveAdOffers(req.params.id, req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
+
+//Creates Advertiser offer
+router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
     if(!req.files){
         res.send('No files were uploaded');
         return;
@@ -140,7 +170,7 @@ router.post('/:id/offers', function(req, res, next) {
 
     UploadHelper.uploadFiles(req.files, "offer").then(function(response){
         req.body.image = response.length === 1 ? response[0] : response;
-        ads.saveAdOffers(req.params.id, req.body).then(function(response){
+        ads.saveAdvertiserOffer(req.params.advertiserId, req.body).then(function(response){
             res.json(response);
         }, function(error) {
             error.message = 'Error';
