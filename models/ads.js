@@ -361,11 +361,12 @@ module.exports = {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
                 connection.query('INSERT INTO ppc_offers SET ?', [advertiser_offer],
-                    function (err, rows, fields) {
+                    function (err, result) {
                         if(err){
                             reject(err);
                         }
-                        resolve(rows);
+                        advertiser_offer.id = result.insertId;
+                        resolve(advertiser_offer);
                     }
                 );
                 connection.release();
@@ -375,17 +376,45 @@ module.exports = {
             });
         });
     },
-    saveAdFiles: function(ad_id,ad_file) {
+    saveAdvertiserFile: function(advertiser_id, advertiser_file) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('INSERT INTO ppc_ad_files SET ?', [ad_file],
-                    function (err, rows, fields) {
+                connection.query('INSERT INTO ppc_files SET ?', [advertiser_file],
+                    function (err, result) {
                         if(err){
                             reject(err);
                         }
-                        resolve(rows);
+                        advertiser_file.id = result.insertId;
+                        resolve(advertiser_file);
                     }
                 );
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    saveAdFiles: function(ad_id,ad_files) {
+        var insertedData = [];
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                ad_files.forEach(function(objFile, i){
+                    var post = {ad_id: objFile.ad_id, file_id: objFile.file_id };
+
+                    connection.query('INSERT INTO ppc_ad_files SET ?', [post],
+                        function (err, result) {
+                            if(err){
+                                reject(err);
+                            }
+                            post.id = result.insertId;
+                            insertedData.push(post);
+                            if(i== ad_files.length -1) {
+                                resolve(insertedData);
+                            }
+                        }
+                    );
+                });
                 connection.release();
             }, function(error){
                 if(error)
