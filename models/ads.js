@@ -343,9 +343,17 @@ module.exports = {
                                 reject(err);
                             }
                             post.id = result.insertId;
-                            insertedData.push(post);
+                            insertedData.push(post.offer_id);
+
                             if(i== ad_offers.length -1) {
-                                resolve(insertedData);
+                                connection.query('Select ppc_offers.*, ppc_ad_offers.ad_id from ppc_offers inner join ppc_ad_offers on ppc_offers.id = ppc_ad_offers.offer_id WHERE ppc_ad_offers.offer_id IN (?)', [insertedData],
+                                    function(err, rows, fields) {
+                                        if(err) {
+                                            reject(err);
+                                        }
+                                        resolve(rows);
+                                    }
+                                );
                             }
                         }
                     );
