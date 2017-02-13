@@ -4,10 +4,16 @@ var ppcModel = require('../models/ppcModel');
 var userModel = require('../models/userModel');
 var Util = require('../lib/util');
 
+//Track deal download for non-members
+router.get('/deals/:dealId', function(req, res, next){
+	downloadDeal(req, res, next);
+});
+
 //Track deal download
 router.get('/deals/:dealId/:userId', function(req, res, next){
 	downloadDeal(req, res, next);
 });
+
 
 var downloadDeal = function(req, res, next){
 	var dealId = req.params.dealId;
@@ -30,7 +36,6 @@ var downloadDeal = function(req, res, next){
 						ppcModel.saveFraudClick(ip, userAgent, userId);
 						next(new Error('Fraud click.'));
 					}
-					console.log(hasPassed);
 
 					ppcModel.trackDealDownload(deal, ip, userAgent, userId).then(
 						function(response){
