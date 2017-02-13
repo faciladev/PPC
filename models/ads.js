@@ -180,6 +180,7 @@ module.exports = {
                 if(ad.id == 0 ) {
                     ad.created_at = DateHelper.today();
                     ad.updated_at = DateHelper.today();
+                    ad.available_since = DateHelper.today();
                     connection.query('INSERT INTO ppc_ads SET ?', [ad],
                         function (err, rows, fields) {
                             connection.release();
