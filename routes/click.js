@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var ppcModel = require('../models/ppcModel');
+var userModel = require('../models/userModel');
 var Util = require('../lib/util');
 
 router.get('/ad/:searchId/:redirectUrl', function(req, res, next){
@@ -72,42 +73,48 @@ router.get('/ad/:searchId/:redirectUrl', function(req, res, next){
 
 });
 
-router.get('/deal/:dealId/:redirectUrl', function(req, res, next){
+router.get('/deal/:dealId/:userId/:redirectUrl', function(req, res, next){
 	var dealId = req.params.dealId;
 	var redirectUrl = req.params.redirectUrl;
-	var userId; //get user from cookie
+	var userId = req.params.userId;
 
-	ppcModel.getDealById(dealId).then(
-		function(deal){
-			if(deal.length <= 0)
-				next(new Error('No deal found with this id.'));
+	userModel.getUser(userId).then(
+		function(user){
+			ppcModel.getDealById(dealId).then(
+				function(deal){
 
-			var userAgent = Util.getUserAgent();
-			var ip = Util.getClientIp(req);
+					var userAgent = Util.getUserAgent(req);
+					var ip = Util.getClientIp(req);
 
-			//Make sure if click meets click policy
-			ppcModel.requestMeetsClickPolicy(ip, userAgent).then(
-				function(hasPassed){
-					if(! hasPassed){
-						//Save fraud click
-						ppcModel.saveFraudClick(ip, userAgent, userId);
-						next(new Error('Fraud click.'));
-					}
+					//Make sure if click meets click policy
+					ppcModel.requestMeetsClickPolicy(ip, userAgent).then(
+						function(hasPassed){
+							if(! hasPassed){
+								//Save fraud click
+								ppcModel.saveFraudClick(ip, userAgent, userId);
+								next(new Error('Fraud click.'));
+							}
+							console.log('here yy');
+							ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
+								function(response){
+									console.log('here xx');
+									res.redirect(Utile.decodeUrl(redirectUrl));
+								},
+								function(error){
+									next(error);
+								}
+							);
 
-					ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
-						function(response){
-							res.redirect(Utile.decodeUrl(redirectUrl));
+							//TODO
+							//1) Budget limit check
+							//2)availability check
+
 						},
 						function(error){
 							next(error);
 						}
 					);
-
-					//TODO
-					//1) Budget limit check
-					//2)availability check
-
-				},
+				}, 
 				function(error){
 					next(error);
 				}
@@ -116,7 +123,9 @@ router.get('/deal/:dealId/:redirectUrl', function(req, res, next){
 		function(error){
 			next(error);
 		}
-	);
+	)
+
+			
 
 });
 
