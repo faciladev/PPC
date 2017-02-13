@@ -59,42 +59,21 @@ router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next) {
 	var keyword = req.params.keyword;
 	var categoryId = req.params.categoryId;
 	var userId = req.params.userId;
-	console.log(keyword + categoryId + userId);
 
 	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
 		function(searchData){
-			console.log(searchData);res.json(searchData);return;
-
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
-			//Make sure if click meets click policy
-			ppcModel.requestMeetsClickPolicy(ip, userAgent).then(
-				function(hasPassed){
-					if(! hasPassed){
-						//Save fraud click
-						ppcModel.saveFraudClick(ip, userAgent, userId);
-						next(new Error('Fraud click.'));
-					}
-					//Log impression
-					ppcModel.trackDailyDealImpression(searchData, ip, userAgent, userId).then(
-						function(response){
-							res.json(searchData);
-						}, 
-						function(error){
-							next(error);
-						}
-					);
-
-					//TODO
-					//1) Budget limit check
-					//2)availability check
-
-				},
+			
+			//Log impression
+			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
+				function(response){
+					res.json(searchData);
+				}, 
 				function(error){
 					next(error);
 				}
 			);
-			
 
 			
 		}, 

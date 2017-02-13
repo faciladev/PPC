@@ -39,20 +39,18 @@ var userModel = {
     getUserGroup : function(userId){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
-                console.log('z')
                 connection.query('SELECT group_id FROM users_groups WHERE user_id = ?', 
                     [userId], 
                     function(err, rows, fields){
                         connection.release();
 
-                        console.log(rows);
+                        
                         if(err)                            
                             return reject(err);
 
                         if(rows.length <= 0)
                             return reject(Error('User has no valid group'));
                         
-                        conso
                         resolve(rows[0]);
                         
                     }

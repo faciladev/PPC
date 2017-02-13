@@ -382,43 +382,46 @@ var ppcModel = {
         });
     },
 
-    trackDailyDealImpression : function(savedSearchIds, ip, userAgent, userId){
+    trackDailyDealImpression : function(searchData, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
-            DbHelper.getConnection().then(function(connection){
+                userModel.getUserGroup(userId).then(
+                    function(group){
 
-                Util.getUserGroup(userId).then(
-                    function(response){
-
-                        var actor_type_id = getActorType(userId);
+                        var actor_type_id = ppcModel.getActorType(group);
 
                         var query = '';
+
                         for(var i = 0; i<searchData.length; i++){
                             query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
                             'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
                             'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
                             ', '+ actor_type_id +', '+ searchData[i].deal_id +
-                            ', '+ userId +','+ ip +','+ userAgent.user_agent +','+ userAgent.device_version +');';
+                            ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ userAgent.device_version +'\');';
                         }
 
-                        connection.query(query, function(err, results, fields){
-                            connection.release();
+                        DbHelper.getConnection().then(function(connection){
+                            connection.query(query, function(err, results, fields){
+                                connection.release();
 
-                            if(err)
-                                return reject(err);
+                                if(err)
+                                    return reject(err);
 
-                            resolve(results);
+                                resolve(results);
+                            });
+                            
+                        },function(error){
+                            reject(error);
                         });
+
+                    
                     }, 
                     function(error){
-
+                        reject(error);
                     }
                 );
 
                 
-                
-            },function(error){
-                return reject(error);
-            });
+              
         });
     },
 
@@ -446,26 +449,31 @@ var ppcModel = {
     requestMeetsClickPolicy: function(ip, userAgent){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
-                var query = 'SELECT COUNT(id) AS count FROM one_hour_analytics '+
-                'WHERE ip_address = ? AND user_agent = ? AND device_version = ? '
-                'AND ((activity_type_id = ? AND item_type_id = ?) OR '
-                'activity_type_id = ? AND item_type_id = ?)';
+                var query = 'SELECT COUNT(id) AS count FROM one_hour_analytics ' +
+                'WHERE (activity_type_id = ? AND item_type_id = ?) ' +
+                ' OR (activity_type_id = ? AND item_type_id = ?) '+
+                'AND ip_address =  ? ' +
+                'AND user_agent = ? ' +
+                'AND device_version = ?';
                 connection.query(query, 
                     [
-                        ip, 
-                        userAgent.user_agent, 
-                        userAgent.device_version, 
+                        ACTIVITY_DOWNLOAD,
+                        ITEM_DAILY_DEAL,
                         ACTIVITY_CLICK,
                         ITEM_SPONSORED_AD,
-                        ACTIVITY_DOWNLOAD,
-                        ITEM_DAILY_DEAL
-                    ], 
+                        ip,
+                        userAgent.user_agent,
+                        userAgent.device_version
+
+                    ],
                     function(err, results, fields){
                     connection.release();
 
 
                     if(err)
                         return reject(err);
+
+                    console.log(results);
 
                     resolve(results[0].count < 6 ? true : false);
                 });
@@ -491,6 +499,7 @@ var ppcModel = {
                         device_version: device_version,
                         user_id: userId
                     }, 
+                    
                     function(err, results, fields){
                     connection.release();
 
@@ -690,6 +699,7 @@ var ppcModel = {
         } else {
             actor_type_id = ACTOR_NON_MEMBER;
         }
+
         return actor_type_id;
     },
 
