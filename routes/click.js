@@ -4,7 +4,13 @@ var ppcModel = require('../models/ppcModel');
 var userModel = require('../models/userModel');
 var Util = require('../lib/util');
 
+//Deal click for members
 router.get('/deals/:dealId/:redirectUrl/:userId', function(req, res, next){
+	clickDeal(req, res, next);
+});
+
+//Deal click for non-members
+router.get('/deals/:dealId/:redirectUrl', function(req, res, next){
 	clickDeal(req, res, next);
 });
 
@@ -81,37 +87,31 @@ var clickDeal = function(req, res, next){
 	var dealId = req.params.dealId;
 	var redirectUrl = req.params.redirectUrl;
 	var userId = req.params.userId;
+	
+	ppcModel.getDealById(dealId).then(
+		function(deal){
+			var userAgent = Util.getUserAgent(req);
+			var ip = Util.getClientIp(req);
 
-	userModel.getUser(userId).then(
-		function(user){
-			ppcModel.getDealById(dealId).then(
-				function(deal){
-					var userAgent = Util.getUserAgent(req);
-					var ip = Util.getClientIp(req);
+			//TODO
+			//1) Budget limit check
+			//2)availability check
 
-					//TODO
-					//1) Budget limit check
-					//2)availability check
-
-					ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
-						function(response){
-							res.redirect(Util.decodeUrl(redirectUrl));
-						},
-						function(error){
-							next(error);
-						}
-					);
-
-				}, 
+			ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
+				function(response){
+					console.log(response);
+					res.redirect(Util.decodeUrl(redirectUrl));
+				},
 				function(error){
 					next(error);
 				}
 			);
+
 		}, 
 		function(error){
 			next(error);
 		}
-	)
+	);
 }
 
 module.exports = router;
