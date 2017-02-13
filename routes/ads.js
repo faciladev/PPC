@@ -3,9 +3,9 @@ var router = express.Router();
 var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
 
-//Ads GET requests
-router.get('/', function(req, res, next) {
-    ads.getAll(req.query.page).then(function(response){
+//Gets all ads by advertiser
+router.get('/advertiser/:advertiserId', function(req, res, next) {
+    ads.getAllByAdvertiser(req.query.page, req.params.advertiserId).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
