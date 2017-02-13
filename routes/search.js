@@ -55,19 +55,56 @@ router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
-router.get('/deals/:category/:keyword', function(req, res, next) {
+//Non-member search
+router.get('/deals/:categoryId/:keyword', function(req, res, next){
+	searchDeals(req, res, next);
+});
+
+//Member search
+router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
+	searchDeals(req, res, next);
+});
+
+
+router.get('/deals/:categoryId', function(req, res, next) {
+	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){
+		console.log(error)			
+			next(error);
+		}
+	)
+});
+
+router.get('/deals', function(req, res, next) {
+	ppcModel.getDealsFromEachCategory(8).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){
+		console.log(error)			
+			next(error);
+		}
+	)
+});
+
+var searchDeals = function(req, res, next) {
 	var keyword = req.params.keyword;
-	var userId; //get user from cookie
+	var categoryId = req.params.categoryId;
+	var userId = req.params.userId;
 
-	ppcModel.findDailyDeals(keyword).then(
+	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
 		function(searchData){
-			if(searchData.length <= 0)
-				return res.json(searchData);
-
+			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
 
+			if(searchData.result.length <= 0)
+				return res.json([]);
+
 			//Log impression
-			ppcModel.trackDailyDealImpression(searchData, ip, userAgent, userId).then(
+			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
 				function(response){
 					res.json(searchData);
 				}, 
@@ -82,32 +119,8 @@ router.get('/deals/:category/:keyword', function(req, res, next) {
 			next(error);
 		}
 	)
-});
+}
 
-
-router.get('/deals', function(req, res, next) {
-	ppcModel.getDealsFromEachCategory(8).then(
-		function(deals){
-			res.json(deals);
-		}, 
-		function(error){
-		console.log(error)			
-			next(error);
-		}
-	)
-});
-
-router.get('/deals/:categoryId', function(req, res, next) {
-	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
-		function(deals){
-			res.json(deals);
-		}, 
-		function(error){
-		console.log(error)			
-			next(error);
-		}
-	)
-});
 
 
 module.exports = router;

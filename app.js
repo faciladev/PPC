@@ -13,6 +13,7 @@ var config = require('config');
 var ads = require('./routes/ads');
 var search = require('./routes/search');
 var click = require('./routes/click');
+var download = require('./routes/download');
 var deal = require('./routes/deal');
 var index = require('./routes/index');
 
@@ -56,6 +57,9 @@ app.use('/api/search', search);
 
 //Track clicks for sponsored ads and daily deals
 app.use('/api/click', click);
+
+//Searches sponsored ads and daily deals
+app.use('/api/download', download);
 
 //Daily Deals
 app.use('/api/deals', deal);

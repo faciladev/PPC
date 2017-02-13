@@ -1,9 +1,20 @@
 var express = require('express');
 var router = express.Router();
 var ppcModel = require('../models/ppcModel');
+var userModel = require('../models/userModel');
 var Util = require('../lib/util');
 
-router.get('/ad/:searchId/:redirectUrl', function(req, res, next){
+//Deal click for members
+router.get('/deals/:dealId/:redirectUrl/:userId', function(req, res, next){
+	clickDeal(req, res, next);
+});
+
+//Deal click for non-members
+router.get('/deals/:dealId/:redirectUrl', function(req, res, next){
+	clickDeal(req, res, next);
+});
+
+router.get('/ads/:searchId/:redirectUrl', function(req, res, next){
 	var searchId = req.params.searchId;
 	var redirectUrl = req.params.redirectUrl;
 	var userId; //get user from cookie
@@ -72,52 +83,36 @@ router.get('/ad/:searchId/:redirectUrl', function(req, res, next){
 
 });
 
-router.get('/deal/:dealId/:redirectUrl', function(req, res, next){
+var clickDeal = function(req, res, next){
 	var dealId = req.params.dealId;
 	var redirectUrl = req.params.redirectUrl;
-	var userId; //get user from cookie
-
+	var userId = req.params.userId;
+	
 	ppcModel.getDealById(dealId).then(
 		function(deal){
-			if(deal.length <= 0)
-				next(new Error('No deal found with this id.'));
-
-			var userAgent = Util.getUserAgent();
+			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
 
-			//Make sure if click meets click policy
-			ppcModel.requestMeetsClickPolicy(ip, userAgent).then(
-				function(hasPassed){
-					if(! hasPassed){
-						//Save fraud click
-						ppcModel.saveFraudClick(ip, userAgent, userId);
-						next(new Error('Fraud click.'));
-					}
+			//TODO
+			//1) Budget limit check
+			//2)availability check
 
-					ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
-						function(response){
-							res.redirect(Utile.decodeUrl(redirectUrl));
-						},
-						function(error){
-							next(error);
-						}
-					);
-
-					//TODO
-					//1) Budget limit check
-					//2)availability check
-
+			ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
+				function(response){
+					console.log(response);
+					res.redirect(Util.decodeUrl(redirectUrl));
 				},
 				function(error){
 					next(error);
 				}
 			);
+
 		}, 
 		function(error){
 			next(error);
 		}
 	);
+}
 
-});
 
 module.exports = router;
