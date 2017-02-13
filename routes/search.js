@@ -55,26 +55,46 @@ router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
-router.get('/deals/:category/:keyword', function(req, res, next) {
+router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next) {
 	var keyword = req.params.keyword;
-	var userId; //get user from cookie
+	var categoryId = req.params.categoryId;
+	var userId = req.params.userId;
+	console.log(keyword + categoryId + userId);
 
-	ppcModel.findDailyDeals(keyword).then(
+	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
 		function(searchData){
-			if(searchData.length <= 0)
-				return res.json(searchData);
+			console.log(searchData);res.json(searchData);return;
 
+			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
+			//Make sure if click meets click policy
+			ppcModel.requestMeetsClickPolicy(ip, userAgent).then(
+				function(hasPassed){
+					if(! hasPassed){
+						//Save fraud click
+						ppcModel.saveFraudClick(ip, userAgent, userId);
+						next(new Error('Fraud click.'));
+					}
+					//Log impression
+					ppcModel.trackDailyDealImpression(searchData, ip, userAgent, userId).then(
+						function(response){
+							res.json(searchData);
+						}, 
+						function(error){
+							next(error);
+						}
+					);
 
-			//Log impression
-			ppcModel.trackDailyDealImpression(searchData, ip, userAgent, userId).then(
-				function(response){
-					res.json(searchData);
-				}, 
+					//TODO
+					//1) Budget limit check
+					//2)availability check
+
+				},
 				function(error){
 					next(error);
 				}
 			);
+			
 
 			
 		}, 

@@ -3,6 +3,7 @@ var Promise = require('promise');
 var DbHelper = require('../lib/DbHelper');
 var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
+var userModel = require('./userModel');
 
 const ACTIVITY_CLICK = 1;
 const ACTIVITY_IMPRESSION = 2;
@@ -172,44 +173,59 @@ var ppcModel = {
         });
     },
 
-    findDailyDeals : function(keyword){
+    findDailyDeals : function(keyword, categoryId, page){
 
         return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function(connection){
-                //set default argument value
-                var subpage = (undefined === subpage) ? false : subpage;
-                //TODO
-                //Check deal availability
-                var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.name, m.company_name, m.what_you_get, m.location,' +
-                    'm.end_date, m.discount_daily_description, m.discount_type, m.discount_percentage, m.discount_description, ' +
-                    'm.regular_price, m.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
-                    'm.discount_description, m.daily_deal_description, m.approved_category FROM daily_deal AS dd LEFT JOIN daily_deal_microsite ' +
-                    'AS m ON dd.daily_deal_microsite_id=m.id ' +
-                    'WHERE m.is_deleted=0 AND m.is_approved=1 AND m.is_complete=1 ' + 
-                    'AND m.name LIKE ?';
+            //TODO
+            //Check deal availability
+            var query = 
+            'SELECT ' + 
+            'dd.id AS deal_id, ' +
+            'm.id AS microsite_id, '+
+            'm.company_name, ' +
+            'm.what_you_get, '+
+            'm.location,' +
+            'dd.end_date, ' +
+            'dd.start_date, ' +
+            'm.discount_daily_description, '+
+            'm.discount_percentage, '+
+            'dd.discount_type, '+
+            'm.name, '+
+            'dd.discount_price, ' +
+            'm.image, ' +
+            'm.image_1, ' +
+            'm.image_2, ' +
+            'm.code, ' +
+            'dd.date_created, ' +
+            'dd.download_price, ' +
+            'm.discount_description, ' +
+            'dd.regular_price, '+
+            'dd.discount_rate, '+
+            'dd.coupon_name, '+
+            'dd.coupon_generated_code, '+
+            'dd.is_approved, ' +
+            'dd.is_deleted, ' +
+            'dd.list_rank, ' +
+            'dd.deal_image, ' +
+            'm.discount_description, '+
+            'm.daily_deal_description, '+
+            'dd.approved_category_id '+
+            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+            'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
+            'dd.approved_category_id = cat.category_id ' +
+            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id = ? ' +
+            'AND m.name LIKE ?';            
 
-                var queryParams = ['%' + keyword + '%'];
-
-                connection.query(
-                    query, 
-                    queryParams,
-                    function (err, rows, fields) {
-
-                        //release connection
-                        connection.release();
-
-                        if(err){
-                            return reject(err);
-                        }
-
-
-                        resolve(rows);
-                    }
-                );
-            }, function(error){
-                reject(error);
-            });
-
+            var queryParams = [categoryId ,'%' + keyword + '%'];
+            
+            PaginationHelper.paginate(query, page, null, queryParams).then(
+                function(response){
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
             
         });
     },
@@ -264,7 +280,6 @@ var ppcModel = {
             'dd.discount_rate, '+
             'dd.coupon_name, '+
             'dd.coupon_generated_code, '+
-            'm.image, '+
             'dd.is_approved, ' +
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
@@ -323,7 +338,6 @@ var ppcModel = {
                             'dd.discount_rate, '+
                             'dd.coupon_name, '+
                             'dd.coupon_generated_code, '+
-                            'm.image, '+
                             'dd.is_approved, ' +
                             'dd.is_deleted, ' +
                             'dd.list_rank, ' +
@@ -432,7 +446,7 @@ var ppcModel = {
     requestMeetsClickPolicy: function(ip, userAgent){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
-                var query = 'SELECT COUNT(id) FROM one_hour_analytics '+
+                var query = 'SELECT COUNT(id) AS count FROM one_hour_analytics '+
                 'WHERE ip_address = ? AND user_agent = ? AND device_version = ? '
                 'AND ((activity_type_id = ? AND item_type_id = ?) OR '
                 'activity_type_id = ? AND item_type_id = ?)';
@@ -449,10 +463,11 @@ var ppcModel = {
                     function(err, results, fields){
                     connection.release();
 
+
                     if(err)
                         return reject(err);
 
-                    resolve(results < 6 ? true : false);
+                    resolve(results[0].count < 6 ? true : false);
                 });
 
                 
@@ -619,14 +634,58 @@ var ppcModel = {
         });
     },
 
-    getActorType : function(userId){
+    trackDealClick : function(deal, ip, userAgent, userId){
+
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+
+                userModel.getUserGroup(userId).then(
+                    function(group){
+                        console.log('here');
+                        var actor_type_id = getActorType(group);
+                        console.log(actor_type_id);
+                        var query = 'INSERT INTO ppc_analytics SET ?';
+
+
+                        connection.query(query, 
+                            {
+                                actor_type_id: actor_type_id,
+                                item_id: deal.id,
+                                actor_id: userId,
+                                ip_address: ip,
+                                user_agent: userAgent.user_agent,
+                                device_version: userAgent.device_version
+                            }, 
+                            function(err, results, fields){
+                            connection.release();
+
+                            if(err)
+                                return reject(err);
+
+                            resolve(results.insertId);
+                        });
+                    }, 
+                    function(error){
+                        reject(error);
+                    }
+                );
+
+                
+                
+            },function(error){
+                return reject(error);
+            });
+        });
+    },
+
+    getActorType : function(group){
         var actor_type_id;
-        if(response.group_id === 1){
+        if(group.group_id === 1){
             actor_type_id = ACTOR_ADMIN;
         }
-        else if(response.group_id === 2){
+        else if(group.group_id === 2){
             actor_type_id = ACTOR_CONSUMER;
-        } else if(response.group_id === 3){
+        } else if(group.group_id === 3){
             actor_type_id = ACTOR_ADVERTISER;
         } else {
             actor_type_id = ACTOR_NON_MEMBER;
@@ -641,13 +700,41 @@ var ppcModel = {
 
                 //TODO
                 //Check deal availability
-                var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.name, m.company_name, m.what_you_get, m.location,' +
-                    'm.end_date, m.discount_daily_description, m.discount_type, m.discount_percentage, m.discount_description, ' +
-                    'm.regular_price, m.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
-                    'm.discount_description, m.daily_deal_description, m.approved_category FROM daily_deal AS dd LEFT JOIN daily_deal_microsite ' +
-                    'AS m ON dd.daily_deal_microsite_id=m.id ' +
-                    'WHERE m.is_deleted=0 AND m.is_approved=1 AND m.is_complete=1 ' + 
-                    'AND dd.id = ?';
+                var query = 
+                'SELECT ' + 
+                'dd.id AS deal_id, ' +
+                'm.id AS microsite_id, '+
+                'm.company_name, ' +
+                'm.what_you_get, '+
+                'm.location,' +
+                'dd.end_date, ' +
+                'dd.start_date, ' +
+                'm.discount_daily_description, '+
+                'm.discount_percentage, '+
+                'dd.discount_type, '+
+                'm.name, '+
+                'dd.discount_price, ' +
+                'm.image, ' +
+                'm.image_1, ' +
+                'm.image_2, ' +
+                'm.code, ' +
+                'dd.date_created, ' +
+                'dd.download_price, ' +
+                'm.discount_description, ' +
+                'dd.regular_price, '+
+                'dd.discount_rate, '+
+                'dd.coupon_name, '+
+                'dd.coupon_generated_code, '+
+                'dd.is_approved, ' +
+                'dd.is_deleted, ' +
+                'dd.list_rank, ' +
+                'dd.deal_image, ' +
+                'm.discount_description, '+
+                'm.daily_deal_description, '+
+                'dd.approved_category_id '+
+                'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+                'AS m ON dd.daily_deal_microsite_id=m.id ' +
+                'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.id=?';
 
                 connection.query(
                     query, 
@@ -661,8 +748,10 @@ var ppcModel = {
                             return reject(err);
                         }
 
+                        if(rows.length <= 0)
+                            return reject(new Error('No deal found.'));
 
-                        resolve(rows);
+                        resolve(rows[0]);
                     }
                 );
             }, function(error){
