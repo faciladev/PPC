@@ -386,18 +386,25 @@ var ppcModel = {
         return new Promise(function(resolve, reject){
                 userModel.getUserGroup(userId).then(
                     function(group){
-
-                        var actor_type_id = ppcModel.getActorType(group);
-
                         var query = '';
+                        var actor_type_id;
+                        
+                        if(group === false){
+                            actor_type_id = ACTOR_NON_MEMBER;
+                            userId = null;
+                        } else {
+                            actor_type_id = ppcModel.getActorType(group);
+                        }
 
                         for(var i = 0; i<searchData.length; i++){
                             query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
                             'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
                             'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
                             ', '+ actor_type_id +', '+ searchData[i].deal_id +
-                            ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ userAgent.device_version +'\');';
+                            ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
+                            userAgent.device_version +'\');';
                         }
+
 
                         DbHelper.getConnection().then(function(connection){
                             connection.query(query, function(err, results, fields){
@@ -499,7 +506,7 @@ var ppcModel = {
                         device_version: device_version,
                         user_id: userId
                     }, 
-                    
+
                     function(err, results, fields){
                     connection.release();
 
