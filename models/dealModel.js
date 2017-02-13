@@ -49,6 +49,8 @@ var dealModel = {
 				    var micrositeId = results.insertId;
 				    deal.daily_deal_microsite_id = micrositeId;
                     deal.approved_category_id = deal.suggested_category_id;
+                    deal.start_date = deal.start_date.substring(0,10);
+                    deal.end_date = deal.end_date.substring(0,10);
 
 				    connection.query('INSERT INTO ppc_daily_deal SET ?', [deal], function (error, results, fields) {
 				      if (error) {
