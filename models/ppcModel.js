@@ -731,7 +731,54 @@ var ppcModel = {
     },
 
     trackDealDownload : function(deal, ip, userAgent, userId){
+        return new Promise(function(resolve, reject){
 
+            userModel.getUserGroup(userId).then(
+                function(group){
+
+                    //If user has no group then it is a non-member
+                    if(group === false){
+                        actor_type_id = ACTOR_NON_MEMBER;
+                        userId = null;
+                    } else {
+                        actor_type_id = userModel.getActorType(group);
+                    }
+
+                    var query = 'INSERT INTO ppc_analytics SET ?';
+                    DbHelper.getConnection().then(function(connection){
+                        connection.query(query, 
+                            {
+                                actor_type_id: actor_type_id,
+                                item_id: deal.deal_id,
+                                actor_id: userId,
+                                ip_address: ip,
+                                user_agent: userAgent.user_agent,
+                                device_version: userAgent.device_version,
+                                activity_type_id: ACTIVITY_DOWNLOAD,
+                                item_type_id: ITEM_DAILY_DEAL
+                            }, 
+                            function(err, results, fields){
+                                connection.release();
+
+                                if(err)
+                                    return reject(err);
+
+                                resolve(results.insertId);
+                            }
+                        );
+                        
+                    },function(error){
+                        reject(error);
+                    });
+
+                    
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
+        });
     },
 
     getDealById : function(dealId){
