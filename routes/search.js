@@ -55,18 +55,19 @@ router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
-//Member search
-router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
-	searchDeals(req, res, next);
-});
-
 //Non-member search
 router.get('/deals/:categoryId/:keyword', function(req, res, next){
 	searchDeals(req, res, next);
 });
 
-router.get('/deals', function(req, res, next) {
-	ppcModel.getDealsFromEachCategory(8).then(
+//Member search
+router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
+	searchDeals(req, res, next);
+});
+
+
+router.get('/deals/:categoryId', function(req, res, next) {
+	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
 		function(deals){
 			res.json(deals);
 		}, 
@@ -77,8 +78,8 @@ router.get('/deals', function(req, res, next) {
 	)
 });
 
-router.get('/deals/:categoryId', function(req, res, next) {
-	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
+router.get('/deals', function(req, res, next) {
+	ppcModel.getDealsFromEachCategory(8).then(
 		function(deals){
 			res.json(deals);
 		}, 
@@ -119,5 +120,7 @@ var searchDeals = function(req, res, next) {
 		}
 	)
 }
+
+
 
 module.exports = router;

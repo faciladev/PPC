@@ -1,4 +1,5 @@
 var Promise = require('promise');
+var config = require('config');
 
 var DbHelper = require('../lib/DbHelper');
 var PaginationHelper = require('../lib/PaginationHelper');
@@ -140,7 +141,7 @@ var ppcModel = {
                 Util.getUserGroup(userId).then(
                     function(response){
 
-                        var actor_type_id = getActorType(userId);
+                        var actor_type_id = userModel.getActorType(userId);
 
                         var query = '';
                         for(var i = 0; i<savedSearchIds.length; i++){
@@ -220,6 +221,17 @@ var ppcModel = {
             
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
+                    
+                    for(var i = 0; i<response.result.length; i++){
+                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                            'Categories/daily_deals_microsite/' + response.result[i].microsite_id);
+
+                        response.result[i].url = config.get('project_url') + 
+                        '/api/click/deals/' + response.result[i].deal_id + '/' +
+                        redirectUrl
+                        ;
+                    }
+                    
                     resolve(response);
                 }, 
                 function(error){
@@ -305,80 +317,96 @@ var ppcModel = {
     getDealsFromEachCategory : function(limit){
 
         return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function (connection) {
 
-                ppcModel.findAllDealCategories().then(function(response){
-                    if(response.length > 0){
-                        //Build Query
-                        var query = '';
+            ppcModel.findAllDealCategories().then(function(response){
+                if(response.length > 0){
+                    console.log(response);
+                    //Build Query
+                    var query = '';
 
-                        for(var i=0; i<response.length; i++){
-                            query += '(' +
-                            'SELECT ' + 
-                            'dd.id AS deal_id, ' +
-                            'm.id AS microsite_id, '+
-                            'm.company_name, ' +
-                            'm.what_you_get, '+
-                            'm.location,' +
-                            'dd.end_date, ' +
-                            'dd.start_date, ' +
-                            'm.discount_daily_description, '+
-                            'm.discount_percentage, '+
-                            'dd.discount_type, '+
-                            'm.name, '+
-                            'dd.discount_price, ' +
-                            'm.image, ' +
-                            'm.image_1, ' +
-                            'm.image_2, ' +
-                            'm.code, ' +
-                            'dd.date_created, ' +
-                            'dd.download_price, ' +
-                            'm.discount_description, ' +
-                            'dd.regular_price, '+
-                            'dd.discount_rate, '+
-                            'dd.coupon_name, '+
-                            'dd.coupon_generated_code, '+
-                            'dd.is_approved, ' +
-                            'dd.is_deleted, ' +
-                            'dd.list_rank, ' +
-                            'dd.deal_image, ' +
-                            'm.discount_description, '+
-                            'm.daily_deal_description, '+
-                            'dd.approved_category_id '+
-                            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
-                            'AS m ON dd.daily_deal_microsite_id=m.id ' +
-                            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
-                            response[i].category_id + ' LIMIT ' + limit + ')';
+                    for(var i=0; i<response.length; i++){
+                        query += '(' +
+                        'SELECT ' + 
+                        'dd.id AS deal_id, ' +
+                        'm.id AS microsite_id, '+
+                        'm.company_name, ' +
+                        'm.what_you_get, '+
+                        'm.location,' +
+                        'dd.end_date, ' +
+                        'dd.start_date, ' +
+                        'm.discount_daily_description, '+
+                        'm.discount_percentage, '+
+                        'dd.discount_type, '+
+                        'm.name, '+
+                        'dd.discount_price, ' +
+                        'm.image, ' +
+                        'm.image_1, ' +
+                        'm.image_2, ' +
+                        'm.code, ' +
+                        'dd.date_created, ' +
+                        'dd.download_price, ' +
+                        'm.discount_description, ' +
+                        'dd.regular_price, '+
+                        'dd.discount_rate, '+
+                        'dd.coupon_name, '+
+                        'dd.coupon_generated_code, '+
+                        'dd.is_approved, ' +
+                        'dd.is_deleted, ' +
+                        'dd.list_rank, ' +
+                        'dd.deal_image, ' +
+                        'm.discount_description, '+
+                        'm.daily_deal_description, '+
+                        'dd.approved_category_id '+
+                        'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+                        'AS m ON dd.daily_deal_microsite_id=m.id ' +
+                        'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
+                        response[i].category_id + ' LIMIT ' + limit + ')';
 
-                            if(i < response.length - 1)
-                                query += 'UNION ALL';
-                        }
-
-                        //Run query
-                        connection.query(query,
-                            function (err, rows, fields) {
-                                connection.release();
-
-                                if(err)
-                                    return reject(err);
-
-                                
-                                resolve(rows);
-                            }
-                        );
-
-                    } else {
-                        reject(new Error());
+                        if(i < response.length - 1)
+                            query += 'UNION ALL';
                     }
 
-                }, function(error){
-                    reject(error);
-                })
+                    DbHelper.getConnection().then(
+                        function(connection){
+                            //Run query
+                            connection.query(query,
+                                function (err, rows, fields) {
+                                    connection.release();
 
-            },
-            function(error){
+                                    if(err)
+                                        return reject(err);
+
+                                    for(var i = 0; i<rows.length; i++){
+                                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                                            'Categories/daily_deals_microsite/' + rows[i].microsite_id);
+
+                                        rows[i].url = config.get('project_url') + 
+                                        '/api/click/deals/' + rows[i].deal_id + '/' +
+                                        redirectUrl
+                                        ;
+                                    }
+
+                                    
+                                    resolve(rows);
+                                }
+                            );
+                        }, 
+                        function(error){
+                            reject(error);
+                        }
+                    );
+
+                    
+
+                } else {
+                    reject(new Error('No category found.'));
+                }
+
+            }, function(error){
                 reject(error);
-            });
+            })
+
+            
         });
     },
 
@@ -564,7 +592,7 @@ var ppcModel = {
                 Util.getUserGroup(userId).then(
                     function(response){
 
-                        var actor_type_id = getActorType(userId);
+                        var actor_type_id = userModel.getActorType(userId);
                       
                         var query = 'INSERT INTO ppc_analytics SET ?';
 
@@ -600,7 +628,7 @@ var ppcModel = {
         });
     },
 
-    trackDailyDealImpression : function(searchData, ip, userAgent, userId){
+    trackDailyDealImpression : function(deals, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
             userModel.getUserGroup(userId).then(
                 function(group){
@@ -612,14 +640,15 @@ var ppcModel = {
                         actor_type_id = ACTOR_NON_MEMBER;
                         userId = null;
                     } else {
-                        actor_type_id = ppcModel.getActorType(group);
+                        actor_type_id = userModel.getActorType(group);
                     }
 
-                    for(var i = 0; i<searchData.length; i++){
+                    for(var i = 0; i<deals.length; i++){
+                        
                         query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
                         'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
                         'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
-                        ', '+ actor_type_id +', '+ searchData[i].deal_id +
+                        ', '+ actor_type_id +', '+ deals[i].deal_id +
                         ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
                         userAgent.device_version +'\');';
                     }
@@ -661,7 +690,7 @@ var ppcModel = {
                         actor_type_id = ACTOR_NON_MEMBER;
                         userId = null;
                     } else {
-                        actor_type_id = ppcModel.getActorType(group);
+                        actor_type_id = userModel.getActorType(group);
                     }
 
                     var query = 'INSERT INTO ppc_analytics SET ?';
@@ -690,7 +719,7 @@ var ppcModel = {
                     },function(error){
                         reject(error);
                     });
-                    
+
                     
                 }, 
                 function(error){
@@ -701,20 +730,8 @@ var ppcModel = {
         });
     },
 
-    getActorType : function(group){
-        var actor_type_id;
-        if(group.group_id === 1){
-            actor_type_id = ACTOR_ADMIN;
-        }
-        else if(group.group_id === 2){
-            actor_type_id = ACTOR_CONSUMER;
-        } else if(group.group_id === 3){
-            actor_type_id = ACTOR_ADVERTISER;
-        } else {
-            actor_type_id = ACTOR_NON_MEMBER;
-        }
+    trackDealDownload : function(deal, ip, userAgent, userId){
 
-        return actor_type_id;
     },
 
     getDealById : function(dealId){
