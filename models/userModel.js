@@ -38,6 +38,9 @@ var userModel = {
 
     getUserGroup : function(userId){
         return new Promise(function(resolve, reject){
+            if(typeof userId === 'undefined' || userId === null)
+                return resolve(false);
+
             DbHelper.getConnection().then(function(connection){
                 connection.query('SELECT group_id FROM users_groups WHERE user_id = ?', 
                     [userId], 
@@ -49,7 +52,7 @@ var userModel = {
                             return reject(err);
 
                         if(rows.length <= 0)
-                            return reject(Error('User has no valid group'));
+                            return reject(new Error('User has no valid group'));
                         
                         resolve(rows[0]);
                         

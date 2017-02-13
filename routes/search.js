@@ -55,34 +55,12 @@ router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
-router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next) {
-	var keyword = req.params.keyword;
-	var categoryId = req.params.categoryId;
-	var userId = req.params.userId;
-
-	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
-		function(searchData){
-			var userAgent = Util.getUserAgent(req);
-			var ip = Util.getClientIp(req);
-			
-			//Log impression
-			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
-				function(response){
-					res.json(searchData);
-				}, 
-				function(error){
-					next(error);
-				}
-			);
-
-			
-		}, 
-		function(error){			
-			next(error);
-		}
-	)
+router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
+	searchDeals(req, res, next);
 });
-
+router.get('/deals/:categoryId/:keyword', function(req, res, next){
+	searchDeals(req, res, next);
+});
 
 router.get('/deals', function(req, res, next) {
 	ppcModel.getDealsFromEachCategory(8).then(
@@ -108,5 +86,32 @@ router.get('/deals/:categoryId', function(req, res, next) {
 	)
 });
 
+var searchDeals = function(req, res, next) {
+	var keyword = req.params.keyword;
+	var categoryId = req.params.categoryId;
+	var userId = req.params.userId;
+
+	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
+		function(searchData){
+			var userAgent = Util.getUserAgent(req);
+			var ip = Util.getClientIp(req);
+			
+			//Log impression
+			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
+				function(response){
+					res.json(searchData);
+				}, 
+				function(error){
+					next(error);
+				}
+			);
+
+			
+		}, 
+		function(error){			
+			next(error);
+		}
+	)
+}
 
 module.exports = router;
