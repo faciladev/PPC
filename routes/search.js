@@ -55,9 +55,12 @@ router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
 	)
 });
 
+//Member search
 router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
 	searchDeals(req, res, next);
 });
+
+//Non-member search
 router.get('/deals/:categoryId/:keyword', function(req, res, next){
 	searchDeals(req, res, next);
 });
@@ -95,7 +98,10 @@ var searchDeals = function(req, res, next) {
 		function(searchData){
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
-			
+
+			if(searchData.result.length <= 0)
+				return res.json([]);
+
 			//Log impression
 			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
 				function(response){

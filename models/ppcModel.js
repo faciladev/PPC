@@ -382,56 +382,6 @@ var ppcModel = {
         });
     },
 
-    trackDailyDealImpression : function(searchData, ip, userAgent, userId){
-        return new Promise(function(resolve, reject){
-                userModel.getUserGroup(userId).then(
-                    function(group){
-                        var query = '';
-                        var actor_type_id;
-                        
-                        if(group === false){
-                            actor_type_id = ACTOR_NON_MEMBER;
-                            userId = null;
-                        } else {
-                            actor_type_id = ppcModel.getActorType(group);
-                        }
-
-                        for(var i = 0; i<searchData.length; i++){
-                            query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
-                            'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
-                            'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
-                            ', '+ actor_type_id +', '+ searchData[i].deal_id +
-                            ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
-                            userAgent.device_version +'\');';
-                        }
-
-
-                        DbHelper.getConnection().then(function(connection){
-                            connection.query(query, function(err, results, fields){
-                                connection.release();
-
-                                if(err)
-                                    return reject(err);
-
-                                resolve(results);
-                            });
-                            
-                        },function(error){
-                            reject(error);
-                        });
-
-                    
-                    }, 
-                    function(error){
-                        reject(error);
-                    }
-                );
-
-                
-              
-        });
-    },
-
     getAdSearchById : function(searchId){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
@@ -650,47 +600,104 @@ var ppcModel = {
         });
     },
 
-    trackDealClick : function(deal, ip, userAgent, userId){
-
+    trackDailyDealImpression : function(searchData, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
-            DbHelper.getConnection().then(function(connection){
+            userModel.getUserGroup(userId).then(
+                function(group){
+                    var query = '';
+                    var actor_type_id;
 
-                userModel.getUserGroup(userId).then(
-                    function(group){
-                        console.log('here');
-                        var actor_type_id = getActorType(group);
-                        console.log(actor_type_id);
-                        var query = 'INSERT INTO ppc_analytics SET ?';
+                    //If user has no group then it is a non-member
+                    if(group === false){
+                        actor_type_id = ACTOR_NON_MEMBER;
+                        userId = null;
+                    } else {
+                        actor_type_id = ppcModel.getActorType(group);
+                    }
+
+                    for(var i = 0; i<searchData.length; i++){
+                        query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
+                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
+                        'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
+                        ', '+ actor_type_id +', '+ searchData[i].deal_id +
+                        ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
+                        userAgent.device_version +'\');';
+                    }
 
 
-                        connection.query(query, 
-                            {
-                                actor_type_id: actor_type_id,
-                                item_id: deal.id,
-                                actor_id: userId,
-                                ip_address: ip,
-                                user_agent: userAgent.user_agent,
-                                device_version: userAgent.device_version
-                            }, 
-                            function(err, results, fields){
+                    DbHelper.getConnection().then(function(connection){
+                        connection.query(query, function(err, results, fields){
                             connection.release();
 
                             if(err)
                                 return reject(err);
 
-                            resolve(results.insertId);
+                            resolve(results);
                         });
-                    }, 
-                    function(error){
+                        
+                    },function(error){
                         reject(error);
-                    }
-                );
+                    });
 
                 
-                
-            },function(error){
-                return reject(error);
-            });
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
+        });
+    },
+
+    trackDealClick : function(deal, ip, userAgent, userId){
+
+        return new Promise(function(resolve, reject){
+
+            userModel.getUserGroup(userId).then(
+                function(group){
+
+                    //If user has no group then it is a non-member
+                    if(group === false){
+                        actor_type_id = ACTOR_NON_MEMBER;
+                        userId = null;
+                    } else {
+                        actor_type_id = ppcModel.getActorType(group);
+                    }
+
+                    var query = 'INSERT INTO ppc_analytics SET ?';
+                    DbHelper.getConnection().then(function(connection){
+                        connection.query(query, 
+                            {
+                                actor_type_id: actor_type_id,
+                                item_id: deal.deal_id,
+                                actor_id: userId,
+                                ip_address: ip,
+                                user_agent: userAgent.user_agent,
+                                device_version: userAgent.device_version,
+                                activity_type_id: ACTIVITY_CLICK,
+                                item_type_id: ITEM_DAILY_DEAL
+                            }, 
+                            function(err, results, fields){
+                                connection.release();
+
+                                if(err)
+                                    return reject(err);
+
+                                resolve(results.insertId);
+                            }
+                        );
+                        
+                    },function(error){
+                        reject(error);
+                    });
+                    
+                    
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
         });
     },
 
