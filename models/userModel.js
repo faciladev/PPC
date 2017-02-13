@@ -3,6 +3,11 @@ var Promise = require('promise');
 var DbHelper = require('../lib/DbHelper');
 var Util = require('../lib/util');
 
+const ACTOR_CONSUMER = 1;
+const ACTOR_ADVERTISER = 2;
+const ACTOR_NON_MEMBER = 3;
+const ACTOR_ADMIN = 4;
+
 var userModel = {
 
     getUser: function(userId){
@@ -34,6 +39,22 @@ var userModel = {
 
             
         });
+    },
+
+    getActorType : function(group){
+        var actor_type_id;
+        if(group.group_id === 1){
+            actor_type_id = ACTOR_ADMIN;
+        }
+        else if(group.group_id === 2){
+            actor_type_id = ACTOR_CONSUMER;
+        } else if(group.group_id === 3){
+            actor_type_id = ACTOR_ADVERTISER;
+        } else {
+            actor_type_id = ACTOR_NON_MEMBER;
+        }
+
+        return actor_type_id;
     },
 
     getUserGroup : function(userId){
