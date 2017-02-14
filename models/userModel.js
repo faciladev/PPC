@@ -59,6 +59,7 @@ var userModel = {
 
     getUserGroup : function(userId){
         return new Promise(function(resolve, reject){
+            
             if(typeof userId === 'undefined' || userId === null)
                 return resolve(false);
 
@@ -68,7 +69,6 @@ var userModel = {
                     function(err, rows, fields){
                         connection.release();
 
-                        
                         if(err)                            
                             return reject(err);
 
