@@ -3,56 +3,11 @@ var router = express.Router();
 var ppcModel = require('../models/ppcModel');
 var Util = require('../lib/util');
 
-
-router.get('/ads/:keyword/:location/:subpage', function(req, res, next) {
-	var keyword = req.params.keyword;
-	var location = req.params.location;
-	var subpage = req.params.subpage;
-	var userId; //get user from cookie
-
-	ppcModel.findSponsoredAds(keyword, location, subpage).then(
-		function(searchData){
-			if(searchData.length <= 0)
-				return res.json(searchData);
-
-			//Save searches
-			ppcModel.saveSponsoredAdSearch(searchData).then(
-				function(savedSearchIds){
-					
-
-					if(searchData.length !== savedSearchIds.length){
-						next(new Error('Matched and saved search data inconsistent.'));
-					}
-
-					//Attach search id with search result
-					for(var i = 0; i<searchData.length; i++)
-						searchData[i].search_id = savedSearchIds[i].insertId;
-
-					var ip = Util.getClientIp(req);
-
-					//Log impression
-					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
-						function(response){
-							
-							res.json(searchData);
-						}, 
-						function(error){
-							next(error);
-						}
-					);
-
-					
-					
-				}, 
-				function(error){
-					next(error);
-				}
-			);
-		}, 
-		function(error){			
-			next(error);
-		}
-	)
+router.get('/ads/:keyword/:location/:subPage', function(req, res, next){
+	searchAds(req, res, next);
+});
+router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) {
+	searchAds(req, res, next);
 });
 
 //Non-member search
@@ -89,6 +44,67 @@ router.get('/deals', function(req, res, next) {
 		}
 	)
 });
+
+var searchAds = function(req, res, next){
+	var keyword = req.params.keyword;
+	var location = req.params.location;
+	var subPage = req.params.subPage;
+	var userId = req.params.userId;
+
+	ppcModel.findSponsoredAds(keyword, location, subPage, req.query.page).then(
+		function(searchData){
+			var paginatedSearchData = searchData;
+			searchData = searchData.result;
+
+			if(searchData.length <= 0)
+				return res.json(searchData);
+
+			//Save searches
+			ppcModel.saveSponsoredAdSearch(searchData).then(
+				function(savedSearchIds){
+					
+					if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
+						//matched one result
+						searchData[0].search_id = savedSearchIds.insertId;
+					}
+					else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
+						//matched multiple results
+						for(var i = 0; i<searchData.length; i++)
+							searchData[i].search_id = savedSearchIds[i].insertId;
+					}
+					else {
+						next(new Error('Matched and saved search data inconsistent.'));
+					}
+
+					
+					
+
+					var ip = Util.getClientIp(req);
+					var userAgent = Util.getUserAgent(req);
+
+					//Log impression
+					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
+						function(response){
+							res.json(paginatedSearchData);
+						}, 
+						function(error){
+							next(error);
+						}
+					);
+
+					
+					
+				}, 
+				function(error){
+					next(error);
+				}
+			);
+		}, 
+		function(error){			
+			next(error);
+		}
+	)
+}
 
 var searchDeals = function(req, res, next) {
 	var keyword = req.params.keyword;
