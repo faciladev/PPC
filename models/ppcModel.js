@@ -12,6 +12,7 @@ const ACTIVITY_DOWNLOAD = 3;
 
 const ITEM_SPONSORED_AD = 1;
 const ITEM_DAILY_DEAL = 2;
+const ITEM_FLEX_OFFER = 3;
 
 const ACTOR_CONSUMER = 1;
 const ACTOR_ADVERTISER = 2;
@@ -795,6 +796,58 @@ var ppcModel = {
         });
     },
 
+    trackFlexClick : function(flex, ip, userAgent, userId){
+
+        return new Promise(function(resolve, reject){
+
+            userModel.getUserGroup(userId).then(
+                function(group){
+
+                    //If user has no group then it is a non-member
+                    if(group === false){
+                        actor_type_id = ACTOR_NON_MEMBER;
+                        userId = null;
+                    } else {
+                        actor_type_id = userModel.getActorType(group);
+                    }
+
+                    var query = 'INSERT INTO ppc_analytics SET ?';
+                    DbHelper.getConnection().then(function(connection){
+                        connection.query(query, 
+                            {
+                                actor_type_id: actor_type_id,
+                                item_id: flex.flexoffer_link_id,
+                                actor_id: userId,
+                                ip_address: ip,
+                                user_agent: userAgent.user_agent,
+                                device_version: userAgent.device_version,
+                                activity_type_id: ACTIVITY_CLICK,
+                                item_type_id: ITEM_FLEX_OFFER
+                            }, 
+                            function(err, results, fields){
+                                connection.release();
+
+                                if(err)
+                                    return reject(err);
+
+                                resolve(results.insertId);
+                            }
+                        );
+                        
+                    },function(error){
+                        reject(error);
+                    });
+
+                    
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
+        });
+    },
+
     getDealById : function(dealId){
 
         return new Promise(function(resolve, reject) {
@@ -852,6 +905,37 @@ var ppcModel = {
 
                         if(rows.length <= 0)
                             return reject(new Error('No deal found.'));
+
+                        resolve(rows[0]);
+                    }
+                );
+            }, function(error){
+                reject(error);
+            });
+
+            
+        });
+    },
+
+    getFlexById : function(flexId){
+
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+
+                connection.query(
+                    "SELECT * FROM iziphub_flexoffer_link WHERE flexoffer_link_id = ?", 
+                    [flexId],
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            return reject(err);
+                        }
+
+                        if(rows.length <= 0)
+                            return reject(new Error('No flex offer found.'));
 
                         resolve(rows[0]);
                     }

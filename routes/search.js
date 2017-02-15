@@ -1,13 +1,30 @@
 var express = require('express');
+var config = require('config');
+
 var router = express.Router();
 var ppcModel = require('../models/ppcModel');
 var Util = require('../lib/util');
 
+//Non-member search
 router.get('/ads/:keyword/:location/:subPage', function(req, res, next){
 	searchAds(req, res, next);
 });
+
+//Member search
 router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) {
 	searchAds(req, res, next);
+});
+
+//Get deals from one category
+router.get('/deals/:categoryId', function(req, res, next) {
+	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){		
+			next(error);
+		}
+	)
 });
 
 //Non-member search
@@ -20,21 +37,13 @@ router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
 	searchDeals(req, res, next);
 });
 
-
-router.get('/deals/:categoryId', function(req, res, next) {
-	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
-		function(deals){
-			res.json(deals);
-		}, 
-		function(error){
-		console.log(error)			
-			next(error);
-		}
-	)
-});
-
+//Get deals from all categories
 router.get('/deals', function(req, res, next) {
-	ppcModel.getDealsFromEachCategory(8).then(
+	var limit = req.query.limit;
+	if(typeof limit === 'undefined' || limit === null)
+		limit = config.get('numRowsPerPage');
+
+	ppcModel.getDealsFromEachCategory(limit).then(
 		function(deals){
 			res.json(deals);
 		}, 
@@ -69,8 +78,15 @@ var searchAds = function(req, res, next){
 					}
 					else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
 						//matched multiple results
-						for(var i = 0; i<searchData.length; i++)
-							searchData[i].search_id = savedSearchIds[i].insertId;
+						for(var i = 0; i<searchData.length; i++){
+	                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+	                            'ad_microsite/' + searchData[i].ad_id);
+
+	                        searchData[i].url = config.get('project_url') + 
+	                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +
+	                        redirectUrl
+	                        ;
+	                    }
 					}
 					else {
 						next(new Error('Matched and saved search data inconsistent.'));

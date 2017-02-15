@@ -18,8 +18,6 @@ router.post('/', function(req, res, next){
 	}, function(error){
 		next(error);
 	});
-
-
 });
 
 
@@ -34,11 +32,10 @@ router.get('/', function(req, res, next){
 			next(error);
 		}
 	);
-
 });
 
 
-
+//Get all daily deal categories
 router.get('/categories', function(req, res, next){
 	dealModel.getDealCategories().then(
 		function(categories){
@@ -48,9 +45,9 @@ router.get('/categories', function(req, res, next){
 			next(error);
 		}
 	);
-
 });
 
+//Upload images of deals, microsites, and coupons.
 router.post('/upload', function(req, res, next){
 	var uploadType = req.query.type;
 
@@ -84,29 +81,15 @@ router.post('/upload', function(req, res, next){
             "/" + subDir + "/" + response[0] + "' /></a>";
 
         res.json({banner_code: banner_code, banner_image_link: webpath});
-		res.json(response);
+		// res.json(response);
 		
 	}, function(error){
 		console.log(error);
 		res.json(error);
 	});
-
 });
 
-//Get all daily deals
-router.get('/:dealId', function(req, res, next){
-	var dealId = req.params.dealId;
-	dealModel.getDealById(dealId).then(
-		function(deal){
-			res.json(deal);
-		}, 
-		function(error){
-			next(error);
-		}
-	);
-
-});
-
+//Approves a daily deal
 router.put('/:dealId/approve', function(req, res, next){
 	dealModel.updateDeal(req.params.dealId, {is_approved: 1}).then(
 		function(result){
@@ -117,8 +100,22 @@ router.put('/:dealId/approve', function(req, res, next){
 			next(error);
 		}
 	);
-
 });
+
+//Get one daily deal
+router.get('/:dealId', function(req, res, next){
+	var dealId = req.params.dealId;
+	dealModel.getDealById(dealId).then(
+		function(deal){
+			res.json(deal);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+});
+
+
 
 
 
