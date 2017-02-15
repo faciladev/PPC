@@ -169,7 +169,7 @@ router.get('/flexoffers/:subPageName',
                     var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
                     var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
                     var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
-                    var redirectUrl = Util.sanitizeUrl(url);
+                    var redirectUrl = Util.sanitizeUrl(link);
                     flexoffers[i].flexSrc = url;
                     flexoffers[i].flexLink = link;
                     flexoffers[i].url = config.get('project_url') + 
