@@ -34,6 +34,18 @@ router.get('/', function(req, res, next){
 	);
 });
 
+router.get('/advertisers/:advertiserId', function(req, res, next){
+	var advertiserId = req.params.advertiserId;
+	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page).then(
+		function(deals){
+			res.json(deals);
+		}, 
+		function(error){
+			next(error);
+		}
+	);
+});
+
 
 //Get all daily deal categories
 router.get('/categories', function(req, res, next){
