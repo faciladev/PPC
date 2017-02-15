@@ -178,7 +178,7 @@ router.get('/flexoffers/:subPageName',
                 }
             }
 
-            res.json(flexoffers);
+            res.json(response);
 
         }, function(error){
             next(error);
