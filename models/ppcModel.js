@@ -198,6 +198,23 @@ var ppcModel = {
         });
     },
 
+    findFlexOffersBySubPageName : function(subPageName, page){
+        return new Promise(function(resolve, reject) {
+            var query = 'SELECT * FROM iziphub_flexoffer_link WHERE flexoffer_link_subpage_id = ' +
+                '(SELECT iziphub_subpage.subpage_id FROM iziphub_subpage WHERE iziphub_subpage.subpage_name = ?)';
+            var queryParams = [subPageName];
+
+            PaginationHelper.paginate(query, page, null, queryParams).then(
+                function(response){
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+        });
+    },
+
     findAllDealCategories : function(){
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function (connection) {

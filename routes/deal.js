@@ -34,6 +34,7 @@ router.get('/', function(req, res, next){
 	);
 });
 
+//Get all daily deals for one advertiser
 router.get('/advertisers/:advertiserId', function(req, res, next){
 	var advertiserId = req.params.advertiserId;
 	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page).then(
