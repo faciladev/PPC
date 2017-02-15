@@ -153,6 +153,40 @@ var searchDeals = function(req, res, next) {
 	)
 }
 
+//Return flex offers by subpage name
+router.get('/flexoffers/:subPageName',
+    function(req, res, next) {
+    	var subPageName = req.params.subPageName;
+        ppcModel.findFlexOffersBySubPageName(subPageName, req.query.page).then(function(response){
+            var flexoffers = response.result;
+            if(flexoffers.length > 0){
+
+                //Extract flex offer image source from link
+                for(var i=0; i<flexoffers.length; i++){
+                    var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
+                    var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
+                    var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
+                    var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
+                    var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+                    var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+                    var redirectUrl = Util.sanitizeUrl(url);
+                    flexoffers[i].flexSrc = url;
+                    flexoffers[i].flexLink = link;
+                    flexoffers[i].url = config.get('project_url') + 
+	                    '/api/click/flexoffers/' + flexoffers[i].flexoffer_link_id + '/' +
+	                    redirectUrl;
+                }
+            }
+
+            res.json(flexoffers);
+
+        }, function(error){
+            next(error);
+        });
+
+    }
+);
+
 
 
 module.exports = router;
