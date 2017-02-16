@@ -223,8 +223,7 @@ var ppcModel = {
                     iziphub_subpage.subpage_id = ? ';
 
             var queryParams = [subpageId];
-
-            if(typeof keyword !== 'undefined' && keyword === null){
+            if(typeof keyword !== 'undefined' && keyword !== null){
                 query += 'AND flexoffer_keywords.keyword_name LIKE ?';
                 queryParams.push('%' + keyword + '%');
             }
