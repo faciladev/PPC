@@ -88,7 +88,7 @@ var searchFlex = function(req, res, next){
                 flexoffers[i].flexSrc = url;
                 flexoffers[i].flexLink = link;
                 flexoffers[i].url = config.get('project_url') + 
-                    '/api/click/flexoffers/' + flexoffers[i].flexoffer_link_id + '/' +
+                    '/api/click/flexoffers/' + flexoffers[i].flexoffer_link_keyword_id + '/' +
                     redirectUrl;
             }
         }

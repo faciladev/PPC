@@ -210,7 +210,8 @@ var ppcModel = {
                     iziphub_flexoffer_link.flexoffer_link_subpage_id, \
                     iziphub_flexoffer_link.flexoffer_list_order, \
                     iziphub_flexoffer_link.flexoffer_list_order_asc, \
-                    iziphub_flexoffer_link.flexoffer_name \
+                    iziphub_flexoffer_link.flexoffer_name, \
+                    flexoffer_link_keyword.id AS flexoffer_link_keyword_id\
                 FROM\
                     flexoffer_keywords\
                         JOIN\
@@ -838,7 +839,7 @@ var ppcModel = {
         });
     },
 
-    trackFlexClick : function(flex, ip, userAgent, userId){
+    trackFlexClick : function(flexLinkKeyword, ip, userAgent, userId){
 
         return new Promise(function(resolve, reject){
 
@@ -858,7 +859,7 @@ var ppcModel = {
                         connection.query(query, 
                             {
                                 actor_type_id: actor_type_id,
-                                item_id: flex.flexoffer_link_id,
+                                item_id: flexLinkKeyword.id,
                                 actor_id: userId,
                                 ip_address: ip,
                                 user_agent: userAgent.user_agent,
@@ -959,14 +960,14 @@ var ppcModel = {
         });
     },
 
-    getFlexById : function(flexId){
+    getFlexByLinkKeywordId : function(flexLinkKeywordId){
 
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
 
                 connection.query(
-                    "SELECT * FROM iziphub_flexoffer_link WHERE flexoffer_link_id = ?", 
-                    [flexId],
+                    "SELECT * FROM flexoffer_link_keyword WHERE id = ?", 
+                    [flexLinkKeywordId],
                     function (err, rows, fields) {
 
                         //release connection
@@ -977,7 +978,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No flex offer found.'));
+                            return reject(new Error('No flex offer found with this keyword.'));
 
                         resolve(rows[0]);
                     }
