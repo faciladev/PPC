@@ -139,26 +139,6 @@ router.post('/:id/locations', function(req, res, next) {
     });
 });
 
-
-//router.post('/:id/offers', function(req, res, next) {
-//    if(!req.files){
-//        res.send('No files were uploaded');
-//        return;
-//    }
-//
-//    UploadHelper.uploadFiles(req.files, "offer").then(function(response){
-//        req.body.image = response.length === 1 ? response[0] : response;
-//        ads.saveAdOffers(req.params.id, req.body).then(function(response){
-//            res.json(response);
-//        }, function(error) {
-//            error.message = 'Error';
-//            next(error);
-//        });
-//    }, function(error){
-//        res.json(error);
-//    });
-//});
-
 //Creates Ad offers
 router.post('/:id/offers', function(req, res, next) {
     ads.saveAdOffers(req.params.id, req.body).then(function(response){
@@ -227,6 +207,17 @@ router.post('/:id/adFiles', function(req, res, next) {
         error.message = 'Error';
         next(error);
     });
+});
+
+//Approve Ads
+router.post('/approve', function(req, res, next) {
+    ads.manageAd(req.body).then(function(response) {
+            res.json(response);
+        }, function(error) {
+            error.message = 'Error';
+            next(error);
+        }
+    );
 });
 
 module.exports = router;
