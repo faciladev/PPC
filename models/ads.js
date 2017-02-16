@@ -448,5 +448,27 @@ module.exports = {
                     reject(new Error('Connection error'));
             });
         });
-    }
+    },
+
+    //Approve or Disapprove Ads
+    manageAd: function(ads) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                for(var i=0; i< ads.length; i++) {
+                    connection.query('Update ppc_ads SET ? WHERE id = ?', [ads[i], ads[i].id],
+                        function (err, rows, fields) {
+                            if(err){
+                                reject(err);
+                            }
+                            resolve({Success: true, message:'ADs Management Completed Successfully'});
+                        }
+                    );
+                }
+                connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
 }
