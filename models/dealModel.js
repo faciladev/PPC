@@ -68,7 +68,7 @@ var dealModel = {
 				          });
 				        }
 				        connection.release();
-				        resolve(dealId);
+				        resolve(results);
 				      });
 				    });
 				  });
@@ -117,11 +117,11 @@ var dealModel = {
             DbHelper.getConnection().then(function(connection){
 
                 var query = 'SELECT dd.id AS deal_id, m.id AS microsite_id, m.name, m.company_name, m.what_you_get, m.location,' +
-                    'm.end_date, m.discount_daily_description, m.discount_type, m.discount_percentage, m.discount_description, ' +
-                    'm.regular_price, m.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
-                    'm.discount_description, m.daily_deal_description, m.approved_category FROM daily_deal AS dd LEFT JOIN daily_deal_microsite ' +
+                    'dd.end_date, dd.start_date, m.discount_daily_description, dd.discount_type, m.discount_percentage, m.discount_description, ' +
+                    'dd.regular_price, dd.discount_rate, dd.coupon_name, dd.coupon_generated_code, m.image, dd.deal_image, ' +
+                    'm.discount_description, m.daily_deal_description, dd.approved_category_id FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
                     'AS m ON dd.daily_deal_microsite_id=m.id ' +
-                    'WHERE m.is_deleted=0 ' + 
+                    'WHERE dd.is_deleted=0 ' + 
                     'AND dd.id = ?';
 
                 connection.query(
@@ -136,8 +136,10 @@ var dealModel = {
                             return reject(err);
                         }
 
-
-                        resolve(rows);
+                        if(rows.length > 0)
+                            resolve(rows[0]);
+                        else
+                            resolve(rows);
                     }
                 );
             }, function(error){
@@ -160,6 +162,30 @@ var dealModel = {
             'WHERE dd.is_deleted=0';
 
             PaginationHelper.paginate(query, page).then(
+                function(result){
+                    resolve(result);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
+            
+        });
+    },
+
+    getAllDealsByAdvertiser : function(advertiserId, page){
+
+        return new Promise(function(resolve, reject) {
+
+            var query = 'SELECT dd.id, mi.image, mi.name, dd.approved_category_id, ' + 
+            'dd.download_price, dd.date_created, dd.is_approved ' +
+            'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
+            'dd.daily_deal_microsite_id = mi.id ' +
+            'WHERE dd.advertiser_id = ? AND dd.is_deleted=0';
+            var queryParams = [advertiserId];
+
+            PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(result){
                     resolve(result);
                 }, 
