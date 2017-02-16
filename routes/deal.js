@@ -104,7 +104,14 @@ router.post('/upload', function(req, res, next){
 
 //Approves a daily deal
 router.put('/:dealId/approve', function(req, res, next){
-	dealModel.updateDeal(req.params.dealId, {is_approved: 1}).then(
+	
+	var deal = {
+		download_price: req.body.download_price,
+		approved_category_id: req.body.approved_category_id,
+		is_approved: 1
+	}
+
+	dealModel.updateDeal(req.params.dealId, deal).then(
 		function(result){
 			res.json(result);
 		}, 
