@@ -210,7 +210,7 @@ var ppcModel = {
                     iziphub_flexoffer_link.flexoffer_link_subpage_id, \
                     iziphub_flexoffer_link.flexoffer_list_order, \
                     iziphub_flexoffer_link.flexoffer_list_order_asc, \
-                    iziphub_flexoffer_link.flexoffer_name, \
+                    iziphub_flexoffer_link.flexoffer_name \
                 FROM\
                     flexoffer_keywords\
                         JOIN\
