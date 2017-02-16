@@ -210,7 +210,7 @@ router.post('/:id/adFiles', function(req, res, next) {
 });
 
 //Approve Ads
-router.post('/approve', function(req, res, next) {
+router.post('/manageAds', function(req, res, next) {
     ads.manageAd(req.body).then(function(response) {
             res.json(response);
         }, function(error) {
