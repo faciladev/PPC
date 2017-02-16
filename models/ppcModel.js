@@ -225,7 +225,8 @@ var ppcModel = {
 
             var queryParams = [subpageId];
             if(typeof keyword !== 'undefined' && keyword !== null){
-                query += 'AND flexoffer_keywords.keyword_name LIKE ?';
+                query += 'AND flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?';
+                queryParams.push('%' + keyword + '%');
                 queryParams.push('%' + keyword + '%');
             }
             
