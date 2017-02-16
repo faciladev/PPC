@@ -1,9 +1,9 @@
 {
 	"db" : {
-        "host"     : "52.9.240.117",
-        "user"     : "ziphub_dev",
-        "password" : "password2017",
-        "database" : "ziphub_dev"
+        "host"     : "devziphub.colrlbywjcwy.us-west-1.rds.amazonaws.com",
+        "user"     : "root",
+        "password" : "ziphub_dev_password",
+        "database" : "dev_ziphub"
     },
 
     "project_url" : "http://52.53.177.10:8081",
