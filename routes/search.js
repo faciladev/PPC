@@ -54,6 +54,52 @@ router.get('/deals', function(req, res, next) {
 	)
 });
 
+//Return flex offers by subpage id
+router.get('/flexoffers/:subpageId',
+    function(req, res, next) {
+    	searchFlex(req, res, next);
+    }
+);
+
+//Return flex offers by subpage id and keyword
+router.get('/flexoffers/:subpageId/:keyword',
+    function(req, res, next) {
+    	searchFlex(req, res, next);
+    }
+);
+
+var searchFlex = function(req, res, next){
+	var subpageId = req.params.subpageId;
+	var keyword = req.params.keyword;
+
+    ppcModel.findFlexOffers(subpageId, keyword, req.query.page).then(function(response){
+        var flexoffers = response.result;
+        if(flexoffers.length > 0){
+
+            //Extract flex offer image source from link
+            for(var i=0; i<flexoffers.length; i++){
+                var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
+                var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
+                var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
+                var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
+                var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+                var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+                var redirectUrl = Util.sanitizeUrl(link);
+                flexoffers[i].flexSrc = url;
+                flexoffers[i].flexLink = link;
+                flexoffers[i].url = config.get('project_url') + 
+                    '/api/click/flexoffers/' + flexoffers[i].flexoffer_link_id + '/' +
+                    redirectUrl;
+            }
+        }
+
+        res.json(response);
+
+    }, function(error){
+        next(error);
+    });
+}
+
 var searchAds = function(req, res, next){
 	var keyword = req.params.keyword;
 	var location = req.params.location;
@@ -153,39 +199,7 @@ var searchDeals = function(req, res, next) {
 	)
 }
 
-//Return flex offers by subpage name
-router.get('/flexoffers/:subPageName',
-    function(req, res, next) {
-    	var subPageName = req.params.subPageName;
-        ppcModel.findFlexOffersBySubPageName(subPageName, req.query.page).then(function(response){
-            var flexoffers = response.result;
-            if(flexoffers.length > 0){
 
-                //Extract flex offer image source from link
-                for(var i=0; i<flexoffers.length; i++){
-                    var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
-                    var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
-                    var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
-                    var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
-                    var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
-                    var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
-                    var redirectUrl = Util.sanitizeUrl(link);
-                    flexoffers[i].flexSrc = url;
-                    flexoffers[i].flexLink = link;
-                    flexoffers[i].url = config.get('project_url') + 
-	                    '/api/click/flexoffers/' + flexoffers[i].flexoffer_link_id + '/' +
-	                    redirectUrl;
-                }
-            }
-
-            res.json(response);
-
-        }, function(error){
-            next(error);
-        });
-
-    }
-);
 
 
 

@@ -198,11 +198,37 @@ var ppcModel = {
         });
     },
 
-    findFlexOffersBySubPageName : function(subPageName, page){
+    findFlexOffers : function(subpageId, keyword, page){
         return new Promise(function(resolve, reject) {
-            var query = 'SELECT * FROM iziphub_flexoffer_link WHERE flexoffer_link_subpage_id = ' +
-                '(SELECT iziphub_subpage.subpage_id FROM iziphub_subpage WHERE iziphub_subpage.subpage_name = ?)';
-            var queryParams = [subPageName];
+            var query = 'SELECT \
+                    flexoffer_keywords.keyword_id, \
+                    flexoffer_keywords.keyword_name, \
+                    iziphub_flexoffer_link.flexoffer_link_id, \
+                    iziphub_flexoffer_link.flexoffer_link_content, \
+                    iziphub_flexoffer_link.flexoffer_link_subpage_id, \
+                    iziphub_flexoffer_link.flexoffer_link_featured, \
+                    iziphub_flexoffer_link.flexoffer_link_subpage_id, \
+                    iziphub_flexoffer_link.flexoffer_list_order, \
+                    iziphub_flexoffer_link.flexoffer_list_order_asc, \
+                    iziphub_flexoffer_link.flexoffer_name, \
+                FROM\
+                    flexoffer_keywords\
+                        JOIN\
+                    flexoffer_link_keyword ON flexoffer_keywords.keyword_id = flexoffer_link_keyword.flexoffer_keyword_id\
+                        JOIN\
+                    iziphub_flexoffer_link ON flexoffer_link_keyword.flexoffer_link_id = iziphub_flexoffer_link.flexoffer_link_id\
+                        JOIN\
+                    iziphub_subpage ON iziphub_subpage.subpage_id = iziphub_flexoffer_link.flexoffer_link_subpage_id\
+                WHERE\
+                    iziphub_subpage.subpage_id = ? ';
+
+            var queryParams = [subpageId];
+
+            if(typeof keyword !== 'undefined' && keyword === null){
+                query += 'AND flexoffer_keywords.keyword_name LIKE ?';
+                queryParams.push('%' + keyword + '%');
+            }
+            
 
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
