@@ -133,6 +133,8 @@ var searchAds = function(req, res, next){
 	                        redirectUrl
 	                        ;
 	                    }
+
+	                    paginatedSearchData.result = searchData;
 					}
 					else {
 						next(new Error('Matched and saved search data inconsistent.'));
