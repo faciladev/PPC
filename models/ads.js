@@ -229,6 +229,24 @@ module.exports = {
             });
         });
     },
+    getKeyword: function(id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                connection.query('SELECT * FROM ppc_keywords where id = ? LIMIT 1', [id],
+                    function (err, rows, fields) {
+                        connection.release();
+                        if(err){
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
 
     saveAd: function(ad) {
         return new Promise(function(resolve, reject) {
