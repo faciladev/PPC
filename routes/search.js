@@ -121,6 +121,12 @@ var searchAds = function(req, res, next){
 					if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
 						//matched one result
 						searchData[0].search_id = savedSearchIds.insertId;
+						var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+	                            'ad_microsite/' + searchData[0].ad_id);
+						searchData[0].url = config.get('project_url') + 
+	                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
+	                        redirectUrl
+	                        ;
 					}
 					else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
 						//matched multiple results
