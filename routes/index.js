@@ -57,6 +57,14 @@ router.get('/keywords', function(req, res, next) {
         next(error);
     });
 });
+router.get('/keywords/:id', function(req, res, next) {
+    ads.getKeyword(req.params.id).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
 
 
 router.get('/advertisers', function(req, res, next){
