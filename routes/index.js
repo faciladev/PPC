@@ -49,6 +49,23 @@ router.get('/categories', function(req, res, next) {
         next(error);
     });
 });
+router.get('/keywords', function(req, res, next) {
+    ads.getKeywords().then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
+router.get('/keywords/:id', function(req, res, next) {
+    ads.getKeyword(req.params.id).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
+
 
 router.get('/advertisers', function(req, res, next){
 	advertiserModel.getAdvertisers().then(
@@ -61,5 +78,30 @@ router.get('/advertisers', function(req, res, next){
 	);
 });
 
+router.post('/categories', function(req, res, next) {
+    ads.saveCategory(req.body).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
+router.post('/keywords', function(req, res, next) {
+    ads.saveKeyword(req.body).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
+
+router.post('/categoryKeywords', function(req, res, next) {
+    ads.saveCategoryKeywords(req.body).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
 
 module.exports = router;
