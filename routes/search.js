@@ -73,27 +73,57 @@ var searchFlex = function(req, res, next){
 	var keyword = req.params.keyword;
 
     ppcModel.findFlexOffers(subpageId, keyword, req.query.page).then(function(response){
+        var paginatedSearchData = response;
         var flexoffers = response.result;
-        if(flexoffers.length > 0){
 
-            //Extract flex offer image source from link
-            for(var i=0; i<flexoffers.length; i++){
-                var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
-                var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
-                var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
-                var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
-                var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
-                var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
-                var redirectUrl = Util.sanitizeUrl(link);
-                flexoffers[i].flexSrc = url;
-                flexoffers[i].flexLink = link;
-                flexoffers[i].url = config.get('project_url') + 
-                    '/api/click/flexoffers/' + flexoffers[i].flexoffer_link_keyword_id + '/' +
-                    redirectUrl;
-            }
-        }
+        if(flexoffers.length <= 0)
+        	return res.json(paginatedSearchData);
 
-        res.json(response);
+        ppcModel.saveFlexSearch(flexoffers).then(
+			function(savedSearchIds){
+				if(flexoffers.length === 1 && (savedSearchIds.affectedRows === 1)){
+					//matched one result
+					var startIndex = flexoffers[0].flexoffer_link_content.indexOf("src=");
+	                var lastIndex = flexoffers[0].flexoffer_link_content.indexOf(" ", startIndex);
+	                var url = flexoffers[0].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
+	                var hrefStartIdx = flexoffers[0].flexoffer_link_content.indexOf("href=");
+	                var hrefEndIdx = flexoffers[0].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+	                var link = flexoffers[0].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+	                var redirectUrl = Util.sanitizeUrl(link);
+	                flexoffers[0].flexSrc = url;
+	                flexoffers[0].flexLink = link;
+	                flexoffers[0].url = config.get('project_url') + 
+	                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
+	                    redirectUrl;
+				}
+				else if(flexoffers.length > 1 && (savedSearchIds.length === flexoffers.length)){
+					//matched multiple results
+					for(var i = 0; i<flexoffers.length; i++){
+                        var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
+		                var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
+		                var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
+		                var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
+		                var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+		                var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+		                var redirectUrl = Util.sanitizeUrl(link);
+		                flexoffers[i].flexSrc = url;
+		                flexoffers[i].flexLink = link;
+		                flexoffers[i].url = config.get('project_url') + 
+		                    '/api/click/flexoffers/' + savedSearchIds[i].insertId  + '/' +
+		                    redirectUrl;
+                    }
+				}
+				else {
+					next(new Error('Matched and saved search data inconsistent.'));
+				}
+
+				res.json(paginatedSearchData);
+
+			}, 
+			function(error){
+				next(error);
+			}
+		);
 
     }, function(error){
         next(error);
@@ -112,7 +142,7 @@ var searchAds = function(req, res, next){
 			searchData = searchData.result;
 
 			if(searchData.length <= 0)
-				return res.json(searchData);
+				return res.json(paginatedSearchData);
 
 			//Save searches
 			ppcModel.saveSponsoredAdSearch(searchData).then(
