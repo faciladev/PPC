@@ -91,6 +91,42 @@ var ppcModel = {
         });
     },
 
+    saveFlexSearch : function(searchData){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+
+                if(searchData.length <= 0)
+                    return reject(new Error('Cannot save empty search result.'));
+
+                var query = '';
+
+                for (var i = 0; i < searchData.length; i++) {
+
+                    if(typeof searchData[i].keyword_id === 'undefined')
+                        searchData[i].keyword_id = null;
+
+                    query += 'INSERT INTO ppc_flex_searches (ppc_flex_id, ppc_flex_keyword_id, ' + 
+                    'ppc_flex_subpage_id) ' +
+                    'VALUES ('+ searchData[i].flexoffer_link_id +', '+ searchData[i].keyword_id +
+                    ', '+ searchData[i].flexoffer_link_subpage_id +');';
+                }
+
+                //Run multiple statement query
+                connection.query(query, function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        return reject(err);
+
+                    resolve(results);
+                });
+
+            },function(error){
+                return reject(error);
+            });
+        });
+    },
+
     saveSponsoredAdSearch : function(searchData){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
@@ -200,37 +236,41 @@ var ppcModel = {
 
     findFlexOffers : function(subpageId, keyword, page){
         return new Promise(function(resolve, reject) {
-            var query = 'SELECT \
-                    flexoffer_keywords.keyword_id, \
-                    flexoffer_keywords.keyword_name, \
-                    iziphub_flexoffer_link.flexoffer_link_id, \
+
+            var select = 'iziphub_flexoffer_link.flexoffer_link_id, \
                     iziphub_flexoffer_link.flexoffer_link_content, \
                     iziphub_flexoffer_link.flexoffer_link_subpage_id, \
                     iziphub_flexoffer_link.flexoffer_link_featured, \
                     iziphub_flexoffer_link.flexoffer_link_subpage_id, \
                     iziphub_flexoffer_link.flexoffer_list_order, \
                     iziphub_flexoffer_link.flexoffer_list_order_asc, \
-                    iziphub_flexoffer_link.flexoffer_name, \
-                    flexoffer_link_keyword.id AS flexoffer_link_keyword_id\
-                FROM\
-                    flexoffer_keywords\
-                        JOIN\
-                    flexoffer_link_keyword ON flexoffer_keywords.keyword_id = flexoffer_link_keyword.flexoffer_keyword_id\
-                        JOIN\
-                    iziphub_flexoffer_link ON flexoffer_link_keyword.flexoffer_link_id = iziphub_flexoffer_link.flexoffer_link_id\
-                        JOIN\
-                    iziphub_subpage ON iziphub_subpage.subpage_id = iziphub_flexoffer_link.flexoffer_link_subpage_id\
-                WHERE\
-                    iziphub_subpage.subpage_id = ? ';
-
+                    iziphub_flexoffer_link.flexoffer_name ';
+            var where = 'iziphub_flexoffer_link.flexoffer_link_subpage_id = ? ';
+            var from = '';
             var queryParams = [subpageId];
-            if(typeof keyword !== 'undefined' && keyword !== null){
-                query += 'AND flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?';
-                queryParams.push('%' + keyword + '%');
-                queryParams.push('%' + keyword + '%');
-            }
-            
 
+            if(typeof keyword !== 'undefined' && keyword !== null){
+                select += ', flexoffer_keywords.keyword_id, \
+                    flexoffer_keywords.keyword_name, \
+                    flexoffer_link_keyword.id AS flexoffer_link_keyword_id ';
+
+                from += 'iziphub_flexoffer_link\
+                        JOIN\
+                    flexoffer_link_keyword ON iziphub_flexoffer_link.flexoffer_link_id = flexoffer_link_keyword.flexoffer_link_id\
+                        JOIN\
+                    flexoffer_keywords ON flexoffer_link_keyword.flexoffer_keyword_id = flexoffer_keywords.keyword_id ';
+                
+                where += 'AND (flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?) ';
+                queryParams.push('%' + keyword + '%');
+                queryParams.push('%' + keyword + '%');
+
+            } else {
+
+                from += 'iziphub_flexoffer_link ';
+            }
+
+            var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
+           
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
                     resolve(response);
@@ -840,7 +880,7 @@ var ppcModel = {
         });
     },
 
-    trackFlexClick : function(flexLinkKeyword, ip, userAgent, userId){
+    trackFlexClick : function(searchData, ip, userAgent, userId){
 
         return new Promise(function(resolve, reject){
 
@@ -860,7 +900,7 @@ var ppcModel = {
                         connection.query(query, 
                             {
                                 actor_type_id: actor_type_id,
-                                item_id: flexLinkKeyword.id,
+                                item_id: searchData.id,
                                 actor_id: userId,
                                 ip_address: ip,
                                 user_agent: userAgent.user_agent,
@@ -961,14 +1001,14 @@ var ppcModel = {
         });
     },
 
-    getFlexByLinkKeywordId : function(flexLinkKeywordId){
+    getFlexSearchById : function(flexSearchId){
 
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
 
                 connection.query(
-                    "SELECT * FROM flexoffer_link_keyword WHERE id = ?", 
-                    [flexLinkKeywordId],
+                    "SELECT * FROM ppc_flex_searches WHERE id = ?", 
+                    [flexSearchId],
                     function (err, rows, fields) {
 
                         //release connection
@@ -979,7 +1019,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No flex offer found with this keyword.'));
+                            return reject(new Error('No flex offer search found with this id.'));
 
                         resolve(rows[0]);
                     }
