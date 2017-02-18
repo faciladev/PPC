@@ -17,7 +17,34 @@ module.exports = {
 
             PaginationHelper.paginate(query, page).then(
                 function(result){
-                    resolve(result);
+                    if(result.result <= 0)
+                        return resolve(result);
+
+                    var ads = result.result;
+                    for(var i = 0; i<ads.length; i++){
+                        (function(i){
+                            module.exports.getAdLocations(ads[i].id).then(function(response){
+                                ads[i].locations = response;
+                                module.exports.getAdKeywords(ads[i].id).then(function(response){
+                                    ads[i].keywords = response;
+
+                                    module.exports.getAdSubpages(ads[i].id).then(function(response){
+                                        ads[i].subpages = response;
+                                        if(i === ads.length - 1)
+                                            return resolve(result);
+
+                                    }, function(error){
+                                        return reject(error);
+                                    });
+
+                                }, function(error){
+                                    return reject(error);
+                                });
+                            }, function(error){
+                                return reject(error);
+                            });
+                        })(i);                          
+                    }
                 },
                 function(error){
                     reject(error);
