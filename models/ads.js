@@ -16,26 +16,34 @@ module.exports = {
                 'FROM ppc_ads INNER JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id WHERE ppc_ads.is_deleted = 0 ';
 
             PaginationHelper.paginate(query, page).then(
-                function(data){
+                function(result){
+                    if(result.result <= 0)
+                        return resolve(result);
 
-                    if(data.result.count == 0) {
-                        resolve('Empty record');
-                    } else {
-                        data.result.forEach(function(objAd, i){
-                            DbHelper.getConnection().then(function(connection) {
-                                connection.query("Select ppc_ads_subpages.id, ad_id, sub_page_id, subpage_name from `ziphub_dev`.`ppc_ads_subpages` inner join `ziphub_dev`.`ppc_subpages` on ppc_ads_subpages.sub_page_id = ppc_subpages.id Where ad_id = ?",[objAd.id],
-                                    function(err, rows, fields) {
-                                        connection.release();
-                                        if(err) throw err;
-                                        data.result[i].subpages = rows
+                    var ads = result.result;
+                    for(var i = 0; i<ads.length; i++){
+                        (function(i){
+                            module.exports.getAdLocations(ads[i].id).then(function(response){
+                                ads[i].locations = response;
+                                module.exports.getAdKeywords(ads[i].id).then(function(response){
+                                    ads[i].keywords = response;
 
-                                        if(i== data.result.length -1) {
-                                            resolve(data);
-                                        }
-                                    }
-                                );
+                                    module.exports.getAdSubpages(ads[i].id).then(function(response){
+                                        ads[i].subpages = response;
+                                        if(i === ads.length - 1)
+                                            return resolve(result);
+
+                                    }, function(error){
+                                        return reject(error);
+                                    });
+
+                                }, function(error){
+                                    return reject(error);
+                                });
+                            }, function(error){
+                                return reject(error);
                             });
-                        });
+                        })(i);                          
                     }
                 },
                 function(error){
@@ -44,6 +52,7 @@ module.exports = {
             );
         });
     },
+  
     getAllByAdvertiser : function(page, advertiserId){
         return new Promise(function(resolve, reject) {
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
