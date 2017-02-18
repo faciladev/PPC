@@ -880,7 +880,7 @@ var ppcModel = {
         });
     },
 
-    trackFlexClick : function(flexLinkKeyword, ip, userAgent, userId){
+    trackFlexClick : function(searchData, ip, userAgent, userId){
 
         return new Promise(function(resolve, reject){
 
@@ -900,7 +900,7 @@ var ppcModel = {
                         connection.query(query, 
                             {
                                 actor_type_id: actor_type_id,
-                                item_id: flexLinkKeyword.id,
+                                item_id: searchData.id,
                                 actor_id: userId,
                                 ip_address: ip,
                                 user_agent: userAgent.user_agent,
@@ -1001,14 +1001,14 @@ var ppcModel = {
         });
     },
 
-    getFlexByLinkKeywordId : function(flexLinkKeywordId){
+    getFlexSearchById : function(flexSearchId){
 
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
 
                 connection.query(
-                    "SELECT * FROM flexoffer_link_keyword WHERE id = ?", 
-                    [flexLinkKeywordId],
+                    "SELECT * FROM ppc_flex_searches WHERE id = ?", 
+                    [flexSearchId],
                     function (err, rows, fields) {
 
                         //release connection
@@ -1019,7 +1019,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No flex offer found with this keyword.'));
+                            return reject(new Error('No flex offer search found with this id.'));
 
                         resolve(rows[0]);
                     }

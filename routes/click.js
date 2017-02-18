@@ -25,12 +25,12 @@ router.get('/ads/:searchId/:redirectUrl', function(req, res, next){
 });
 
 //Flex offer click tracking for non-members
-router.get('/flexoffers/:flexLinkKeywordId/:redirectUrl', function(req, res, next){
+router.get('/flexoffers/:flexSearchId/:redirectUrl', function(req, res, next){
 	clickFlexOffer(req, res, next);
 });
 
 //Flex offer click tracking for members
-router.get('/flexoffers/:flexLinkKeywordId/:redirectUrl/:userId', function(req, res, next){
+router.get('/flexoffers/:flexSearchId/:redirectUrl/:userId', function(req, res, next){
 	clickFlexOffer(req, res, next);
 });
 
@@ -133,16 +133,16 @@ var clickDeal = function(req, res, next){
 }
 
 var clickFlexOffer = function(req, res, next){
-	var flexLinkKeywordId = req.params.flexLinkKeywordId;
+	var flexSearchId = req.params.flexSearchId;
 	var redirectUrl = req.params.redirectUrl;
 	var userId = req.params.userId;
 	
-	ppcModel.getFlexByLinkKeywordId(flexLinkKeywordId).then(
-		function(flexLinkKeyword){
+	ppcModel.getFlexSearchById(flexSearchId).then(
+		function(searchData){
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
 
-			ppcModel.trackFlexClick(flexLinkKeyword, ip, userAgent, userId).then(
+			ppcModel.trackFlexClick(searchData, ip, userAgent, userId).then(
 				function(response){
 					res.redirect(Util.decodeUrl(redirectUrl));
 				},
