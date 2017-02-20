@@ -216,7 +216,7 @@ var ppcModel = {
                     
                     for(var i = 0; i<response.result.length; i++){
                         var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-                            'Categories/daily_deals_microsite/' + response.result[i].microsite_id);
+                            'Categories/daily_deals_microsite/' + response.result[i].deal_id);
 
                         response.result[i].url = config.get('project_url') + 
                         '/api/click/deals/' + response.result[i].deal_id + '/' +
