@@ -1,4 +1,6 @@
 var express = require('express');
+var config = require('config');
+
 var router = express.Router();
 var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
