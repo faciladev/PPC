@@ -220,4 +220,26 @@ router.post('/manageAds', function(req, res, next) {
     );
 });
 
+//Upload web offer image
+router.post('/weboffers', function(req, res, next){
+
+    if(typeof req.files.offerBanner === 'undefined' || req.files.offerBanner === null)
+        return next(new Error('No file was uploaded.'));
+
+
+    var subDir = 'offer';
+
+    UploadHelper.uploadFile(req.files.offerBanner, subDir).then(function(response){
+        var webpath = config.get('project_url') + "/" + subDir + "/" + response;
+        var banner_code = "<a rel='nofollow' alt='Target' title='Target'>"+
+            "<img border='0' src='"+ config.get('project_url') +
+            "/" + subDir + "/" + response + "' /></a>";
+
+        res.json({banner_code: banner_code, banner_image_link: webpath});
+        
+    }, function(error){
+        next(error);
+    });
+});
+
 module.exports = router;
