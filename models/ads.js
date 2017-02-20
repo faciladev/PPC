@@ -468,6 +468,31 @@ module.exports = {
             });
         });
     },
+
+    saveZiphubOffer : function(offer){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                offer.is_approved = 0;
+                offer.offer_type = 'ziphub';
+
+                connection.query('INSERT INTO ppc_offers SET ?', [offer],
+                    function (err, result) {
+                        connection.release();
+
+                        if(err){
+                            return reject(err);
+                        }
+
+                        resolve(result);
+                    }
+                );
+                
+            }, function(error){
+                reject(error);
+            });
+        });
+    },
+
     saveAdvertiserFile: function(advertiser_id, advertiser_file) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){

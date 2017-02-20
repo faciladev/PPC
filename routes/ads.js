@@ -171,6 +171,15 @@ router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
     });
 });
 
+router.post('/ziphuboffers', function(req, res, next) {
+    var offer = req.body;
+    ads.saveZiphubOffer(offer).then(function(response){
+        res.json(response);
+    }, function(error) {
+        next(error);
+    });
+});
+
 //Save keyword and keyword category
 router.post('/keywords/:categoryId', function(req, res, next) {
     ads.saveKeywords(req.params.categoryId, req.body).then(function(response){
