@@ -1054,7 +1054,9 @@ var ppcModel = {
                 DbHelper.getConnection().then(function(connection){
                     console.log('here')
                     connection.query(
-                        "SELECT count(ppc_analytics.id) AS downloads FROM ppc_analytics WHERE item_id = ? AND item_type_id=? AND activity_type_id=?", 
+                        "SELECT count(ppc_analytics.id) AS downloads \
+                        FROM ppc_analytics WHERE item_id = ? \
+                        AND item_type_id=? AND activity_type_id=? AND disapproved=0", 
                         [dealId, ITEM_DAILY_DEAL, ACTIVITY_DOWNLOAD],
                         function (err, rows, fields) {
 
