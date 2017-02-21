@@ -515,8 +515,6 @@ var ppcModel = {
                     if(err)
                         return reject(err);
 
-                    console.log(results);
-
                     resolve(results[0].count < 6 ? true : false);
                 });
 
@@ -642,48 +640,56 @@ var ppcModel = {
         });
     }, 
 
-    // trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
-    //     return new Promise(function(resolve, reject){
-    //         DbHelper.getConnection().then(function(connection){
+    trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
+        return new Promise(function(resolve, reject){
+            userModel.getUserGroup(userId).then(
+                function(group){
 
-    //             userModel.getUserGroup(userId).then(
-    //                 function(response){
+                    //If user has no group then it is a non-member
+                    if(group === false){
+                        actor_type_id = ACTOR_NON_MEMBER;
+                        userId = null;
+                    } else {
+                        actor_type_id = userModel.getActorType(group);
+                    }
 
-    //                     var actor_type_id = userModel.getActorType(userId);
-                      
-    //                     var query = 'INSERT INTO ppc_analytics SET ?';
+                  
+                    var query = 'INSERT INTO ppc_analytics SET ?';
 
+                    DbHelper.getConnection().then(function(connection){
+                        connection.query(query, 
+                            {
+                                actor_type_id: actor_type_id,
+                                item_type_id: ITEM_SPONSORED_AD,
+                                activity_type_id: ACTIVITY_CLICK,
+                                item_id: searchData.id,
+                                actor_id: userId,
+                                ip_address: ip,
+                                user_agent: userAgent.user_agent,
+                                device_version: userAgent.device_version
+                            }, 
+                            function(err, results, fields){
+                            connection.release();
 
-    //                     connection.query(query, 
-    //                         {
-    //                             actor_type_id: actor_type_id,
-    //                             item_id: searchData.id,
-    //                             actor_id: userId,
-    //                             ip_address: ip,
-    //                             user_agent: userAgent.user_agent,
-    //                             device_version: userAgent.device_version
-    //                         }, 
-    //                         function(err, results, fields){
-    //                         connection.release();
+                            if(err)
+                                return reject(err);
 
-    //                         if(err)
-    //                             return reject(err);
+                            resolve(results);
+                        });
+                        
+                    },function(error){
+                        return reject(error);
+                    });
 
-    //                         resolve(results.insertId);
-    //                     });
-    //                 }, 
-    //                 function(error){
+                        
+                }, 
+                function(error){
 
-    //                 }
-    //             );
+                }
+            );
 
-                
-                
-    //         },function(error){
-    //             return reject(error);
-    //         });
-    //     });
-    // },
+        });
+    },
 
     trackSponsoredAdImpression : function(savedSearchIds, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
