@@ -15,6 +15,7 @@ var search = require('./routes/search');
 var click = require('./routes/click');
 var download = require('./routes/download');
 var deal = require('./routes/deal');
+var offer = require('./routes/offer');
 var index = require('./routes/index');
 
 var app = express();
@@ -63,6 +64,9 @@ app.use('/api/download', download);
 
 //Daily Deals
 app.use('/api/deals', deal);
+
+//Offer
+app.use('/api/offers', offer);
 
 //Other miscellaneous api
 app.use('/api/', index);
