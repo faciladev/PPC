@@ -153,7 +153,7 @@ var searchAds = function(req, res, next){
 						searchData[0].search_id = savedSearchIds.insertId;
 						var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
 	                            'ad_microsite/' + searchData[0].ad_id);
-						searchData[0].url = config.get('project_url') + 
+						searchData[0].redirectUrl = config.get('project_url') + 
 	                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
 	                        redirectUrl
 	                        ;
@@ -164,7 +164,7 @@ var searchAds = function(req, res, next){
 	                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
 	                            'ad_microsite/' + searchData[i].ad_id);
 
-	                        searchData[i].url = config.get('project_url') + 
+	                        searchData[i].redirectUrl = config.get('project_url') + 
 	                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +
 	                        redirectUrl
 	                        ;

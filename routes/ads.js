@@ -1,4 +1,6 @@
 var express = require('express');
+var config = require('config');
+
 var router = express.Router();
 var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
@@ -169,6 +171,15 @@ router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
     });
 });
 
+router.post('/ziphuboffers', function(req, res, next) {
+    var offer = req.body;
+    ads.saveZiphubOffer(offer).then(function(response){
+        res.json(response);
+    }, function(error) {
+        next(error);
+    });
+});
+
 //Save keyword and keyword category
 router.post('/keywords/:categoryId', function(req, res, next) {
     ads.saveKeywords(req.params.categoryId, req.body).then(function(response){
@@ -218,6 +229,31 @@ router.post('/manageAds', function(req, res, next) {
             next(error);
         }
     );
+});
+
+//Upload web offer image
+router.post('/weboffers', function(req, res, next){
+    var url = req.body.url;
+
+    if(typeof req.files.offerBanner === 'undefined' || req.files.offerBanner === null)
+        return next(new Error('No file was uploaded.'));
+
+    if(typeof url === 'undefined' || url === null)
+        return next(new Error('No url provided.'));
+
+    var subDir = 'offer';
+
+    UploadHelper.uploadFile(req.files.offerBanner, subDir).then(function(response){
+        var webpath = config.get('project_url') + "/" + subDir + "/" + response;
+        
+        var banner_code = "<a href='" + url + "' rel='nofollow' target='_blank' alt='Target' title='Target'>"+
+            "<img border='0' src='"+ webpath + "' /></a>";
+
+        res.json({banner_code: banner_code, banner_image_link: url, banner_image_src: webpath});
+        
+    }, function(error){
+        next(error);
+    });
 });
 
 module.exports = router;
