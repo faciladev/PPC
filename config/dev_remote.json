@@ -1,6 +1,6 @@
 {
 	"db" : {
-        "host"     : "devziphub.colrlbywjcwy.us-west-1.rds.amazonaws.com",
+        "host"     : "devziphubs.colrlbywjcwy.us-west-1.rds.amazonaws.com",
         "user"     : "root",
         "password" : "ziphub_dev_password",
         "database" : "dev_ziphub"
