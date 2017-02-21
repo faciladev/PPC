@@ -165,7 +165,25 @@ module.exports = {
     getAdOffers: function(ad_id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
-                connection.query('SELECT * FROM ppc_ad_offers where ad_id = ?', [ad_id],
+                connection.query('SELECT ppc_offers.*, ad_id FROM ppc_ad_offers INNER JOIN ppc_offers ON ppc_ad_offers.offer_id = ppc_offers.id WHERE ad_id = ?', [ad_id],
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+    getAdFiles: function(ad_id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('SELECT ppc_files.*, ad_id FROM ppc_ad_files INNER JOIN ppc_files ON ppc_ad_files.file_id = ppc_files.id WHERE ad_id = ?', [ad_id],
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
