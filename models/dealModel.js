@@ -3,6 +3,7 @@ var Promise = require('promise');
 var DbHelper = require('../lib/DbHelper');
 var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
+var ppcModel = require('./ppcModel');
 
 var dealModel = {
     updateDeal: function(dealId, deal){
@@ -178,16 +179,49 @@ var dealModel = {
 
         return new Promise(function(resolve, reject) {
 
-            var query = 'SELECT dd.id, mi.image, mi.name, dd.approved_category_id, ' + 
-            'dd.download_price, dd.date_created, dd.is_approved ' +
-            'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
-            'dd.daily_deal_microsite_id = mi.id ' +
-            'WHERE dd.advertiser_id = ? AND dd.is_deleted=0';
-            var queryParams = [advertiserId];
+            var query = 
+            'SELECT ' + 
+            'cat.category_name, ' +
+            'dd.id AS deal_id, ' +
+            'm.id AS microsite_id, '+
+            'm.company_name, ' +
+            'm.what_you_get, '+
+            'm.location,' +
+            'dd.end_date, ' +
+            'dd.start_date, ' +
+            'm.discount_daily_description, '+
+            'm.discount_percentage, '+
+            'dd.discount_type, '+
+            'm.name, '+
+            'dd.discount_price, ' +
+            'm.image, ' +
+            'm.image_1, ' +
+            'm.image_2, ' +
+            'm.code, ' +
+            'dd.date_created, ' +
+            'dd.download_price, ' +
+            'm.discount_description, ' +
+            'dd.regular_price, '+
+            'dd.discount_rate, '+
+            'dd.coupon_name, '+
+            'dd.coupon_generated_code, '+
+            'dd.is_approved, ' +
+            'dd.is_deleted, ' +
+            'dd.list_rank, ' +
+            'dd.deal_image, ' +
+            'm.discount_description, '+
+            'm.daily_deal_description, '+
+            'dd.approved_category_id '+
+            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+            'AS m ON dd.daily_deal_microsite_id=m.id ' +
+            'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
+            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.advertiser_id=? ';
 
+            var queryParams = [advertiserId];
+            
             PaginationHelper.paginate(query, page, null, queryParams).then(
-                function(result){
-                    resolve(result);
+                function(response){
+                    resolve(response);
                 }, 
                 function(error){
                     reject(error);

@@ -7,6 +7,7 @@ var router = express.Router();
 var dealModel = require('../models/dealModel');
 var Util = require('../lib/util');
 var UploadHelper = require('../lib/UploadHelper');
+var ppcModel = require('../models/ppcModel');
 
 //Create Daily Deal
 router.post('/', function(req, res, next){
@@ -38,8 +39,23 @@ router.get('/', function(req, res, next){
 router.get('/advertisers/:advertiserId', function(req, res, next){
 	var advertiserId = req.params.advertiserId;
 	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page).then(
-		function(deals){
-			res.json(deals);
+		function(paginatedDeals){
+			
+			for(var i = 0; i<paginatedDeals.result.length; i++){
+				(function(i){
+					ppcModel.getNumDealDownloads(paginatedDeals.result[i].deal_id).then(
+						function(response){
+							paginatedDeals.result[i]['downloads'] = response.downloads;
+
+							if(i=== paginatedDeals.result.length - 1)
+								return res.json(paginatedDeals);
+						}, 
+						function(error){
+							next(error);
+						}
+					);
+				})(i)
+			}
 		}, 
 		function(error){
 			next(error);

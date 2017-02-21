@@ -27,6 +27,23 @@ const MONTHLY_BUDGET_PERIOD = 'monthly';
 
 var ppcModel = {
 
+    ACTIVITY_CLICK : ACTIVITY_CLICK,
+    ACTIVITY_IMPRESSION : ACTIVITY_IMPRESSION,
+    ACTIVITY_DOWNLOAD : ACTIVITY_DOWNLOAD,
+
+    ITEM_SPONSORED_AD : ITEM_SPONSORED_AD,
+    ITEM_DAILY_DEAL : ITEM_DAILY_DEAL,
+    ITEM_FLEX_OFFER : ITEM_FLEX_OFFER,
+
+    ACTOR_CONSUMER : ACTOR_CONSUMER,
+    ACTOR_ADVERTISER : ACTOR_ADVERTISER,
+    ACTOR_NON_MEMBER : ACTOR_NON_MEMBER,
+    ACTOR_ADMIN : ACTOR_ADMIN,
+
+    WEEKLY_BUDGET_PERIOD : WEEKLY_BUDGET_PERIOD,
+    DAILY_BUDGET_PERIOD : DAILY_BUDGET_PERIOD,
+    MONTHLY_BUDGET_PERIOD : MONTHLY_BUDGET_PERIOD,
+
     findSponsoredAds : function(keyword, location, subPage, page){
         return new Promise(function(resolve, reject) {
             //set default argument value
@@ -1030,13 +1047,34 @@ var ppcModel = {
 
             
         });
+    },
+
+    getNumDealDownloads: function(dealId){
+        return new Promise(function(resolve, reject) {
+                DbHelper.getConnection().then(function(connection){
+                    console.log('here')
+                    connection.query(
+                        "SELECT count(ppc_analytics.id) AS downloads FROM ppc_analytics WHERE item_id = ? AND item_type_id=? AND activity_type_id=?", 
+                        [dealId, ITEM_DAILY_DEAL, ACTIVITY_DOWNLOAD],
+                        function (err, rows, fields) {
+
+                            //release connection
+                            connection.release();
+
+                            if(err){
+                                return reject(err);
+                            }
+                            resolve(rows[0]);
+                        }
+                    );
+                }, function(error){
+                    reject(error);
+                });
+
+                
+            });
     }
     
 }
-
-
-
-
-
 
 module.exports = ppcModel;
