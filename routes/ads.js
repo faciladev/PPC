@@ -70,6 +70,14 @@ router.get('/:id/offers', function(req, res, next) {
         next(error);
     });
 });
+router.get('/:id/adFiles', function(req, res, next) {
+    ads.getAdFiles(req.params.id).then(function(response){
+        res.json(response);
+    }, function(error){
+        error.message = 'Error';
+        next(error);
+    });
+});
 
 //Gets category keywords
 router.get('/keywords/:categoryId', function(req, res, next) {
