@@ -23,7 +23,7 @@ var businessModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('Business doesn\'t exist for this advertiser'));
+                            return resolve([]);
 
                         resolve(rows[0]);
                     }
