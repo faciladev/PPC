@@ -152,7 +152,7 @@ var searchAds = function(req, res, next){
 						//matched one result
 						searchData[0].search_id = savedSearchIds.insertId;
 						var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-	                            'ad_microsite/' + searchData[0].ad_id);
+	                            'Categories/listing_microsite/' + searchData[0].ad_id);
 						searchData[0].redirectUrl = config.get('project_url') + 
 	                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
 	                        redirectUrl
@@ -162,7 +162,7 @@ var searchAds = function(req, res, next){
 						//matched multiple results
 						for(var i = 0; i<searchData.length; i++){
 	                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-	                            'ad_microsite/' + searchData[i].ad_id);
+	                            'Categories/listing_microsite/' + searchData[i].ad_id);
 
 	                        searchData[i].redirectUrl = config.get('project_url') + 
 	                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +

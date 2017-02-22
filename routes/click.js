@@ -57,38 +57,47 @@ var clickSponsoredAd = function(req, res, next){
 						next(new Error('Fraud click.'));
 					}
 
-					//Update sponsored ad 'available_since' field if budget limit exceeded.
-					ppcModel.adBudgetLimitCheck(searchData).then(
+					ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
 						function(response){
-							if(! response.hasPassed){
-								//Do not track click
-								//Update 'available_since' field so future searches won't include this ad
-								ppcModel.postponeAdAvailability(searchData.ad_id, response.budget_period).then(
-									function(response){
-										res.redirect(Util.decodeUrl(redirectUrl));
-									},
-									function(error){
-										next(error);
-									}
-								);
-							} else {
-
-								//Track click
-								ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
-									function(response){
-										res.redirect(Util.decodeUrl(redirectUrl));
-									},
-									function(error){
-										next(error);
-									}
-								);
-							}
-
+							res.redirect(Util.decodeUrl(redirectUrl));
 						},
 						function(error){
 							next(error);
 						}
 					);
+
+					//Update sponsored ad 'available_since' field if budget limit exceeded.
+					// ppcModel.adBudgetLimitCheck(searchData).then(
+					// 	function(response){
+					// 		if(! response.hasPassed){
+					// 			//Do not track click
+					// 			//Update 'available_since' field so future searches won't include this ad
+					// 			ppcModel.postponeAdAvailability(searchData.ad_id, response.budget_period).then(
+					// 				function(response){
+					// 					res.redirect(Util.decodeUrl(redirectUrl));
+					// 				},
+					// 				function(error){
+					// 					next(error);
+					// 				}
+					// 			);
+					// 		} else {
+
+					// 			//Track click
+					// 			ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
+					// 				function(response){
+					// 					res.redirect(Util.decodeUrl(redirectUrl));
+					// 				},
+					// 				function(error){
+					// 					next(error);
+					// 				}
+					// 			);
+					// 		}
+
+					// 	},
+					// 	function(error){
+					// 		next(error);
+					// 	}
+					// );
 
 				},
 				function(error){
