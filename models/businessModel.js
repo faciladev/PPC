@@ -7,19 +7,19 @@ var businessModel = {
 	
 
     getByAdvertisers: function(advertiserId){
+        console.log(advertiserId);
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
                 
                 connection.query(
                     'SELECT * FROM advertiser_business ' +
-                    'WHERE advertizer_id = ? ', [advertiserId], 
+                    'WHERE advertiser_id = ? ', [advertiserId], 
                     function (err, rows, fields) {
-
                         //release connection
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
                         if(rows.length <= 0)
