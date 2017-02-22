@@ -9,11 +9,12 @@ module.exports = {
 
     getAll : function(page){
         return new Promise(function(resolve, reject) {
-            var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
-                'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.image, ppc_ad_microsites.address_1, ' +
+            var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
+                'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
                 'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
-                'FROM ppc_ads INNER JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id WHERE ppc_ads.is_deleted = 0 ';
+                'FROM advertisers Inner join ppc_ads on ppc_ads.advertiser_id = advertisers.advertizer_id Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
+                'WHERE ppc_ads.is_deleted = 0 ';
 
             PaginationHelper.paginate(query, page).then(
                 function(result){
@@ -55,11 +56,12 @@ module.exports = {
   
     getAllByAdvertiser : function(page, advertiserId){
         return new Promise(function(resolve, reject) {
-            var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
-                        'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.image, ppc_ad_microsites.address_1, ' +
-                        'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
-                        'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
-                        'FROM ppc_ads INNER JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id WHERE ppc_ads.is_deleted = 0 && advertiser_id = ' + advertiserId;
+            var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
+                'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
+                'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
+                'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
+                'FROM advertisers Inner join ppc_ads on ppc_ads.advertiser_id = advertisers.advertizer_id Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
+                'WHERE ppc_ads.is_deleted = 0 && ppc_ads.advertiser_id = ' + advertiserId;
 
             PaginationHelper.paginate(query, page).then(
                 function(result){
@@ -89,7 +91,7 @@ module.exports = {
                             }, function(error){
                                 return reject(error);
                             });
-                        })(i);                          
+                        })(i);
                     }
                 },
                 function(error){
