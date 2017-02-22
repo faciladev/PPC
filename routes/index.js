@@ -5,6 +5,7 @@ var router = express.Router();
 var subPageModel = require('../models/subPageModel');
 var usaStateModel = require('../models/usaStateModel');
 var advertiserModel = require('../models/advertiserModel');
+var businessModel = require('../models/businessModel');
 var ads = require('../models/ads');
 var Util = require('../lib/util');
 
@@ -76,6 +77,18 @@ router.get('/advertisers', function(req, res, next){
 			next(error);
 		}
 	);
+});
+
+router.get('/businesses/advertisers/:advertiserId', function(req, res, next){
+    var advertiserId = req.params.advertiserId;
+    businessModel.getByAdvertisers(advertiserId).then(
+        function(businesses){
+            res.json(businesses);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
 });
 
 router.post('/categories', function(req, res, next) {
