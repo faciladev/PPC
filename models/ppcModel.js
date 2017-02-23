@@ -223,10 +223,14 @@ var ppcModel = {
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
             'dd.approved_category_id = cat.category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id = ? ' +
-            'AND m.name LIKE ?';            
+            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id = ? ';
 
-            var queryParams = [categoryId ,'%' + keyword + '%'];
+            var queryParams = [categoryId];
+
+            if(typeof keyword !== "undefined" || keyword != null){
+                query += 'AND m.name LIKE ?';
+                queryParams.push('%' + keyword + '%');
+            }            
             
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
