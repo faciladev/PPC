@@ -17,14 +17,7 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
 
 //Get deals from one category
 router.get('/deals/:categoryId', function(req, res, next) {
-	ppcModel.getDealsByCategory(req.params.categoryId, req.query.page).then(
-		function(deals){
-			res.json(deals);
-		}, 
-		function(error){		
-			next(error);
-		}
-	)
+	searchDeals(req, res, next);
 });
 
 //Non-member search
@@ -208,7 +201,7 @@ var searchDeals = function(req, res, next) {
 	var keyword = req.params.keyword;
 	var categoryId = req.params.categoryId;
 	var userId = req.params.userId;
-
+	
 	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
 		function(searchData){
 			var userAgent = Util.getUserAgent(req);
