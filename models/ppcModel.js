@@ -1058,7 +1058,6 @@ var ppcModel = {
     getNumDealDownloads: function(dealId){
         return new Promise(function(resolve, reject) {
                 DbHelper.getConnection().then(function(connection){
-                    console.log('here')
                     connection.query(
                         "SELECT count(ppc_analytics.id) AS downloads \
                         FROM ppc_analytics WHERE item_id = ? \

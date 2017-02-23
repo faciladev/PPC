@@ -215,7 +215,7 @@ var dealModel = {
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id ' +
             'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.advertiser_id=? ';
+            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ';
 
             var queryParams = [advertiserId];
             

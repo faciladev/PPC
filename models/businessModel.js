@@ -7,7 +7,6 @@ var businessModel = {
 	
 
     getByAdvertisers: function(advertiserId){
-        console.log(advertiserId);
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
                 
