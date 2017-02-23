@@ -40,7 +40,9 @@ router.get('/advertisers/:advertiserId', function(req, res, next){
 	var advertiserId = req.params.advertiserId;
 	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page).then(
 		function(paginatedDeals){
-			
+			if(paginatedDeals.result.length === 0)
+				return res.json(paginatedDeals);
+
 			for(var i = 0; i<paginatedDeals.result.length; i++){
 				(function(i){
 					ppcModel.getNumDealDownloads(paginatedDeals.result[i].deal_id).then(
