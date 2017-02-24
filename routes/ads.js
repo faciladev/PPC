@@ -54,6 +54,20 @@ router.get('/:id/keywords', function(req, res, next) {
         next(error);
     });
 });
+
+router.delete('/:id', function(req, res, next){
+    var adId = req.params.id;
+    ads.deleteAd(adId).then(
+        function(response){
+            res.json(response);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
+
 router.get('/:id/subpages', function(req, res, next) {
     ads.getAdSubpages(req.params.id).then(function(response){
         res.json(response);
