@@ -118,25 +118,24 @@ router.post('/', function(req, res, next) {
     );
 });
 router.post('/:id/microsite', function(req, res, next) {
-
-    if(!req.files){
-        res.send('No files were uploaded');
-        return;
-    }
-
-    UploadHelper.uploadFiles(req.files, "microsite").then(function(response){
-        req.body.image = response.length === 1 ? response[0] : response;
-        ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
-            res.json(response);
-        }, function(error) {
-            error.message = 'Error';
-            next(error);
-        });
-    }, function(error){
-        res.json(error);
+    ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
     });
 
-
+//    if(!req.files){
+//        res.send('No files were uploaded');
+//        return;
+//    }
+//
+//    UploadHelper.uploadFiles(req.files, "microsite").then(function(response){
+//        req.body.image = response.length === 1 ? response[0] : response;
+//
+//    }, function(error){
+//        res.json(error);
+//    });
 });
 router.post('/:id/keywords', function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
