@@ -6,7 +6,7 @@ var Util = require('../lib/util');
 var ppcModel = require('./ppcModel');
 
 var dealModel = {
-    updateDeal: function(dealId, deal){
+    approveDeal: function(dealId, deal){
         return new Promise(function(resolve, reject){
             
             DbHelper.getConnection().then(
@@ -25,6 +25,26 @@ var dealModel = {
                     reject(error);
                 }
             );
+        });
+    },
+
+    deleteDeal: function(dealId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                connection.query('UPDATE ppc_daily_deal SET is_deleted = 1 where id = ?', [dealId],
+                    function (err, rows, fields) {
+                        connection.release();
+                        if(err){
+                            return reject(err);
+                        }
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
         });
     },
 
@@ -82,6 +102,80 @@ var dealModel = {
             
         });
 	},
+
+    updateDeal: function(dealId, deal, dealMicrosite){
+        return new Promise(function(resolve, reject) {
+
+            DbHelper.getConnection().then(function(connection){
+                Connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
+                    [dealId], 
+                    function(error, results, fields){
+                        if(error){
+                            connection.release();
+                            return reject(error);
+                        }
+
+                        if(results.length < 1){
+                            connection.release();
+                            return reject(new Error('No microsite found for this ad.'));
+                        }
+
+                        var micrositeId = results[0].daily_deal_microsite_id;
+
+                        connection.beginTransaction(function(err) {
+                          if (err) { 
+                            connection.release();
+                            return reject(err);
+                          }
+
+                          connection.query('UPDATE ppc_deal_microsites SET ? WHERE id = ?', 
+                            [dealMicrosite, micrositeId], 
+                            function (error, results, fields) {
+                            if (error) {
+                              return connection.rollback(function() {
+                                connection.release();
+                                return reject(error);
+                              });
+                            }
+                            if(typeof deal.start_date !== "undefined" && deal.start_date !== null)
+                                deal.start_date = deal.start_date.substring(0,10);
+                            if(typeof deal.end_date !== "undefined" && deal.end_date !== null)
+                                deal.end_date = deal.end_date.substring(0,10);
+
+                            connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?', [deal, dealId], function (error, results, fields) {
+                              if (error) {
+                                return connection.rollback(function() {
+                                    connection.release();
+                                    return reject(error);
+                                });
+                              }
+                              connection.commit(function(err) {
+                                if (err) {
+                                  return connection.rollback(function() {
+                                    connection.release();
+                                    return reject(err);
+                                  });
+                                }
+                                connection.release();
+                                resolve(results);
+                              });
+                            });
+                          });
+
+                        });
+
+                    }
+                );
+
+                        
+                
+            }, function(error){
+                reject(error);
+            });
+
+            
+        });
+    },
 
     getDealCategories: function(){
         return new Promise(function(resolve, reject) {

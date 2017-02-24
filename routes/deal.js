@@ -21,6 +21,18 @@ router.post('/', function(req, res, next){
 	});
 });
 
+router.delete('/:id', function(req, res, next){
+    var dealId = req.params.id;
+    ads.deleteDeal(dealId).then(
+        function(response){
+            res.json(response);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
 
 //Get all daily deals
 router.get('/', function(req, res, next){
@@ -120,6 +132,22 @@ router.post('/upload', function(req, res, next){
 	});
 });
 
+router.put('/:dealId', function(req, res, next){
+	var deal = req.body.daily_deal;
+	var dealMicrosite = req.body.daily_deal_microsite;
+	var dealId = req.params.dealId;
+
+	dealModel.updateDeal(dealId, deal, dealMicrosite).then(
+		function(result){
+			res.json(result);
+		}, 
+		function(error){
+			console.log(error);
+			next(error);
+		}
+	);
+});
+
 //Approves a daily deal
 router.put('/:dealId/approve', function(req, res, next){
 	
@@ -129,7 +157,7 @@ router.put('/:dealId/approve', function(req, res, next){
 		is_approved: 1
 	}
 
-	dealModel.updateDeal(req.params.dealId, deal).then(
+	dealModel.approveDeal(req.params.dealId, deal).then(
 		function(result){
 			res.json(result);
 		}, 
