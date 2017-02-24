@@ -53,6 +53,26 @@ module.exports = {
             );
         });
     },
+
+    deleteAd: function(adId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                connection.query('UPDATE ppc_ads SET is_deleted = 1 where id = ?', [adId],
+                    function (err, rows, fields) {
+                        connection.release();
+                        if(err){
+                            return reject(err);
+                        }
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
   
     getAllByAdvertiser : function(page, advertiserId){
         return new Promise(function(resolve, reject) {
