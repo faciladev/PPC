@@ -16,5 +16,6 @@
     	"http://localhost",
         "http://localhost:8012",
         "http://localhost:8000"
-    ]
+    ],
+    "google_map_api_key": "AIzaSyCScrZhqgWrCJACbnr_frSVCaEQoBCLRM8"
 }
