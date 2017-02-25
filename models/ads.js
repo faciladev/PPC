@@ -110,12 +110,32 @@ module.exports = {
                         if(err){
                             reject(err);
                         }
-                        resolve(rows);
+
+                        (function(ad){
+                            module.exports.getAdLocations(ad.id).then(function(response){
+                                ad.locations = response;
+                                module.exports.getAdKeywords(ad.id).then(function(response){
+                                    ad.keywords = response;
+
+                                    module.exports.getAdSubpages(ad.id).then(function(response){
+                                        ad.subpages = response;
+                                        return resolve(ad);
+
+                                    }, function(error){
+                                        return reject(error);
+                                    });
+
+                                }, function(error){
+                                    return reject(error);
+                                });
+                            }, function(error){
+                                return reject(error);
+                            });
+                        })(rows); 
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
