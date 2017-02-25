@@ -51,53 +51,67 @@ var dealModel = {
 	saveDeal: function(deal, dealMicrosite){
 		return new Promise(function(resolve, reject) {
 
-            DbHelper.getConnection().then(function(connection){
+            Util.getAddressLatLng(dealMicrosite.location).then(
+                function(location){
+                    if(location !== false){
+                        dealMicrosite.lat = location.lat;
+                        dealMicrosite.lng = location.lng;
+                    }
 
-            	connection.beginTransaction(function(err) {
-				  if (err) { 
-				  	connection.release();
-				  	return reject(err);
-				  }
+                    DbHelper.getConnection().then(function(connection){
 
-				  connection.query('INSERT INTO ppc_deal_microsites SET ?', [dealMicrosite], function (error, results, fields) {
-				    if (error) {
-				      return connection.rollback(function() {
-				  		connection.release();
-				        return reject(error);
-				      });
-				    }
+                        connection.beginTransaction(function(err) {
+                          if (err) { 
+                            connection.release();
+                            return reject(err);
+                          }
 
-				    var micrositeId = results.insertId;
-				    deal.daily_deal_microsite_id = micrositeId;
-                    deal.approved_category_id = deal.suggested_category_id;
-                    deal.start_date = deal.start_date.substring(0,10);
-                    deal.end_date = deal.end_date.substring(0,10);
+                          connection.query('INSERT INTO ppc_deal_microsites SET ?', [dealMicrosite], function (error, results, fields) {
+                            if (error) {
+                              return connection.rollback(function() {
+                                connection.release();
+                                return reject(error);
+                              });
+                            }
 
-				    connection.query('INSERT INTO ppc_daily_deal SET ?', [deal], function (error, results, fields) {
-				      if (error) {
-				        return connection.rollback(function() {
-				        	connection.release();
-				          	return reject(error);
-				        });
-				      }
-				      var dealId = results.insertId;
-				      connection.commit(function(err) {
-				        if (err) {
-				          return connection.rollback(function() {
-				          	connection.release();
-				            return reject(err);
-				          });
-				        }
-				        connection.release();
-				        resolve(results);
-				      });
-				    });
-				  });
-				});
-                
-            }, function(error){
-                reject(error);
-            });
+                            var micrositeId = results.insertId;
+                            deal.daily_deal_microsite_id = micrositeId;
+                            deal.approved_category_id = deal.suggested_category_id;
+                            deal.start_date = deal.start_date.substring(0,10);
+                            deal.end_date = deal.end_date.substring(0,10);
+
+                            connection.query('INSERT INTO ppc_daily_deal SET ?', [deal], function (error, results, fields) {
+                              if (error) {
+                                return connection.rollback(function() {
+                                    connection.release();
+                                    return reject(error);
+                                });
+                              }
+                              var dealId = results.insertId;
+                              connection.commit(function(err) {
+                                if (err) {
+                                  return connection.rollback(function() {
+                                    connection.release();
+                                    return reject(err);
+                                  });
+                                }
+                                connection.release();
+                                resolve(results);
+                              });
+                            });
+                          });
+                        });
+                        
+                    }, function(error){
+                        reject(error);
+                    });
+                },
+                function(error){
+                    reject(error);
+                }
+            );
+
+                    
 
             
         });
