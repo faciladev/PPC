@@ -124,10 +124,9 @@ router.post('/upload', function(req, res, next){
             "<img border='0' src='"+ config.get('project_url') +
             "/" + assetPath + "' /></a>";
 
-        res.json({banner_code: banner_code, banner_image_link: webpath, banner_image: assetPath});
+        res.json({banner_code: banner_code, banner_image_link: webpath, banner_image_name: response[0]});
 		
 	}, function(error){
-		console.log(error);
 		res.json(error);
 	});
 });
