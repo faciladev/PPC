@@ -54,26 +54,6 @@ module.exports = {
         });
     },
 
-    deleteAd: function(adId){
-        return new Promise(function(resolve, reject){
-            DbHelper.getConnection().then(function(connection){
-                connection.query('UPDATE ppc_ads SET is_deleted = 1 where id = ?', [adId],
-                    function (err, rows, fields) {
-                        connection.release();
-                        if(err){
-                            return reject(err);
-                        }
-
-                        resolve(rows);
-                    }
-                );
-            }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
-            });
-        });
-    },
-  
     getAllByAdvertiser : function(page, advertiserId){
         return new Promise(function(resolve, reject) {
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
@@ -120,6 +100,7 @@ module.exports = {
             );
         });
     },
+
     get: function(id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
@@ -177,6 +158,7 @@ module.exports = {
             });
         });
     },
+
     getAdMicrosite: function(ad_id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
@@ -736,6 +718,46 @@ module.exports = {
                     );
                 }
                 connection.release();
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+
+    deleteAd: function(adId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                connection.query('UPDATE ppc_ads SET is_deleted = 1 where id = ?', [adId],
+                    function (err, rows, fields) {
+                        connection.release();
+                        if(err){
+                            return reject(err);
+                        }
+
+                        resolve(rows);
+                    }
+                );
+            }, function(error){
+                if(error)
+                    reject(new Error('Connection error'));
+            });
+        });
+    },
+
+    deleteAdOffer: function(offerId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                connection.query('DELETE FROM ppc_ad_offers WHERE id = ?', [offerId],
+                    function (err, rows, fields) {
+                        connection.release();
+                        if(err){
+                            return reject(err);
+                        }
+
+                        resolve(rows);
+                    }
+                );
             }, function(error){
                 if(error)
                     reject(new Error('Connection error'));
