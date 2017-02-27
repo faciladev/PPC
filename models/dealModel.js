@@ -256,7 +256,10 @@ var dealModel = {
                 'm.discount_description, '+
                 'm.daily_deal_description, '+
                 'm.lat, m.lng, ' +
-                'dd.approved_category_id '+
+                'dd.approved_category_id, ' +
+                'dd.suggested_category_id, ' +
+                'm.code, ' +
+                'm.city, m.state_id, m.zip_code ' +
                 'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
                 'AS m ON dd.daily_deal_microsite_id=m.id ' +
                 'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
