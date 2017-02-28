@@ -111,6 +111,9 @@ module.exports = {
                             reject(err);
                         }
 
+                        if(rows.length == 0)
+                            return resolve(rows);
+
                         (function(ad){
                             module.exports.getAdLocations(ad.id).then(function(response){
                                 ad.locations = response;
@@ -119,6 +122,7 @@ module.exports = {
 
                                     module.exports.getAdSubpages(ad.id).then(function(response){
                                         ad.subpages = response;
+                                        console.log(ad)
                                         return resolve(ad);
 
                                     }, function(error){
