@@ -111,6 +111,8 @@ module.exports = {
                             reject(err);
                         }
 
+                        console.log(rows[0])
+
                         if(rows.length == 0)
                             return resolve(rows);
 
@@ -135,7 +137,7 @@ module.exports = {
 
                                     module.exports.getAdSubpages(ad.id).then(function(response){
                                         ad.subpages = response;
-                                        console.log(ad);
+                                        console.log(ad)
                                         return resolve(ad);
 
                                     }, function(error){
