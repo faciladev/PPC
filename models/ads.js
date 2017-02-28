@@ -18,7 +18,7 @@ module.exports = {
                 'WHERE ppc_ads.is_deleted = 0 ';
 
             if(typeof search != "undefined" && search != null){
-                query += ' AND (ppc_ad_microsites.name LIKE ? OR ppc_ads.ad_text LIKE ? OR ppc_ads.title )';
+                query += ' AND (ppc_ad_microsites.name LIKE ? OR ppc_ads.ad_text LIKE ? OR ppc_ads.title LIKE ? )';
                 queryParams.push('%' + search + '%', '%' + search + '%', '%' + search + '%');
             }
 
