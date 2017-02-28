@@ -238,6 +238,7 @@ var dealModel = {
                 'dd.discount_type, '+
                 'm.name, '+
                 'dd.discount_price, ' +
+                'dd.budget_limit, ' +
                 'm.image, ' +
                 'm.image_1, ' +
                 'm.image_2, ' +
@@ -334,6 +335,7 @@ var dealModel = {
             'dd.discount_type, '+
             'm.name, '+
             'dd.discount_price, ' +
+            'dd.budget_limit, ' +
             'm.image, ' +
             'm.image_1, ' +
             'm.image_2, ' +
