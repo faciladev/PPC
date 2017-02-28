@@ -135,6 +135,7 @@ module.exports = {
 
                                     module.exports.getAdSubpages(ad.id).then(function(response){
                                         ad.subpages = response;
+                                        console.log(ad);
                                         return resolve(ad);
 
                                     }, function(error){
