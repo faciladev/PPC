@@ -1084,6 +1084,35 @@ var ppcModel = {
 
                 
             });
+    },
+
+    getAllAdAnalytics: function(adId){
+        return new Promise(function(resolve, reject) {
+                DbHelper.getConnection().then(function(connection){
+                    var query = "SELECT * \
+                        FROM ppc_analytics JOIN ppc_ad_searches ON ppc_analytics.item_id = ppc_ad_searches.id \
+                        WHERE ppc_ad_searches.ad_id = " + adId +
+                        " AND item_type_id= " + ITEM_SPONSORED_AD + " AND (activity_type_id=" + ACTIVITY_CLICK + " OR activity_type_id="+ ACTIVITY_IMPRESSION +") AND disapproved=0";
+                    connection.query(
+                        query, 
+                        function (err, rows, fields) {
+
+                            //release connection
+                            connection.release();
+
+                            if(err){
+                                return reject(err);
+                            }
+
+                            resolve(rows);
+                        }
+                    );
+                }, function(error){
+                    reject(error);
+                });
+
+                
+            });
     }
     
 }
