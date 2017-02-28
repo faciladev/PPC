@@ -111,8 +111,6 @@ module.exports = {
                             reject(err);
                         }
 
-                        console.log(rows[0])
-
                         if(rows.length == 0)
                             return resolve(rows);
 
@@ -150,7 +148,7 @@ module.exports = {
                             }, function(error){
                                 return reject(error);
                             });
-                        })(rows); 
+                        })(rows[0]); 
                     }
                 );
             }, function(error){
