@@ -1,8 +1,18 @@
 {
 	"db" : {
-        "host"     : "",
-        "user"     : "",
-        "password" : "",
-        "database" : ""
-    }
+        "host"     : "sdevziphub.colrlbywjcwy.us-west-1.rds.amazonaws.com",
+        "user"     : "root",
+        "password" : "ziphub_dev_password",
+        "database" : "dev_ziphub"
+    },
+
+    "project_url" : "http://ppc.ziphub.com:8081",
+    "web_portal_url" : "http://iziphub.com",
+    "upload_path" : "/var/www/PPC_ASSETS",
+    "numRowsPerPage" : 10,
+    "cors_whitelist" : [
+    	"http://ziphub.com", 
+    	"http://iziphub.com"
+    ],
+    "google_map_api_key": "AIzaSyCScrZhqgWrCJACbnr_frSVCaEQoBCLRM8"
 }
