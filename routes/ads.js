@@ -6,7 +6,8 @@ var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
 
 router.get('/', function(req, res, next) {
-    ads.getAll(req.query.page).then(function(response){
+    var search = req.query.search;
+    ads.getAll(req.query.page, search).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
@@ -22,7 +23,7 @@ router.get('/advertiser/:advertiserId', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
     ads.get(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -104,6 +105,20 @@ router.post('/', function(req, res, next) {
         }
     );
 });
+
+router.put('/:id', function(req, res, next){
+    var adId = req.params.id;
+    var newAdData = req.body;
+    ads.updateAd(newAdData, adId).then(
+        function(response){
+            res.json(response);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
 router.post('/:id/microsite', function(req, res, next) {
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         res.json(response);

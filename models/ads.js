@@ -7,8 +7,9 @@ var DateHelper = require('../lib/DateHelper');
 
 module.exports = {
 
-    getAll : function(page){
+    getAll : function(page, search){
         return new Promise(function(resolve, reject) {
+            var queryParams;
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
                 'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
@@ -16,7 +17,12 @@ module.exports = {
                 'FROM advertisers Inner join ppc_ads on ppc_ads.advertiser_id = advertisers.advertizer_id Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
                 'WHERE ppc_ads.is_deleted = 0 ';
 
-            PaginationHelper.paginate(query, page).then(
+            if(typeof search != "undefined" && search != null){
+                query += ' AND (ppc_ad_microsites.name LIKE ? OR ppc_ads.ad_text LIKE ? )';
+                queryParams = ['%' + search + '%', '%' + search + '%'];
+            }
+
+            PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(result){
                     if(result.result <= 0)
                         return resolve(result);
@@ -56,6 +62,7 @@ module.exports = {
 
     getAllByAdvertiser : function(page, advertiserId){
         return new Promise(function(resolve, reject) {
+            var queryParams;
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
                 'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
@@ -63,7 +70,12 @@ module.exports = {
                 'FROM advertisers Inner join ppc_ads on ppc_ads.advertiser_id = advertisers.advertizer_id Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
                 'WHERE ppc_ads.is_deleted = 0 && ppc_ads.advertiser_id = ' + advertiserId;
 
-            PaginationHelper.paginate(query, page).then(
+            if(typeof search != "undefined" && search != null){
+                query += ' AND (ppc_ad_microsites.name LIKE ? OR ppc_ads.ad_text LIKE ? )';
+                queryParams = ['%' + search + '%', '%' + search + '%'];
+            }
+            
+            PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(result){
                     if(result.result <= 0)
                         return resolve(result);
@@ -135,7 +147,6 @@ module.exports = {
 
                                     module.exports.getAdSubpages(ad.id).then(function(response){
                                         ad.subpages = response;
-                                        console.log(ad)
                                         return resolve(ad);
 
                                     }, function(error){
@@ -154,6 +165,20 @@ module.exports = {
             }, function(error){
                 reject(error);
             });
+        });
+    },
+
+    updateAd: function(newAdData, adId){
+        return new Promise(function(resolve, reject){
+            module.exports.get(adId).then(
+                function(oldAdData){
+
+                }, 
+
+                function(error){
+                    reject(error);
+                }
+            );
         });
     },
 
