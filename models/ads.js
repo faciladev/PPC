@@ -116,13 +116,25 @@ module.exports = {
 
                         (function(ad){
                             module.exports.getAdLocations(ad.id).then(function(response){
-                                ad.locations = response;
+                                if(response.length == 0)
+                                {
+                                    ad['locations'] = [
+                                        {
+                                            city: "",
+                                            state_id: "",
+                                            zip_code: ""
+                                        }
+                                    ];
+                                }
+                                else
+                                {
+                                    ad['locations'] = response;
+                                }
                                 module.exports.getAdKeywords(ad.id).then(function(response){
                                     ad.keywords = response;
 
                                     module.exports.getAdSubpages(ad.id).then(function(response){
                                         ad.subpages = response;
-                                        console.log(ad)
                                         return resolve(ad);
 
                                     }, function(error){
