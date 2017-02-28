@@ -7,7 +7,8 @@ var UploadHelper = require('../lib/UploadHelper');
 
 router.get('/', function(req, res, next) {
     var search = req.query.search;
-    ads.getAll(req.query.page, search).then(function(response){
+    var type = req.query.type;
+    ads.getAll(req.query.page, search, type).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
@@ -16,7 +17,11 @@ router.get('/', function(req, res, next) {
 });
 //Gets all ads by advertiser
 router.get('/advertiser/:advertiserId', function(req, res, next) {
-    ads.getAllByAdvertiser(req.query.page, req.params.advertiserId).then(function(response){
+    var search = req.query.search;
+    var type = req.query.type;
+    var advertiserId = req.params.advertiserId;
+    var page = req.query.page;
+    ads.getAllByAdvertiser(page, advertiserId, search, type).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';

@@ -259,10 +259,11 @@ var dealModel = {
                 'dd.approved_category_id, ' +
                 'dd.suggested_category_id, ' +
                 'm.code, ' +
-                'm.city, m.state_id, m.zip_code ' +
+                'm.city, m.state_id, m.zip_code, usa_states.usa_state_name ' +
                 'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
                 'AS m ON dd.daily_deal_microsite_id=m.id ' +
                 'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
+                'JOIN usa_states ON m.state_id = usa_states.usa_state_id ' +
                 'WHERE dd.is_deleted=0 AND dd.id=? ';
 
                 connection.query(
