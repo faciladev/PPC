@@ -23,7 +23,7 @@ router.post('/', function(req, res, next){
 
 router.delete('/:id', function(req, res, next){
     var dealId = req.params.id;
-    ads.deleteDeal(dealId).then(
+    dealModel.deleteDeal(dealId).then(
         function(response){
             res.json(response);
         }, 
