@@ -11,13 +11,13 @@ module.exports = {
       script    : "./bin/www",
       watch     : true,
       env: {
+        NODE_ENV: "dev_remote",
+        PORT: "8000"
+      },
+      env_local : {
         COMMON_VARIABLE: "true",
         NODE_ENV: "development",
         PORT: "8081"
-      },
-      env_dev_remote : {
-        NODE_ENV: "dev_remote",
-        PORT: "8000"
       }
     },
     //Production App
@@ -27,7 +27,7 @@ module.exports = {
       watch     : true,
       instances : 0,
       exec_mode : "cluster",
-      env_production : {
+      env : {
         NODE_ENV: "production",
         PORT: "9000"
       }
