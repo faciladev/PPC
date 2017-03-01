@@ -6,13 +6,12 @@
         "database" : "dev_ziphub"
     },
 
-    "project_url" : "http://ppc.ziphub.com:8081",
-    "web_portal_url" : "http://iziphub.com",
-    "upload_path" : "/var/www/PPC_ASSETS",
+    "project_url" : "http://ppc.ziphub.com:3000",
+    "web_portal_url" : "http://ziphub.com",
+    "upload_path" : "/var/www/PPC_ASSETS_PROD",
     "numRowsPerPage" : 10,
     "cors_whitelist" : [
-    	"http://ziphub.com", 
-    	"http://iziphub.com"
+    	"http://ziphub.com"
     ],
     "google_map_api_key": "AIzaSyCScrZhqgWrCJACbnr_frSVCaEQoBCLRM8"
 }
