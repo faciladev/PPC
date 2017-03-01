@@ -25,7 +25,6 @@ module.exports = {
       name      : "PPC_PROD",
       script    : "./bin/www",
       watch     : true,
-      instances : 0,
       exec_mode : "cluster",
       env : {
         NODE_ENV: "production",
