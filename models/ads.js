@@ -547,16 +547,18 @@ module.exports = {
                     connection.query('INSERT INTO ppc_ad_offers SET ?', [post],
                         function (err, result) {
                             if(err){
+                                connection.release();
                                 reject(err);
                             }
                             post.id = result.insertId;
                             insertedData.push(post.offer_id);
 
-                            if(i== ad_offers.length -1) {
-                                connection.query('Select ppc_offers.*, ppc_ad_offers.ad_id from ppc_offers inner join ppc_ad_offers on ppc_offers.id = ppc_ad_offers.offer_id WHERE ppc_ad_offers.offer_id IN (?)', [insertedData],
+                            if(i== ad_offers.length - 1) {
+                                connection.query('SELECT ppc_offers.*, ppc_ad_offers.ad_id from ppc_offers inner join ppc_ad_offers on ppc_offers.id = ppc_ad_offers.offer_id WHERE ppc_ad_offers.offer_id IN (?)', [insertedData],
                                     function(err, rows, fields) {
+                                        connection.release();
                                         if(err) {
-                                            reject(err);
+                                            return reject(err);
                                         }
                                         resolve(rows);
                                     }
@@ -565,10 +567,8 @@ module.exports = {
                         }
                     );
                 });
-                connection.release();
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -645,20 +645,21 @@ module.exports = {
                     connection.query('INSERT INTO ppc_ad_files SET ?', [post],
                         function (err, result) {
                             if(err){
+                                connection.release();
                                 reject(err);
                             }
                             post.id = result.insertId;
                             insertedData.push(post);
-                            if(i== ad_files.length -1) {
+                            if(i== ad_files.length - 1) {
+                                connection.release();
                                 resolve(insertedData);
                             }
                         }
                     );
                 });
-                connection.release();
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },

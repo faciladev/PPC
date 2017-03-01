@@ -243,7 +243,6 @@ router.post('/:id/adFiles', function(req, res, next) {
     ads.saveAdFiles(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
-        error.message = 'Error';
         next(error);
     });
 });
