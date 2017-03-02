@@ -10,6 +10,8 @@ module.exports = {
       name      : "PPC_DEV",
       script    : "./bin/www",
       watch     : true,
+	  exec_mode : "cluster",
+	  instances : 0,
       env: {
         NODE_ENV: "dev_remote",
         PORT: "8000"
@@ -26,6 +28,7 @@ module.exports = {
       script    : "./bin/www",
       watch     : true,
       exec_mode : "cluster",
+	  instances	: 0,
       env : {
         NODE_ENV: "production",
         PORT: "9000"
