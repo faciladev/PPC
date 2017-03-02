@@ -207,8 +207,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -226,8 +225,7 @@ module.exports = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -244,8 +242,7 @@ module.exports = {
                 }
             );
          }, function(error) {
-             if(error)
-                reject(new Error('Connection error'));
+             reject(error);
          });
       });
     },
@@ -262,8 +259,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -280,8 +276,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -298,8 +293,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -318,8 +312,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -337,8 +330,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -356,8 +348,7 @@ module.exports = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -374,8 +365,7 @@ module.exports = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -410,129 +400,184 @@ module.exports = {
                 }
 
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
     saveAdMicrosite: function(ad_id, ad_microsite) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('DELETE FROM ppc_ad_microsites WHERE ad_id = ?', [ad_id]);
-                connection.query('INSERT INTO ppc_ad_microsites SET ?', [ad_microsite],
+				var query = "DELETE FROM ppc_ad_microsites WHERE ad_id = ? ;"
+				query += "INSERT INTO ppc_ad_microsites SET ?";
+                connection.query(query, [ad_id, ad_microsite],
                     function (err, rows, fields) {
+						connection.release();
                         if(err){
                             reject(err);
                         }
                         resolve(rows);
                     }
                 );
-                connection.release();
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+				reject(error);
             });
         });
     },
     saveAdKeywords: function(ad_id, ad_keywords) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('DELETE FROM ppc_ads_keywords WHERE ad_id = ?', [ad_id]);
-                for(var i=0; i< ad_keywords.length; i++) {
-                    connection.query('INSERT INTO ppc_ads_keywords SET ?', [ad_keywords[i]],
-                        function (err, rows, fields) {
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
+                connection.query('DELETE FROM ppc_ads_keywords WHERE ad_id = ?', [ad_id], function(err, rows, fields){
+					if(err){
+						connection.release();
+						return reject(err);
+					}
+					
+					for(var i=0; i< ad_keywords.length; i++) {
+						(function(i, ad_keywords){
+							connection.query('INSERT INTO ppc_ads_keywords SET ?', [ad_keywords[i]],
+								function (err, rows, fields) {
+									if(err){
+										connection.release();
+										return reject(err);
+									}
+									if(i === ad_keywords.length - 1){
+										connection.release();
+										resolve(rows);
+									}
+								}
+							);
+						})(i, ad_keywords);
                 }
-                connection.release();
+				});
+                
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
     saveAdSubPages: function(ad_id,ad_subPages) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('DELETE FROM ppc_ads_subpages WHERE ad_id = ?', [ad_id]);
-                for(var i=0; i< ad_subPages.length; i++) {
-                    connection.query('INSERT INTO ppc_ads_subpages SET ?', [ad_subPages[i]],
-                        function (err, rows, fields) {
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                }
-                connection.release();
+                connection.query('DELETE FROM ppc_ads_subpages WHERE ad_id = ?', [ad_id], function(err, rows, fields){
+					if(err){
+						connection.release();
+						return reject(err);
+					}
+					
+					for(var i=0; i< ad_subPages.length; i++) {
+						(function(i, ad_subPages){
+							connection.query('INSERT INTO ppc_ads_subpages SET ?', [ad_subPages[i]],
+							function (err, rows, fields) {
+								if(err){
+									connection.release();
+									return reject(err);
+								}
+								if(i === ad_subPages.length - 1){
+									connection.release();
+									resolve(rows);
+								}
+								
+							}
+						);
+						})(i, ad_subPages);
+					}
+				});
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
     saveAdLocations: function(ad_id,ad_locations) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                connection.query('DELETE FROM ppc_ad_locations WHERE ad_id = ?', [ad_id]);
-                for(var i=0; i< ad_locations.length; i++) {
-                    connection.query('INSERT INTO ppc_ad_locations SET ?', [ad_locations[i]],
-                        function (err, rows, fields) {
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                }
-                connection.release();
+                connection.query('DELETE FROM ppc_ad_locations WHERE ad_id = ?', [ad_id], function(err, rows, fields){
+					if(err){
+						connection.release();
+						return reject(err);
+					}
+					
+					for(var i=0; i< ad_locations.length; i++) {
+						(function(i, ad_locations){
+							connection.query('INSERT INTO ppc_ad_locations SET ?', [ad_locations[i]],
+								function (err, rows, fields) {
+									if(err){
+										connection.release();
+										reject(err);
+									}
+									if(i === ad_locations.length - 1){
+										connection.release();
+										resolve(rows);
+									}
+									
+								}
+							);
+						})(i, ad_locations);
+					}
+				});
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
     saveKeywords: function(category_id, keywords) {
         var insertedData = [];
         return new Promise(function(resolve, reject){
-            DbHelper.getConnection().then(function(connection){
-                if(keywords != null){
-                    keywords.forEach(function(objKeyword, i){
-                        var post = {keyword: objKeyword.keyword, price: objKeyword.price, created_by: objKeyword.created_by};
-                        connection.query("SELECT id FROM ppc_keywords WHERE keyword = ?", [post.keyword], function(err, rows, fields){
-                            if(err) throw err;
-                            if(typeof rows == 'undefined' || rows.length <= 0 || rows[0].id == null){
-                                connection.query('INSERT INTO ppc_keywords SET ?', [post], function(err, result) {
-                                    if(err) throw err;
-                                    post.id = result.insertId;
-                                    if(category_id != null){
-                                        connection.query("INSERT INTO ppc_keywords_categories SET ?",[{category_id: category_id, keyword_id: post.id}],
-                                            function (err, rows, fields) {
-                                            })
-                                    }
-                                    insertedData.push(post);
-                                    if(i== keywords.length -1) {
-                                        resolve(insertedData);
-                                    }
-                                });
-                            } else {
-                                if(i== keywords.length -1 && insertedData.length == 0) {
-                                    resolve({status: false, message: 'Duplicate Keyword'});
-                                }
-                            }
-                        });
-                    });
-                }
-                connection.release();
-            }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
-            });
+			if(keywords != null){
+				DbHelper.getConnection().then(function(connection){
+			
+					keywords.forEach(function(objKeyword, i){
+						var post = {keyword: objKeyword.keyword, price: objKeyword.price, created_by: objKeyword.created_by};
+						connection.query("SELECT id FROM ppc_keywords WHERE keyword = ?", [post.keyword], function(err, rows, fields){
+							if(err){
+								connection.release();
+								return reject(err);
+							}
+							
+							if(typeof rows == 'undefined' || rows.length <= 0 || rows[0].id == null){
+								connection.query('INSERT INTO ppc_keywords SET ?', [post], function(err, result) {
+									if(err){
+										connection.release();
+										return reject(err);
+									}
+									
+									post.id = result.insertId;
+									if(category_id != null){
+										connection.query("INSERT INTO ppc_keywords_categories SET ?",[{category_id: category_id, keyword_id: post.id}],
+											function (err, rows, fields) {
+												//log unreachable error 
+												if(err)
+													console.log(err);
+											}
+										)
+									}
+									
+									insertedData.push(post);
+									
+									if(i== keywords.length -1) {
+										connection.release();
+										resolve(insertedData);
+									}
+								});
+							} else {
+								if(i== keywords.length -1 && insertedData.length == 0) {
+									connection.release();
+									resolve({status: false, message: 'Duplicate Keyword'});
+								}
+							}
+						});
+					});
+			
+				}, function(error){
+					reject(error);
+				});
+			} else {
+				reject(new Error("Empty Keyword"));
+			}
+            
         });
 
     },
@@ -577,6 +622,7 @@ module.exports = {
             DbHelper.getConnection().then(function(connection){
                 connection.query('INSERT INTO ppc_offers SET ?', [advertiser_offer],
                     function (err, result) {
+						connection.release();
                         if(err){
                             reject(err);
                         }
@@ -584,10 +630,9 @@ module.exports = {
                         resolve(advertiser_offer);
                     }
                 );
-                connection.release();
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -621,6 +666,7 @@ module.exports = {
             DbHelper.getConnection().then(function(connection){
                 connection.query('INSERT INTO ppc_files SET ?', [advertiser_file],
                     function (err, result) {
+						connection.release();
                         if(err){
                             reject(err);
                         }
@@ -628,10 +674,9 @@ module.exports = {
                         resolve(advertiser_file);
                     }
                 );
-                connection.release();
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -673,7 +718,7 @@ module.exports = {
                         function (err, rows, fields) {
                             connection.release();
                             if(err){
-                                reject(err);
+                                return reject(err);
                             }
                             resolve(rows);
                         }
@@ -683,7 +728,7 @@ module.exports = {
                         function (err, rows, fields) {
                             connection.release();
                             if(err){
-                                reject(err);
+                                return reject(err);
                             }
                             resolve(rows);
                         }
@@ -691,8 +736,7 @@ module.exports = {
                 }
 
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -723,8 +767,7 @@ module.exports = {
                 }
 
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -738,21 +781,22 @@ module.exports = {
                     connection.query('INSERT INTO ppc_keywords_categories SET ?', [post],
                         function (err, result) {
                             if(err){
-                                reject(err);
+								connection.release();
+                                return reject(err);
                             }
                             post.id = result.insertId;
                             insertedData.push(post);
                             if(i== categoryKeywords.length -1) {
+								connection.release();
                                 resolve(insertedData);
                             }
                         }
                     );
                 });
 
-                connection.release();
+                
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
 
@@ -763,19 +807,25 @@ module.exports = {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
                 for(var i=0; i< ads.length; i++) {
-                    connection.query('Update ppc_ads SET ? WHERE id = ?', [ads[i], ads[i].id],
-                        function (err, rows, fields) {
-                            if(err){
-                                reject(err);
-                            }
-                            resolve({Success: true, message:'ADs Management Completed Successfully'});
-                        }
-                    );
+                    (function(i, ads){
+						connection.query('Update ppc_ads SET ? WHERE id = ?', [ads[i], ads[i].id],
+							function (err, rows, fields) {
+								if(err){
+									connection.release();
+									return reject(err);
+								}
+								
+								if(i === ads.length - 1){
+									connection.release();
+									resolve({Success: true, message:'ADs Management Completed Successfully'});
+								}
+								
+							}
+						);
+					})(i, ads);
                 }
-                connection.release();
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -794,8 +844,7 @@ module.exports = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
@@ -814,8 +863,7 @@ module.exports = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     }
