@@ -1089,10 +1089,19 @@ var ppcModel = {
     getAllAdAnalytics: function(adId){
         return new Promise(function(resolve, reject) {
                 DbHelper.getConnection().then(function(connection){
-                    var query = "SELECT * \
-                        FROM ppc_analytics JOIN ppc_ad_searches ON ppc_analytics.item_id = ppc_ad_searches.id \
-                        WHERE ppc_ad_searches.ad_id = " + adId +
-                        " AND item_type_id= " + ITEM_SPONSORED_AD + " AND (activity_type_id=" + ACTIVITY_CLICK + " OR activity_type_id="+ ACTIVITY_IMPRESSION +") AND disapproved=0";
+                    var query = "SELECT a.item_type_id, a.activity_type_id,\
+                     a.actor_type_id, a.item_id, a.actor_id, a.activity_time, \
+                     a.ip_address, a.user_agent, a.device_version, s.ad_id, \
+                     s.keyword_id, s.keyword_category_id, s.ad_location_id, \
+                     s.ad_subpage_id, s.price, s.url, s.title, s.address, \
+                     s.lat, s.lng, s.phone_no, s.ad_text, s.ad_keyword_id \
+                        FROM ppc_analytics AS a JOIN ppc_ad_searches AS s \
+                        ON a.item_id = s.id \
+                        WHERE s.ad_id = " + adId +
+                        " AND a.item_type_id= " + ITEM_SPONSORED_AD + 
+                        " AND (a.activity_type_id=" + ACTIVITY_CLICK + 
+                        " OR a.activity_type_id="+ ACTIVITY_IMPRESSION + 
+                        ") AND a.disapproved=0";
                     connection.query(
                         query, 
                         function (err, rows, fields) {
