@@ -239,6 +239,9 @@ var dealModel = {
                 'm.name, '+
                 'dd.discount_price, ' +
                 'dd.budget_limit, ' +
+                'dd.coupon_image, ' +
+                'dd.budget_period, '+
+                'dd.advertiser_id, ' +
                 'm.image, ' +
                 'm.image_1, ' +
                 'm.image_2, ' +
