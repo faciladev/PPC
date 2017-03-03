@@ -1089,7 +1089,7 @@ var ppcModel = {
     getAllAdAnalytics: function(adId){
         return new Promise(function(resolve, reject) {
                 DbHelper.getConnection().then(function(connection){
-                    var query = "SELECT a.item_type_id, a.activity_type_id,\
+                    var query = "SELECT a.item_type_id, k.keyword, a.activity_type_id,\
                      a.actor_type_id, a.item_id, a.actor_id, a.activity_time, \
                      a.ip_address, a.user_agent, a.device_version, s.ad_id, \
                      s.keyword_id, s.keyword_category_id, s.ad_location_id, \
@@ -1097,6 +1097,7 @@ var ppcModel = {
                      s.lat, s.lng, s.phone_no, s.ad_text, s.ad_keyword_id \
                         FROM ppc_analytics AS a JOIN ppc_ad_searches AS s \
                         ON a.item_id = s.id \
+                        JOIN ppc_keywords AS k ON k.id = s.keyword_id \
                         WHERE s.ad_id = " + adId +
                         " AND a.item_type_id= " + ITEM_SPONSORED_AD + 
                         " AND (a.activity_type_id=" + ACTIVITY_CLICK + 
