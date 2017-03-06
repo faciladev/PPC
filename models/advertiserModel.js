@@ -14,7 +14,7 @@ var advertiserModel = {
             DbHelper.getConnection().then(function(connection){
                 
                 connection.query(
-                    'SELECT advertizer_id, advertizer_business_name FROM advertisers ' +
+                    'SELECT * FROM advertisers ' +
                     'WHERE advertizer_deleted = 0 AND advertizer_status = ' + STATUS_APPROVED, 
                     function (err, rows, fields) {
 
