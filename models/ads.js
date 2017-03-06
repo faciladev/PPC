@@ -531,9 +531,7 @@ module.exports = {
 			
 					keywords.forEach(function(objKeyword, i){
 						var post = {keyword: objKeyword.keyword, price: objKeyword.price, created_by: objKeyword.created_by};
-						connection.query("SELECT ppc_keywords.id FROM ppc_keywords JOIN ppc_keywords_categories " +
-                            "ON ppc_keywords.id = ppc_keywords_categories.keyword_id WHERE keyword = ? AND ppc_keywords_categories.category_id = ?", 
-                            post.keyword, category_id], function(err, rows, fields){
+						connection.query("SELECT id FROM ppc_keywords WHERE keyword = ?", [post.keyword], function(err, rows, fields){
 							if(err){
 								connection.release();
 								return reject(err);
