@@ -30,8 +30,38 @@ var advertiserModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
+            });
+
+            
+        });
+    },
+    getOneAdvertiser: function(advertiserId){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                
+                connection.query(
+                    'SELECT * FROM advertisers ' +
+                    'WHERE advertizer_deleted = 0 AND advertizer_status = ? AND advertizer_id = ?',
+                    [STATUS_APPROVED, advertiserId], 
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            reject(err);
+                        }
+
+                        if(rows.length > 0)
+                            return rows[0];
+                        else
+                            return reject(new Error('Advertiser not found.'));
+
+                    }
+                );
+            }, function(error){
+                reject(error);
             });
 
             
