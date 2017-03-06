@@ -55,7 +55,7 @@ var advertiserModel = {
                         }
 
                         if(rows.length > 0)
-                            return rows[0];
+                            return resolve(rows[0]);
                         else
                             return reject(new Error('Advertiser not found.'));
 
