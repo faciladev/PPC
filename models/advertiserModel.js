@@ -22,7 +22,7 @@ var advertiserModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -36,6 +36,7 @@ var advertiserModel = {
             
         });
     },
+
     getOneAdvertiser: function(advertiserId){
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
@@ -50,7 +51,7 @@ var advertiserModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
                         if(rows.length > 0)
