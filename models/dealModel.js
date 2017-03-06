@@ -121,7 +121,7 @@ var dealModel = {
         return new Promise(function(resolve, reject) {
 
             DbHelper.getConnection().then(function(connection){
-                Connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
+                connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
                     [dealId], 
                     function(error, results, fields){
                         if(error){
