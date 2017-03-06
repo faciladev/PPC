@@ -304,7 +304,7 @@ var dealModel = {
             'dd.download_price, dd.date_created, dd.is_approved ' +
             'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
             'dd.daily_deal_microsite_id = mi.id ' +
-            'WHERE dd.is_deleted=0';
+            'WHERE dd.is_deleted=0 ORDER BY dd.id DESC';
 
             PaginationHelper.paginate(query, page).then(
                 function(result){
@@ -360,7 +360,7 @@ var dealModel = {
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id ' +
             'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ';
+            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ORDER BY dd.deal_id DESC';
 
             var queryParams = [advertiserId];
             
