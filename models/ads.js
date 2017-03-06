@@ -28,6 +28,9 @@ module.exports = {
                 queryParams.push(type);
             }
 
+            query += " ORDER BY id DESC";
+
+
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(result){
                     if(result.result <= 0)
@@ -86,6 +89,8 @@ module.exports = {
                 query += ' AND is_approved = ?';
                 queryParams.push(type);
             }
+
+            query += " ORDER BY id DESC";
             
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(result){
