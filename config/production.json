@@ -1,12 +1,12 @@
 {
 	"db" : {
-        "host"     : "sdevziphub.colrlbywjcwy.us-west-1.rds.amazonaws.com",
-        "user"     : "root",
-        "password" : "ziphub_dev_password",
-        "database" : "dev_ziphub"
+        "host"     : "ziphubprod.colrlbywjcwy.us-west-1.rds.amazonaws.com",
+        "user"     : "ziphub_prod",
+        "password" : "Strawberry75K1",
+        "database" : "ziphub_prod"
     },
 
-    "project_url" : "http://ppc.ziphub.com:3000",
+    "project_url" : "http://54.67.28.43:3000",
     "web_portal_url" : "http://ziphub.com",
     "upload_path" : "/var/www/PPC_ASSETS_PROD",
     "numRowsPerPage" : 10,

@@ -6,7 +6,7 @@
         "database" : "dev_ziphub"
     },
 
-    "project_url" : "http://ppc.ziphub.com:8081",
+    "project_url" : "http://54.67.28.43:8081",
     "web_portal_url" : "http://iziphub.com",
     "upload_path" : "/var/www/PPC_ASSETS",
     "numRowsPerPage" : 10,
