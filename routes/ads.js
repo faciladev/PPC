@@ -276,7 +276,7 @@ router.post('/weboffers', function(req, res, next){
         var banner_code = "<a href='" + url + "' rel='nofollow' target='_blank' alt='Target' title='Target'>"+
             "<img border='0' src='"+ webpath + "' /></a>";
 
-        res.json({banner_code: banner_code, banner_image_link: url, banner_image_src: webpath});
+        res.json({banner_code: banner_code, banner_image_link: url, banner_image_src: webpath, banner_image_name: response});
         
     }, function(error){
         next(error);
