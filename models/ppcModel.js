@@ -273,9 +273,14 @@ var ppcModel = {
                     iziphub_flexoffer_link.flexoffer_list_order, \
                     iziphub_flexoffer_link.flexoffer_list_order_asc, \
                     iziphub_flexoffer_link.flexoffer_name ';
-            var where = 'iziphub_flexoffer_link.flexoffer_link_subpage_id = ? ';
+            var where = '';
             var from = '';
-            var queryParams = [subpageId];
+            var queryParams = [];
+
+            if(typeof subpageId !== 'undefined' && subpageId !== null){
+                where += 'iziphub_flexoffer_link.flexoffer_link_subpage_id = ? ';
+                queryParams.push(subpageId);
+            }
 
             if(typeof keyword !== 'undefined' && keyword !== null){
                 select += ', flexoffer_keywords.keyword_id, \
@@ -287,8 +292,8 @@ var ppcModel = {
                     flexoffer_link_keyword ON iziphub_flexoffer_link.flexoffer_link_id = flexoffer_link_keyword.flexoffer_link_id\
                         JOIN\
                     flexoffer_keywords ON flexoffer_link_keyword.flexoffer_keyword_id = flexoffer_keywords.keyword_id ';
-                
-                where += 'AND (flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?) ';
+                where += (where === '') ? '':'AND ';
+                where += '(flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?) ';
                 queryParams.push('%' + keyword + '%');
                 queryParams.push('%' + keyword + '%');
 
@@ -297,8 +302,11 @@ var ppcModel = {
                 from += 'iziphub_flexoffer_link ';
             }
 
+            if(where === '' || from === '' || queryParams.length === 0)
+                return reject(new Error('subpage id or keyword is required.'));
+
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
-           
+
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
                     resolve(response);
