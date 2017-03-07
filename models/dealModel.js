@@ -121,7 +121,7 @@ var dealModel = {
         return new Promise(function(resolve, reject) {
 
             DbHelper.getConnection().then(function(connection){
-                Connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
+                connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
                     [dealId], 
                     function(error, results, fields){
                         if(error){
@@ -239,6 +239,9 @@ var dealModel = {
                 'm.name, '+
                 'dd.discount_price, ' +
                 'dd.budget_limit, ' +
+                'dd.coupon_image, ' +
+                'dd.budget_period, '+
+                'dd.advertiser_id, ' +
                 'm.image, ' +
                 'm.image_1, ' +
                 'm.image_2, ' +
@@ -301,7 +304,7 @@ var dealModel = {
             'dd.download_price, dd.date_created, dd.is_approved ' +
             'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
             'dd.daily_deal_microsite_id = mi.id ' +
-            'WHERE dd.is_deleted=0';
+            'WHERE dd.is_deleted=0 ORDER BY dd.id DESC';
 
             PaginationHelper.paginate(query, page).then(
                 function(result){
@@ -357,7 +360,7 @@ var dealModel = {
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id ' +
             'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ';
+            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ORDER BY dd.id DESC';
 
             var queryParams = [advertiserId];
             

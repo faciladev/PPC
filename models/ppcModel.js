@@ -52,7 +52,10 @@ var ppcModel = {
 
             var query = 'SELECT ' +
             'available_ad_keywords.ad_keyword_id, '+ 
-            // 'usa_states.usa_state_code, ' +
+            'usa_states.usa_state_code, ' +
+            'usa_states.usa_state_name, ' +
+            'ppc_ad_microsites.city, ' +
+            'ppc_ad_microsites.zipcode, ' +
             'ppc_ads.id AS ad_id, ' +
             'ppc_ads.url, ' +
             'ppc_ads.title, ' +
@@ -64,7 +67,7 @@ var ppcModel = {
             'ppc_keywords.price, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
-            'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
+            'sub_page.sub_page_id AS ad_subpage_id, ' +
             'available_ad_keywords.keyword_id ' +
             'FROM ' +
             'available_ad_keywords ' +
@@ -73,9 +76,13 @@ var ppcModel = {
             'JOIN ' + 
             'ppc_ads ON ppc_ads.id = available_ad_keywords.ad_id ' +
             'JOIN ' +
-            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
+            'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id '+
             'JOIN ' +
-            'ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id '
+            'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+            'JOIN ' +
+            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id ' +
+            'JOIN ' +
+            'ppc_ads_subpages AS sub_page ON ppc_ads.id = sub_page.ad_id '
             ;
 
             if(subPage)
@@ -1097,10 +1104,20 @@ var ppcModel = {
     getAllAdAnalytics: function(adId){
         return new Promise(function(resolve, reject) {
                 DbHelper.getConnection().then(function(connection){
-                    var query = "SELECT * \
-                        FROM ppc_analytics JOIN ppc_ad_searches ON ppc_analytics.item_id = ppc_ad_searches.id \
-                        WHERE ppc_ad_searches.ad_id = " + adId +
-                        " AND item_type_id= " + ITEM_SPONSORED_AD + " AND (activity_type_id=" + ACTIVITY_CLICK + " OR activity_type_id="+ ACTIVITY_IMPRESSION +") AND disapproved=0";
+                    var query = "SELECT a.item_type_id, k.keyword, a.activity_type_id,\
+                     a.actor_type_id, a.item_id, a.actor_id, a.activity_time, \
+                     a.ip_address, a.user_agent, a.device_version, s.ad_id, \
+                     s.keyword_id, s.keyword_category_id, s.ad_location_id, \
+                     s.ad_subpage_id, s.price, s.url, s.title, s.address, \
+                     s.lat, s.lng, s.phone_no, s.ad_text, s.ad_keyword_id \
+                        FROM ppc_analytics AS a JOIN ppc_ad_searches AS s \
+                        ON a.item_id = s.id \
+                        JOIN ppc_keywords AS k ON k.id = s.keyword_id \
+                        WHERE s.ad_id = " + adId +
+                        " AND a.item_type_id= " + ITEM_SPONSORED_AD + 
+                        " AND (a.activity_type_id=" + ACTIVITY_CLICK + 
+                        " OR a.activity_type_id="+ ACTIVITY_IMPRESSION + 
+                        ") AND a.disapproved=0";
                     connection.query(
                         query, 
                         function (err, rows, fields) {
