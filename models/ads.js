@@ -685,6 +685,7 @@ module.exports = {
             });
         });
     },
+    
     saveAdFiles: function(ad_id,ad_files) {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
