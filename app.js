@@ -41,7 +41,7 @@ app.use(cors(corsOptionsDelegate));
 //Enable pre-flight mode
 app.options('*', cors()) 
 
-app.use(logger('dev'));
+app.use(logger('combined'));
 app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -98,7 +98,7 @@ app.use(function(err, req, res, next) {
   }
   else{
     //Error in non-production environment
-    console.log(err);
+    console.error(err);
     res.status(err.status || 500);
     res.json({error: err});
   }
