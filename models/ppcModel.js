@@ -224,13 +224,14 @@ var ppcModel = {
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
             'dd.deal_image, ' +
+            'dd.paused, ' +
             'm.discount_description, '+
             'm.daily_deal_description, '+
             'dd.approved_category_id '+
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
             'dd.approved_category_id = cat.category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id = ? ';
+            'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 AND dd.approved_category_id = ? ';
 
             var queryParams = [categoryId];
 
@@ -396,7 +397,6 @@ var ppcModel = {
 
             ppcModel.findAllDealCategories().then(function(response){
                 if(response.length > 0){
-                    console.log(response);
                     //Build Query
                     var query = '';
 
