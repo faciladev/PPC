@@ -580,7 +580,8 @@ var ppcModel = {
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
                 var query = 'SELECT ' + 
-                '(COUNT(ppc_analytics.id) * ?) + ? <= ppc_ads.budget_limit AS has_passed ' +
+                '(ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) AS available_fund, ' +
+                'SUM(ppc_ad_searches.price) <= ppc_ads.budget_limit AS has_passed ' +
                 'FROM ppc_ad_searches JOIN available_ad_keywords ON ' +
                 'available_ad_keywords.ad_keyword_id = ppc_ad_searches.ad_keyword_id JOIN ppc_ads ON ' +
                 'available_ad_keywords.ad_id = ppc_ads.id JOIN ppc_analytics ON ' +

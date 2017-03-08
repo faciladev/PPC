@@ -374,7 +374,7 @@ var dealModel = {
         return new Promise(function(resolve, reject) {
 
             var query = 'SELECT dd.id, dd.deal_image AS image, mi.name, dd.approved_category_id, ' + 
-            'dd.download_price, dd.date_created, dd.is_approved ' +
+            'dd.download_price, dd.date_created, dd.paused, dd.is_approved ' +
             'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
             'dd.daily_deal_microsite_id = mi.id ' +
             'WHERE dd.is_deleted=0 ORDER BY dd.id DESC';
