@@ -9,6 +9,7 @@
     "project_url" : "http://54.67.28.43:3000",
     "web_portal_url" : "http://ziphub.com",
     "upload_path" : "/var/www/PPC_ASSETS_PROD",
+    "upload_relative_path" : "/../PPC_ASSETS_PROD",
     "numRowsPerPage" : 10,
     "cors_whitelist" : [
     	"http://ziphub.com"
