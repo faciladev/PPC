@@ -20,6 +20,7 @@
     "mime": "^1.3.4",
     "morgan": "~1.7.0",
     "mysql": "^2.12.0",
+    "node-seaweedfs": "^1.1.0",
     "promise": "^7.1.1",
     "querystring": "^0.2.0",
     "request": "^2.79.0",

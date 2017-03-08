@@ -5,25 +5,33 @@ module.exports = {
    */
   apps : [
 
-    // First application
+    // Dev App
     {
-      name      : "PPC",
+      name      : "PPC_DEV",
       script    : "./bin/www",
       watch     : true,
-      instances : 0,
-      exec_mode : "cluster",
+	  exec_mode : "cluster",
+	  instances : 0,
       env: {
+        NODE_ENV: "dev_remote",
+        PORT: "8000"
+      },
+      env_local : {
         COMMON_VARIABLE: "true",
         NODE_ENV: "development",
         PORT: "8081"
-      },
-      env_production : {
+      }
+    },
+    //Production App
+    {
+      name      : "PPC_PROD",
+      script    : "./bin/www",
+      watch     : true,
+      exec_mode : "cluster",
+	  instances	: 0,
+      env : {
         NODE_ENV: "production",
-        PORT: "3000"
-      },
-      env_dev_remote : {
-        NODE_ENV: "dev_remote",
-        PORT: "8000"
+        PORT: "9000"
       }
     }
   ],

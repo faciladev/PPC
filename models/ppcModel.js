@@ -52,7 +52,10 @@ var ppcModel = {
 
             var query = 'SELECT ' +
             'available_ad_keywords.ad_keyword_id, '+ 
-            // 'usa_states.usa_state_code, ' +
+            'usa_states.usa_state_code, ' +
+            'usa_states.usa_state_name, ' +
+            'ppc_ad_microsites.city, ' +
+            'ppc_ad_microsites.zipcode, ' +
             'ppc_ads.id AS ad_id, ' +
             'ppc_ads.url, ' +
             'ppc_ads.title, ' +
@@ -64,7 +67,7 @@ var ppcModel = {
             'ppc_keywords.price, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
-            'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
+            'sub_page.sub_page_id AS ad_subpage_id, ' +
             'available_ad_keywords.keyword_id ' +
             'FROM ' +
             'available_ad_keywords ' +
@@ -73,9 +76,13 @@ var ppcModel = {
             'JOIN ' + 
             'ppc_ads ON ppc_ads.id = available_ad_keywords.ad_id ' +
             'JOIN ' +
-            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
+            'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id '+
             'JOIN ' +
-            'ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id '
+            'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+            'JOIN ' +
+            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id ' +
+            'JOIN ' +
+            'ppc_ads_subpages AS sub_page ON ppc_ads.id = sub_page.ad_id '
             ;
 
             if(subPage)
@@ -266,9 +273,14 @@ var ppcModel = {
                     iziphub_flexoffer_link.flexoffer_list_order, \
                     iziphub_flexoffer_link.flexoffer_list_order_asc, \
                     iziphub_flexoffer_link.flexoffer_name ';
-            var where = 'iziphub_flexoffer_link.flexoffer_link_subpage_id = ? ';
+            var where = '';
             var from = '';
-            var queryParams = [subpageId];
+            var queryParams = [];
+
+            if(typeof subpageId !== 'undefined' && subpageId !== null){
+                where += 'iziphub_flexoffer_link.flexoffer_link_subpage_id = ? ';
+                queryParams.push(subpageId);
+            }
 
             if(typeof keyword !== 'undefined' && keyword !== null){
                 select += ', flexoffer_keywords.keyword_id, \
@@ -280,8 +292,8 @@ var ppcModel = {
                     flexoffer_link_keyword ON iziphub_flexoffer_link.flexoffer_link_id = flexoffer_link_keyword.flexoffer_link_id\
                         JOIN\
                     flexoffer_keywords ON flexoffer_link_keyword.flexoffer_keyword_id = flexoffer_keywords.keyword_id ';
-                
-                where += 'AND (flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?) ';
+                where += (where === '') ? '':'AND ';
+                where += '(flexoffer_keywords.keyword_name LIKE ? OR iziphub_flexoffer_link.flexoffer_name LIKE ?) ';
                 queryParams.push('%' + keyword + '%');
                 queryParams.push('%' + keyword + '%');
 
@@ -290,8 +302,11 @@ var ppcModel = {
                 from += 'iziphub_flexoffer_link ';
             }
 
+            if(where === '' || from === '' || queryParams.length === 0)
+                return reject(new Error('subpage id or keyword is required.'));
+
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
-           
+
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
                     resolve(response);
@@ -1076,6 +1091,45 @@ var ppcModel = {
                                 return reject(err);
                             }
                             resolve(rows[0]);
+                        }
+                    );
+                }, function(error){
+                    reject(error);
+                });
+
+                
+            });
+    },
+
+    getAllAdAnalytics: function(adId){
+        return new Promise(function(resolve, reject) {
+                DbHelper.getConnection().then(function(connection){
+                    var query = "SELECT a.item_type_id, k.keyword, a.activity_type_id,\
+                     a.actor_type_id, a.item_id, a.actor_id, a.activity_time, \
+                     a.ip_address, a.user_agent, a.device_version, s.ad_id, \
+                     s.keyword_id, s.keyword_category_id, s.ad_location_id, \
+                     s.ad_subpage_id, s.price, s.url, s.title, s.address, \
+                     s.lat, s.lng, s.phone_no, s.ad_text, s.ad_keyword_id \
+                        FROM ppc_analytics AS a JOIN ppc_ad_searches AS s \
+                        ON a.item_id = s.id \
+                        JOIN ppc_keywords AS k ON k.id = s.keyword_id \
+                        WHERE s.ad_id = " + adId +
+                        " AND a.item_type_id= " + ITEM_SPONSORED_AD + 
+                        " AND (a.activity_type_id=" + ACTIVITY_CLICK + 
+                        " OR a.activity_type_id="+ ACTIVITY_IMPRESSION + 
+                        ") AND a.disapproved=0";
+                    connection.query(
+                        query, 
+                        function (err, rows, fields) {
+
+                            //release connection
+                            connection.release();
+
+                            if(err){
+                                return reject(err);
+                            }
+
+                            resolve(rows);
                         }
                     );
                 }, function(error){

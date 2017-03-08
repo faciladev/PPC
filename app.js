@@ -16,6 +16,7 @@ var click = require('./routes/click');
 var download = require('./routes/download');
 var deal = require('./routes/deal');
 var offer = require('./routes/offer');
+var analytic = require('./routes/analytic');
 var index = require('./routes/index');
 
 var app = express();
@@ -48,7 +49,7 @@ app.use(expressValidator());
 app.use(cookieParser());
 
 //Used to serve image assets and directory is outside project root
-app.use(express.static(path.join(__dirname, '/../PPC_ASSETS')));
+app.use(express.static(config.get('upload_path')));
 
 //Sponsored ad api
 app.use('/api/ads', ads);
@@ -67,6 +68,9 @@ app.use('/api/deals', deal);
 
 //Offer
 app.use('/api/offers', offer);
+
+//Analytics
+app.use('/api/analytics', analytic);
 
 //Other miscellaneous api
 app.use('/api/', index);

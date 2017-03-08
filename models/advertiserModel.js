@@ -14,7 +14,7 @@ var advertiserModel = {
             DbHelper.getConnection().then(function(connection){
                 
                 connection.query(
-                    'SELECT advertizer_id, advertizer_business_name FROM advertisers ' +
+                    'SELECT * FROM advertisers ' +
                     'WHERE advertizer_deleted = 0 AND advertizer_status = ' + STATUS_APPROVED, 
                     function (err, rows, fields) {
 
@@ -22,7 +22,7 @@ var advertiserModel = {
                         connection.release();
 
                         if(err){
-                            reject(err);
+                            return reject(err);
                         }
 
 
@@ -30,8 +30,39 @@ var advertiserModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(error);
+                reject(error);
+            });
+
+            
+        });
+    },
+
+    getOneAdvertiser: function(advertiserId){
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection){
+                
+                connection.query(
+                    'SELECT * FROM advertisers ' +
+                    'WHERE advertizer_deleted = 0 AND advertizer_status = ? AND advertizer_id = ?',
+                    [STATUS_APPROVED, advertiserId], 
+                    function (err, rows, fields) {
+
+                        //release connection
+                        connection.release();
+
+                        if(err){
+                            return reject(err);
+                        }
+
+                        if(rows.length > 0)
+                            return resolve(rows[0]);
+                        else
+                            return reject(new Error('Advertiser not found.'));
+
+                    }
+                );
+            }, function(error){
+                reject(error);
             });
 
             

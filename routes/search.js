@@ -48,7 +48,14 @@ router.get('/deals', function(req, res, next) {
 });
 
 //Return flex offers by subpage id
-router.get('/flexoffers/:subpageId',
+router.get(/^\/flexoffers\/(\d+)$/,
+    function(req, res, next) {
+    	searchFlex(req, res, next);
+    }
+);
+
+//Return flex offers by subpage id
+router.get('/flexoffers/:keyword',
     function(req, res, next) {
     	searchFlex(req, res, next);
     }
@@ -62,7 +69,9 @@ router.get('/flexoffers/:subpageId/:keyword',
 );
 
 var searchFlex = function(req, res, next){
-	var subpageId = req.params.subpageId;
+
+	var subpageId = (typeof req.params[0] === "undefined")
+	? req.params.subpageId : req.params[0];
 	var keyword = req.params.keyword;
 
     ppcModel.findFlexOffers(subpageId, keyword, req.query.page).then(function(response){

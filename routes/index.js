@@ -79,6 +79,19 @@ router.get('/advertisers', function(req, res, next){
 	);
 });
 
+
+router.get('/advertisers/:advertiserId', function(req, res, next){
+    var advertiserId = req.params.advertiserId;
+    advertiserModel.getOneAdvertiser(advertiserId).then(
+        function(advertiser){
+            res.json(advertiser);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
 router.get('/businesses/advertisers/:advertiserId', function(req, res, next){
     var advertiserId = req.params.advertiserId;
     businessModel.getByAdvertisers(advertiserId).then(

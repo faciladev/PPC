@@ -6,7 +6,9 @@ var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
 
 router.get('/', function(req, res, next) {
-    ads.getAll(req.query.page).then(function(response){
+    var search = req.query.search;
+    var type = req.query.type;
+    ads.getAll(req.query.page, search, type).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
@@ -15,14 +17,18 @@ router.get('/', function(req, res, next) {
 });
 //Gets all ads by advertiser
 router.get('/advertiser/:advertiserId', function(req, res, next) {
-    ads.getAllByAdvertiser(req.query.page, req.params.advertiserId).then(function(response){
+    var search = req.query.search;
+    var type = req.query.type;
+    var advertiserId = req.params.advertiserId;
+    var page = req.query.page;
+    ads.getAllByAdvertiser(page, advertiserId, search, type).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
         next(error);
     });
 });
-router.get('/:id/', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
     ads.get(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -104,6 +110,20 @@ router.post('/', function(req, res, next) {
         }
     );
 });
+
+router.put('/:id', function(req, res, next){
+    var adId = req.params.id;
+    var newAdData = req.body;
+    ads.updateAd(newAdData, adId).then(
+        function(response){
+            res.json(response);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
 router.post('/:id/microsite', function(req, res, next) {
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         res.json(response);
@@ -223,7 +243,6 @@ router.post('/:id/adFiles', function(req, res, next) {
     ads.saveAdFiles(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
-        error.message = 'Error';
         next(error);
     });
 });
@@ -257,7 +276,7 @@ router.post('/weboffers', function(req, res, next){
         var banner_code = "<a href='" + url + "' rel='nofollow' target='_blank' alt='Target' title='Target'>"+
             "<img border='0' src='"+ webpath + "' /></a>";
 
-        res.json({banner_code: banner_code, banner_image_link: url, banner_image_src: webpath});
+        res.json({banner_code: banner_code, banner_image_link: url, banner_image_src: webpath, banner_image_name: response});
         
     }, function(error){
         next(error);
