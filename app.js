@@ -49,7 +49,7 @@ app.use(expressValidator());
 app.use(cookieParser());
 
 //Used to serve image assets and directory is outside project root
-app.use(express.static(path.join(__dirname, config.get('upload_relative_path'))));
+app.use(express.static(config.get('upload_path')));
 
 //Sponsored ad api
 app.use('/api/ads', ads);
