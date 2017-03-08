@@ -35,7 +35,8 @@ var subPageModel = {
     getAdSubpages: function() {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
-                connection.query('Select * from ppc_subpages',
+                connection.query('SELECT * FROM sub_page WHERE subpage_name=? OR subpage_name=? OR subpage_name=?',
+                    ['Local','Food and Restaurants','Business to Business'],
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
@@ -45,8 +46,7 @@ var subPageModel = {
                     }
                 );
             }, function(error) {
-                if(error)
-                    reject(new Error('Connection error'));
+                reject(error);
             });
         });
     },
