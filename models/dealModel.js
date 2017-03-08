@@ -372,14 +372,47 @@ var dealModel = {
     getAllDeals : function(page){
 
         return new Promise(function(resolve, reject) {
+            var query = '\
+            SELECT \
+                dd.id,\
+                dd.deal_image AS image,\
+                mi.name,\
+                dd.budget_limit,\
+                dd.budget_period,\
+                dd.paused,\
+                COUNT(ppc_analytics.id) AS downloads,\
+                dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price) AS available_fund,\
+                dd.approved_category_id,\
+                dd.download_price,\
+                dd.date_created,\
+                dd.is_approved\
+            FROM\
+                ppc_daily_deal AS dd\
+                    LEFT JOIN\
+                ppc_analytics ON ppc_analytics.item_id = dd.id\
+                    AND ppc_analytics.item_type_id = ?\
+                    AND ppc_analytics.activity_type_id = ?\
+                    AND IF(dd.budget_period = \'daily\',\
+                    ppc_analytics.activity_time BETWEEN CURRENT_DATE() AND CURRENT_DATE(),\
+                    ppc_analytics.activity_time BETWEEN ? AND ?)\
+                    JOIN\
+                ppc_deal_microsites AS mi ON dd.daily_deal_microsite_id = mi.id\
+            WHERE\
+                dd.is_deleted = 0\
+            GROUP BY dd.id\
+            ORDER BY dd.id DESC';
 
-            var query = 'SELECT dd.id, dd.deal_image AS image, mi.name, dd.approved_category_id, ' + 
-            'dd.download_price, dd.date_created, dd.is_approved ' +
-            'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
-            'dd.daily_deal_microsite_id = mi.id ' +
-            'WHERE dd.is_deleted=0 ORDER BY dd.id DESC';
-
-            PaginationHelper.paginate(query, page).then(
+            PaginationHelper.paginate(
+                query, 
+                page, 
+                null, 
+                [
+                    ppcModel.ITEM_DAILY_DEAL, 
+                    ppcModel.ACTIVITY_DOWNLOAD,
+                    Util.firstDay(), 
+                    Util.lastDay()
+                ]
+                ).then(
                 function(result){
                     resolve(result);
                 }, 
@@ -412,6 +445,7 @@ var dealModel = {
             'm.name, '+
             'dd.discount_price, ' +
             'dd.budget_limit, ' +
+            'dd.budget_period, '+
             'm.image, ' +
             'm.image_1, ' +
             'm.image_2, ' +
@@ -424,6 +458,8 @@ var dealModel = {
             'dd.coupon_name, '+
             'dd.coupon_generated_code, '+
             'dd.paused, ' +
+            'COUNT(ppc_analytics.id) AS downloads, ' +
+            'dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price) AS available_fund, ' +
             'dd.is_approved, ' +
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
@@ -431,12 +467,25 @@ var dealModel = {
             'm.discount_description, '+
             'm.daily_deal_description, '+
             'dd.approved_category_id '+
-            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+            'FROM ppc_daily_deal AS dd ' +
+            'LEFT JOIN ' +
+            'ppc_analytics ON ppc_analytics.item_id = dd.id '+
+            'AND ppc_analytics.item_type_id = ? AND ppc_analytics.activity_type_id = ? ' +
+            'AND IF(dd.budget_period = \'daily\',' +
+            'ppc_analytics.activity_time BETWEEN CURRENT_DATE() AND CURRENT_DATE(),' +
+            'ppc_analytics.activity_time BETWEEN ? AND ?)' +
+            'JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id ' +
             'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ORDER BY dd.id DESC';
+            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? GROUP BY dd.id ORDER BY dd.id DESC';
 
-            var queryParams = [advertiserId];
+            var queryParams = [
+            ppcModel.ITEM_DAILY_DEAL, 
+            ppcModel.ACTIVITY_DOWNLOAD, 
+            Util.firstDay(), 
+            Util.lastDay(),
+            advertiserId
+            ];
             
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
