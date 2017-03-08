@@ -6,20 +6,92 @@ var Util = require('../lib/util');
 var ppcModel = require('./ppcModel');
 
 var dealModel = {
-    approveDeal: function(dealId, deal){
+    
+    partialUpdateDeal: function(dealId, deal, microsite){
         return new Promise(function(resolve, reject){
-            
+            microsite = microsite || false;
+
             DbHelper.getConnection().then(
                 function(connection){
-                    connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?',
-                        [deal, dealId],
-                        function(err, results, fields){
-                            if(err)
-                                return reject(err);
 
-                            resolve(results);
+                    connection.beginTransaction(function(err){
+                        if(err){
+                            connection.release();
+                            return reject(err);
                         }
-                    );
+
+                        connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?', 
+                            [deal, dealId], 
+                            function (error, results, fields) {
+                                if(error){
+                                    return connection.rollback(function(){
+                                        connection.release();
+                                        reject(error);
+                                    });
+                                }
+
+                                if(microsite){
+                                    //Update with microsite data
+                                    connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
+                                        [dealId], 
+                                        function(error, results, fields){
+                                            if(error){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(error);
+                                                });
+                                            }
+
+                                            if(results.length <= 0){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(new Error('No microsite to update.'));
+                                                });
+                                            }
+
+                                            var micrositeId = results[0].daily_deal_microsite_id;
+                                            connection.query('UPDATE ppc_deal_microsites SET ? WHERE id = ?', 
+                                                [dealMicrosite, micrositeId], 
+                                                function (error, results, fields) {
+                                                    if(error){
+                                                        return connection.rollback(function(){
+                                                            connection.release();
+                                                            reject(error);
+                                                        });
+                                                    }
+
+                                                    connection.commit(function(err){
+                                                        if(err){
+                                                            return connection.rollback(function(){
+                                                                connection.release();
+                                                                reject(err);
+                                                            });
+                                                        }
+
+                                                        resolve(results);
+                                                    });
+                                                }
+                                            );
+                                        }
+                                    )
+                                } else {
+                                    //Update without microsite data
+                                    connection.commit(function(err){
+                                        if(err){
+                                            return connection.rollback(function(){
+                                                connection.release();
+                                                reject(err);
+                                            });
+                                        }
+
+                                        connection.release();
+                                        resolve(results);
+                                    });
+                                }
+                            }
+                        );
+
+                    });
                 }, 
                 function(error){
                     reject(error);
@@ -242,6 +314,7 @@ var dealModel = {
                 'dd.coupon_image, ' +
                 'dd.budget_period, '+
                 'dd.advertiser_id, ' +
+                'dd.paused, ' +
                 'm.image, ' +
                 'm.image_1, ' +
                 'm.image_2, ' +
@@ -350,6 +423,7 @@ var dealModel = {
             'dd.discount_rate, '+
             'dd.coupon_name, '+
             'dd.coupon_generated_code, '+
+            'dd.paused, ' +
             'dd.is_approved, ' +
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
