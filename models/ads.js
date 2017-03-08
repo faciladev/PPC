@@ -6,6 +6,98 @@ var PaginationHelper = require('../lib/PaginationHelper');
 var DateHelper = require('../lib/DateHelper');
 
 module.exports = {
+    partialUpdateAd: function(adId, ad, microsite){
+        return new Promise(function(resolve, reject){
+            microsite = microsite || false;
+
+            DbHelper.getConnection().then(
+                function(connection){
+
+                    connection.beginTransaction(function(err){
+                        if(err){
+                            connection.release();
+                            return reject(err);
+                        }
+
+                        connection.query('UPDATE ppc_ads SET ? WHERE id = ?', 
+                            [ad, adId], 
+                            function (error, results, fields) {
+                                if(error){
+                                    return connection.rollback(function(){
+                                        connection.release();
+                                        reject(error);
+                                    });
+                                }
+
+                                if(microsite){
+                                    //Update with microsite data
+                                    connection.query('SELECT id FROM ppc_ad_microsites WHERE ad_id = ?', 
+                                        [adId], 
+                                        function(error, results, fields){
+                                            if(error){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(error);
+                                                });
+                                            }
+
+                                            if(results.length <= 0){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(new Error('No microsite to update.'));
+                                                });
+                                            }
+
+                                            var micrositeId = results[0].id;
+                                            connection.query('UPDATE ppc_ad_microsites SET ? WHERE id = ?', 
+                                                [microsite, micrositeId], 
+                                                function (error, results, fields) {
+                                                    if(error){
+                                                        return connection.rollback(function(){
+                                                            connection.release();
+                                                            reject(error);
+                                                        });
+                                                    }
+
+                                                    connection.commit(function(err){
+                                                        if(err){
+                                                            return connection.rollback(function(){
+                                                                connection.release();
+                                                                reject(err);
+                                                            });
+                                                        }
+
+                                                        resolve(results);
+                                                    });
+                                                }
+                                            );
+                                        }
+                                    )
+                                } else {
+                                    //Update without microsite data
+                                    connection.commit(function(err){
+                                        if(err){
+                                            return connection.rollback(function(){
+                                                connection.release();
+                                                reject(err);
+                                            });
+                                        }
+
+                                        connection.release();
+                                        resolve(results);
+                                    });
+                                }
+                            }
+                        );
+
+                    });
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+        });
+    },
 
     getAll : function(page, search, type){
         return new Promise(function(resolve, reject) {

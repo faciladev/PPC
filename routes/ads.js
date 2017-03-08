@@ -310,4 +310,73 @@ router.delete('/offers/:offerId', function(req, res, next){
         }
     );
 });
+
+//Pause sponsor ad
+router.put('/:adId/pause', function(req, res, next){
+    
+    var ad = {
+        paused: 1
+    }
+
+    ads.partialUpdateAd(req.params.adId, ad).then(
+        function(result){
+            res.json(result);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
+//Unpause sponsor ad
+router.put('/:adId/unpause', function(req, res, next){
+    
+    var ad = {
+        paused: 0
+    }
+
+    ads.partialUpdateAd(req.params.adId, ad).then(
+        function(result){
+            res.json(result);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
+//Approve sponsor ad
+router.put('/:adId/approve', function(req, res, next){
+    
+    var ad = {
+        is_approved: 1
+    }
+
+    ads.partialUpdateAd(req.params.adId, ad).then(
+        function(result){
+            res.json(result);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
+//Disapprove sponsor ad
+router.put('/:adId/disapprove', function(req, res, next){
+    
+    var ad = {
+        is_approved: 0
+    }
+
+    ads.partialUpdateAd(req.params.adId, ad).then(
+        function(result){
+            res.json(result);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
 module.exports = router;

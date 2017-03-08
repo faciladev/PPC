@@ -161,7 +161,23 @@ router.put('/:dealId/approve', function(req, res, next){
 			res.json(result);
 		}, 
 		function(error){
-			console.log(error);
+			next(error);
+		}
+	);
+});
+
+//Disapprove a daily deal
+router.put('/:dealId/disapprove', function(req, res, next){
+	
+	var deal = {
+		is_approved: 0
+	}
+
+	dealModel.partialUpdateDeal(req.params.dealId, deal).then(
+		function(result){
+			res.json(result);
+		}, 
+		function(error){
 			next(error);
 		}
 	);
@@ -179,7 +195,23 @@ router.put('/:dealId/pause', function(req, res, next){
 			res.json(result);
 		}, 
 		function(error){
-			console.log(error);
+			next(error);
+		}
+	);
+});
+
+//Unpause daily deals
+router.put('/:dealId/unpause', function(req, res, next){
+	
+	var deal = {
+		paused: 0
+	}
+
+	dealModel.partialUpdateDeal(req.params.dealId, deal).then(
+		function(result){
+			res.json(result);
+		}, 
+		function(error){
 			next(error);
 		}
 	);
