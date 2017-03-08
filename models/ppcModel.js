@@ -435,7 +435,7 @@ var ppcModel = {
                         'dd.approved_category_id '+
                         'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
                         'AS m ON dd.daily_deal_microsite_id=m.id ' +
-                        'WHERE dd.is_deleted=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
+                        'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
                         response[i].category_id + ' LIMIT ' + limit + ')';
 
                         if(i < response.length - 1)
