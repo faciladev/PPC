@@ -92,7 +92,7 @@ var ppcModel = {
             query += 'WHERE ' +
             'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
             'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
-            'AND ppc_ads.is_deleted = 0 ';
+            'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
 
             if(subPage)
                 query += 'AND ppc_ads_subpages.sub_page_id = ? ';

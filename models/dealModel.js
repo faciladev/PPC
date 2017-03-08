@@ -51,7 +51,7 @@ var dealModel = {
 
                                             var micrositeId = results[0].daily_deal_microsite_id;
                                             connection.query('UPDATE ppc_deal_microsites SET ? WHERE id = ?', 
-                                                [dealMicrosite, micrositeId], 
+                                                [microsite, micrositeId], 
                                                 function (error, results, fields) {
                                                     if(error){
                                                         return connection.rollback(function(){
