@@ -393,8 +393,8 @@ var dealModel = {
                     AND ppc_analytics.item_type_id = ?\
                     AND ppc_analytics.activity_type_id = ?\
                     AND IF(dd.budget_period = \'daily\',\
-                    ppc_analytics.activity_time BETWEEN CURRENT_DATE() AND CURRENT_DATE(),\
-                    ppc_analytics.activity_time BETWEEN ? AND ?)\
+                    ppc_analytics.activity_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),\
+                    ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))\
                     JOIN\
                 ppc_deal_microsites AS mi ON dd.daily_deal_microsite_id = mi.id\
             WHERE\
@@ -472,8 +472,8 @@ var dealModel = {
             'ppc_analytics ON ppc_analytics.item_id = dd.id '+
             'AND ppc_analytics.item_type_id = ? AND ppc_analytics.activity_type_id = ? ' +
             'AND IF(dd.budget_period = \'daily\',' +
-            'ppc_analytics.activity_time BETWEEN CURRENT_DATE() AND CURRENT_DATE(),' +
-            'ppc_analytics.activity_time BETWEEN ? AND ?)' +
+            'ppc_analytics.activity_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
+            'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))' +
             'JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id ' +
             'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
