@@ -59,7 +59,7 @@ var clickSponsoredAd = function(req, res, next){
 
 					ppcModel.adBudgetLimitCheck(searchData).then(
 						function(response){
-							if(! response.hasPassed){
+							if(response.hasPassed === 0){
 								console.log(response);
 								//Do not track click
 								//Update 'available_since' field so future searches won't include this ad

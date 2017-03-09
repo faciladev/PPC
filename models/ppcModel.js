@@ -657,6 +657,7 @@ var ppcModel = {
 
     trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
+            
             userModel.getUserGroup(userId).then(
                 function(group){
 
@@ -673,6 +674,7 @@ var ppcModel = {
                     var query2 = "UPDATE ppc_ad_searches SET ? WHERE id = ?";
 
                     DbHelper.getConnection().then(function(connection){
+
                         connection.beginTransaction(function(err) {
                             if(err){
                                 connection.release();
@@ -736,13 +738,13 @@ var ppcModel = {
                                 
                         
                     },function(error){
-                        return reject(error);
+                         reject(error);
                     });
 
                         
                 }, 
                 function(error){
-
+                    reject(error);
                 }
             );
 
