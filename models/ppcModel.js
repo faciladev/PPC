@@ -642,7 +642,7 @@ var ppcModel = {
 
                         switch(budget_period){
                             case DAILY_BUDGET_PERIOD:
-                                queryParams.push('DATE_ADD(available_since,INTERVAL 1 DAY)');
+                                queryParams.push('DATE_ADD(available_since, INTERVAL 1 DAY)');
                                 break;
                             case WEEKLY_BUDGET_PERIOD:
                                 queryParams.push('DATE_ADD('+ Util.lastDay() +',INTERVAL 1 DAY)');
@@ -655,7 +655,8 @@ var ppcModel = {
                             return reject(new Error('Sponsored ad must have a valid budget period.'));
 
                         queryParams.push(adId);
-                        
+                        console.log(query)
+                        console.log(queryParams)
                         connection.query(query, 
                             queryParams, 
                             function(err, results, fields){
