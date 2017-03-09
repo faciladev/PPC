@@ -59,8 +59,9 @@ var clickSponsoredAd = function(req, res, next){
 
 					ppcModel.adBudgetLimitCheck(searchData).then(
 						function(response){
+							//No available fund
 							if(response.hasPassed === 0){
-								console.log(response);
+								res.redirect(Util.decodeUrl(redirectUrl));
 								//Do not track click
 								//Update 'available_since' field so future searches won't include this ad
 								// ppcModel.postponeAdAvailability(searchData.ad_id, response.budget_period).then(
@@ -72,7 +73,20 @@ var clickSponsoredAd = function(req, res, next){
 								// 	}
 								// );
 							} else {
-								console.log(response);
+								
+								if(response.low_budget === 1){
+
+									ppcModel.sendLowBudgetNotification(searchData).then(
+										function(response){
+											//DO NOTHING
+											console.log(response);
+										}, 
+										function(error){
+											console.error(error);
+										}
+									);
+								}
+
 								ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
 									function(response){
 										res.redirect(Util.decodeUrl(redirectUrl));

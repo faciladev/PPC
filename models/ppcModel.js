@@ -655,6 +655,85 @@ var ppcModel = {
         });
     }, 
 
+    sendLowBudgetNotification: function(adId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(
+                function(connection){
+                    connection.query(
+                        'SELECT advertiser_id FROM ppc_ads WHERE id = ?',
+                        [adId],
+                        function(err, rows, fields){
+                            if(err){
+                                connection.release();
+                                return reject(err);
+                            }
+
+                            if(rows.length <= 0)
+                                return reject(new Error('No advertiser found for this sponsor ad.'));
+
+                            var userId = rows[0].advertiser_id;
+                            connection.beginTransaction(
+                                function(err) {
+                                    if(err){
+                                        connection.release();
+                                        reject(err);
+                                    }
+                                    var query1 = "INSERT INTO admin_notifications SET ?";
+                                    var query2 = "INSERT INTO admin_notifications_user SET ?";
+                                    connection.query(query1,
+                                        {
+                                            notification_subject: "Available Funds Low",
+                                            notification_text: "Your available funds are low. If it is not refilled your sponsored ad will not be displayed on the ziphub portal",
+                                            for_user_group: "Advertizer"
+                                        }, 
+                                        function(err, rows, fields){
+                                            if(err){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(err);
+                                                });
+                                            }
+
+                                            var notificationId = rows.insertId;
+
+                                            connection.query(query2, 
+                                                {user_id: userId, notification_id: notificationId}, 
+                                                function(err, rows, fields){
+                                                    if(err){
+                                                        return connection.rollback(function(){
+                                                            connection.release();
+                                                            reject(err);
+                                                        });
+                                                    }
+
+                                                    connection.commit(function(err){
+                                                        if(err){
+                                                            return connection.rollback(function(){
+                                                                connection.release();
+                                                                reject(err);
+                                                            });
+                                                        }
+
+                                                        connection.release();
+                                                        resolve(rows);
+                                                    });
+                                                }
+                                            );
+                                        }
+                                    );
+                                }
+                            );
+                        }
+                    );
+                            
+                },
+                function(error){
+                    reject(error);
+                }
+            );
+        });
+    },
+
     trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
             
