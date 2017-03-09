@@ -59,6 +59,7 @@ var clickSponsoredAd = function(req, res, next){
 
 					ppcModel.adBudgetLimitCheck(searchData).then(
 						function(response){
+							console.log(response)
 							//No available fund remains
 							if(response.hasPassed === 0){
 								console.log(response);
