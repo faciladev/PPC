@@ -67,7 +67,7 @@ var ppcModel = {
             'ppc_keywords.price, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
-            'sub_page.sub_page_id AS ad_subpage_id, ' +
+            'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
             'available_ad_keywords.keyword_id ' +
             'FROM ' +
             'available_ad_keywords ' +
@@ -80,9 +80,7 @@ var ppcModel = {
             'JOIN ' +
             'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
             'JOIN ' +
-            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id ' +
-            'JOIN ' +
-            'ppc_ads_subpages AS sub_page ON ppc_ads.id = sub_page.ad_id '
+            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
             ;
 
             if(subPage)
