@@ -115,8 +115,8 @@ module.exports = {
                 'LEFT JOIN ppc_ad_searches ON ppc_ad_searches.ad_id = ppc_ads.id '+
                 'AND ppc_ad_searches.clicked = 1 ' +
                 'AND IF(ppc_ads.budget_period = \'daily\', ' +
-                'ppc_ad_searches.search_time BETWEEN CURRENT_DATE() AND CURRENT_DATE(),' +
-                'ppc_ad_searches.search_time BETWEEN ? AND ?) ' +   
+                'ppc_ad_searches.search_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
+                'ppc_ad_searches.search_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ' +   
                 'Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
                 'WHERE ppc_ads.is_deleted = 0 ';
 
@@ -191,8 +191,8 @@ module.exports = {
                 'LEFT JOIN ppc_ad_searches ON ppc_ad_searches.ad_id = ppc_ads.id '+
                 'AND ppc_ad_searches.clicked = 1 ' +
                 'AND IF(ppc_ads.budget_period = \'daily\', ' +
-                'ppc_ad_searches.search_time BETWEEN CURRENT_DATE() AND CURRENT_DATE(),' +
-                'ppc_ad_searches.search_time BETWEEN ? AND ?) ' +                    
+                'ppc_ad_searches.search_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
+                'ppc_ad_searches.search_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ' +                    
                 'Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
                 'WHERE ppc_ads.is_deleted = 0 AND ppc_ads.advertiser_id = ?';
 
