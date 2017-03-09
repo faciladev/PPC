@@ -646,7 +646,7 @@ var ppcModel = {
                                 break;
                             case WEEKLY_BUDGET_PERIOD:
                                 query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(?, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
-                                queryParams.push(Util.lastDay);
+                                queryParams.push(Util.lastDay());
                                 break;
                             default:
                                 break;
@@ -656,7 +656,7 @@ var ppcModel = {
                             return reject(new Error('Sponsored ad must have a valid budget period.'));
 
                         queryParams.push(adId);
-                        
+
                         console.log(query)
                         console.log(queryParams)
                         connection.query(query, 
