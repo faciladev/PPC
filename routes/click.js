@@ -62,7 +62,7 @@ var clickSponsoredAd = function(req, res, next){
 							//No available fund remains
 							if(response.hasPassed === 0){
 								console.log(response);
-								res.redirect(Util.decodeUrl(redirectUrl));
+								// res.redirect(Util.decodeUrl(redirectUrl));
 								//Do not track click
 								//Update 'available_since' field so future searches won't include this ad
 								ppcModel.postponeAdAvailability(searchData.ad_id).then(
