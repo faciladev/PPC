@@ -165,9 +165,9 @@ var ppcModel = {
                     'VALUES ('+ connection.escape(searchData[i].ad_id) +', '+ connection.escape(searchData[i].keyword_id) +
                     ', '+ connection.escape(searchData[i].keyword_category_id) +', '+ 
                     connection.escape(searchData[i].ad_location_id) +','+ connection.escape(searchData[i].ad_subpage_id) +','+ 
-                    connection.escape(searchData[i].price) +', \''+ connection.escape(searchData[i].url) +'\', \''+ connection.escape(searchData[i].title) + 
-                    '\',\''+ connection.escape(searchData[i].address) +'\', '+ connection.escape(searchData[i].lat) +', '+ connection.escape(searchData[i].lng) + 
-                    ',\''+ connection.escape(searchData[i].phone_no) +'\',\''+ connection.escape(searchData[i].ad_text) +'\',' + 
+                    connection.escape(searchData[i].price) +', '+ connection.escape(searchData[i].url) +','+ connection.escape(searchData[i].title) + 
+                    ','+ connection.escape(searchData[i].address) +', '+ connection.escape(searchData[i].lat) +', '+ connection.escape(searchData[i].lng) + 
+                    ','+ connection.escape(searchData[i].phone_no) +','+ connection.escape(searchData[i].ad_text) +',' + 
                     connection.escape(searchData[i].ad_keyword_id) +');';
                 }
 
