@@ -162,15 +162,16 @@ var ppcModel = {
                     query += 'INSERT INTO ppc_ad_searches (ad_id, keyword_id, ' + 
                     'keyword_category_id, ad_location_id, ad_subpage_id, price, ' +
                     'url, title, address, lat, lng, phone_no, ad_text, ad_keyword_id) ' +
-                    'VALUES ('+ searchData[i].ad_id +', '+ searchData[i].keyword_id +
-                    ', '+ searchData[i].keyword_category_id +', '+ 
-                    searchData[i].ad_location_id +','+ searchData[i].ad_subpage_id +','+ 
-                    searchData[i].price +', \''+ searchData[i].url +'\', \''+ searchData[i].title + 
-                    '\',\''+ searchData[i].address +'\', '+ searchData[i].lat +', '+ searchData[i].lng + 
-                    ',\''+ searchData[i].phone_no +'\',\''+ searchData[i].ad_text +'\',' + 
-                    searchData[i].ad_keyword_id +');';
+                    'VALUES ('+ connection.escape(searchData[i].ad_id) +', '+ connection.escape(searchData[i].keyword_id) +
+                    ', '+ connection.escape(searchData[i].keyword_category_id) +', '+ 
+                    connection.escape(searchData[i].ad_location_id) +','+ connection.escape(searchData[i].ad_subpage_id) +','+ 
+                    connection.escape(searchData[i].price) +', '+ connection.escape(searchData[i].url) +','+ connection.escape(searchData[i].title) + 
+                    ','+ connection.escape(searchData[i].address) +', '+ connection.escape(searchData[i].lat) +', '+ connection.escape(searchData[i].lng) + 
+                    ','+ connection.escape(searchData[i].phone_no) +','+ connection.escape(searchData[i].ad_text) +',' + 
+                    connection.escape(searchData[i].ad_keyword_id) +');';
                 }
 
+                console.log(query);
                 //Run multiple statement query
                 connection.query(query, function(err, results, fields){
                     connection.release();
@@ -581,6 +582,7 @@ var ppcModel = {
             DbHelper.getConnection().then(function(connection){
                 var query = 'SELECT ' + 
                 '(ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) AS available_fund, ' +
+                '((ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) < (ppc_ads.budget_limit * 0.1)) AS low_budget, ' +
                 'SUM(ppc_ad_searches.price) <= ppc_ads.budget_limit AS has_passed ' +
                 'FROM ppc_ad_searches JOIN available_ad_keywords ON ' +
                 'available_ad_keywords.ad_keyword_id = ppc_ad_searches.ad_keyword_id JOIN ppc_ads ON ' +
@@ -588,15 +590,13 @@ var ppcModel = {
                 'ppc_ad_searches.id = ppc_analytics.item_id '+
                 'WHERE ' +
                 'ppc_ad_searches.id = ? AND ' +
-                'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_date BETWEEN ' +
-                'CURRENT_DATE() AND CURRENT_DATE(), ' +
-                'ppc_analytics.activity_date BETWEEN ? AND ?)';
+                'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_time BETWEEN ' +
+                'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
+                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))';
 
 
                 connection.query(query, 
                     [
-                        searchData.price, 
-                        searchData.price, 
                         searchData.id, 
                         Util.firstDay(), 
                         Util.lastDay()
@@ -607,11 +607,10 @@ var ppcModel = {
                     if(err)
                         return reject(err);
 
-                    if(results.length > 0 && results[0].has_passed !== 0){
-                        resolve(true);
-                    }
+                    if(results.length > 0)
+                        return resolve(results[0]);
 
-                    resolve(false);
+                    reject(new Error('Failed to check budget for sponsor ad.'));
                 });
 
                 
@@ -622,46 +621,148 @@ var ppcModel = {
         });
     },
 
-    postponeAdAvailability: function(ad_id, budget_period){
+    postponeAdAvailability: function(adId){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
-                var query = 'UPDATE ppc_ads SET available_since = ? WHERE ppc_ads.id = ?';
-                var queryParams;
-                switch(budget_period){
-                    case DAILY_BUDGET_PERIOD:
-                        queryParams = 'DATE_ADD(available_since,INTERVAL 1 DAY)';
-                        break;
-                    case WEEKLY_BUDGET_PERIOD:
-                        queryParams = 'DATE_ADD(available_since,INTERVAL 7 DAY)';
-                        break;
-                    case MONTHLY_BUDGET_PERIOD:
-                        queryParams = 'DATE_ADD(available_since,INTERVAL 30 DAY)';
-                        break;
-                    default:
-                        break;
-                }
+                connection.query("SELECT budget_period FROM ppc_ads WHERE ppc_ads.id = ?", 
+                    [adId], 
+                    function(err, rows, fields){
+                        if(err){
+                            connection.release();
+                            return reject(err);
+                        }
 
-                connection.query(query, 
-                    [queryParams], 
-                    function(err, results, fields){
-                    connection.release();
+                        if(rows.length <= 0)
+                            return reject(new Error('No sponsor ad found to update budget_period'));
 
-                    if(err)
-                        return reject(err);
+                        var budget_period = rows[0].budget_period;
 
-                    resolve(results.affectedRows);
-                });
+                        var query = '';
+                        var queryParams = [];
+
+                        switch(budget_period){
+                            case DAILY_BUDGET_PERIOD:
+                                query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(available_since, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
+                                break;
+                            case WEEKLY_BUDGET_PERIOD:
+                                query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(?, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
+                                queryParams.push(Util.lastDay());
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if(query === '')
+                            return reject(new Error('Sponsored ad must have a valid budget period.'));
+
+                        queryParams.push(adId);
+
+                        console.log(query)
+                        console.log(queryParams)
+                        connection.query(query, 
+                            queryParams, 
+                            function(err, results, fields){
+                            connection.release();
+
+                            if(err)
+                                return reject(err);
+
+                            resolve(results);
+                        });
+                    }
+                );
+                        
 
                 
                 
             },function(error){
-                return reject(error);
+                reject(error);
             });
         });
     }, 
 
+    sendLowBudgetNotification: function(adId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(
+                function(connection){
+                    connection.query(
+                        'SELECT advertiser_id FROM ppc_ads WHERE id = ?',
+                        [adId],
+                        function(err, rows, fields){
+                            if(err){
+                                connection.release();
+                                return reject(err);
+                            }
+
+                            if(rows.length <= 0)
+                                return reject(new Error('No advertiser found for this sponsor ad.'));
+
+                            var userId = rows[0].advertiser_id;
+                            connection.beginTransaction(
+                                function(err) {
+                                    if(err){
+                                        connection.release();
+                                        reject(err);
+                                    }
+                                    var query1 = "INSERT INTO admin_notifications SET ?";
+                                    var query2 = "INSERT INTO admin_notifications_user SET ?";
+                                    connection.query(query1,
+                                        {
+                                            notification_subject: "Available Funds Low",
+                                            notification_text: "Your available funds are low. If it is not refilled your sponsored ad will not be displayed on the ziphub portal",
+                                            for_user_group: "Advertizer"
+                                        }, 
+                                        function(err, rows, fields){
+                                            if(err){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(err);
+                                                });
+                                            }
+
+                                            var notificationId = rows.insertId;
+
+                                            connection.query(query2, 
+                                                {user_id: userId, notification_id: notificationId}, 
+                                                function(err, rows, fields){
+                                                    if(err){
+                                                        return connection.rollback(function(){
+                                                            connection.release();
+                                                            reject(err);
+                                                        });
+                                                    }
+
+                                                    connection.commit(function(err){
+                                                        if(err){
+                                                            return connection.rollback(function(){
+                                                                connection.release();
+                                                                reject(err);
+                                                            });
+                                                        }
+
+                                                        connection.release();
+                                                        resolve(rows);
+                                                    });
+                                                }
+                                            );
+                                        }
+                                    );
+                                }
+                            );
+                        }
+                    );
+                            
+                },
+                function(error){
+                    reject(error);
+                }
+            );
+        });
+    },
+
     trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
         return new Promise(function(resolve, reject){
+            
             userModel.getUserGroup(userId).then(
                 function(group){
 
@@ -674,44 +775,81 @@ var ppcModel = {
                     }
 
                   
-                    var query = 'INSERT INTO ppc_analytics SET ? ;';
-                    query += "UPDATE ppc_ad_searches SET ? WHERE id = ?";
+                    var query1 = 'INSERT INTO ppc_analytics SET ?';
+                    var query2 = "UPDATE ppc_ad_searches SET ? WHERE id = ?";
 
                     DbHelper.getConnection().then(function(connection){
-                        connection.query(query, 
-                            [
-                                {
-                                    actor_type_id: actor_type_id,
-                                    item_type_id: ITEM_SPONSORED_AD,
-                                    activity_type_id: ACTIVITY_CLICK,
-                                    item_id: searchData.id,
-                                    actor_id: userId,
-                                    ip_address: ip,
-                                    user_agent: userAgent.user_agent,
-                                    device_version: userAgent.device_version
-                                },
-                                {
-                                    clicked: 1
-                                },
-                                searchData.id
-                            ], 
-                            function(err, results, fields){
-                            connection.release();
 
-                            if(err)
-                                return reject(err);
+                        connection.beginTransaction(function(err) {
+                            if(err){
+                                connection.release();
+                                reject(err);
+                            }
 
-                            resolve(results);
+                            connection.query(query1, 
+                                    {
+                                        actor_type_id: actor_type_id,
+                                        item_type_id: ITEM_SPONSORED_AD,
+                                        activity_type_id: ACTIVITY_CLICK,
+                                        item_id: searchData.id,
+                                        actor_id: userId,
+                                        ip_address: ip,
+                                        user_agent: userAgent.user_agent,
+                                        device_version: userAgent.device_version
+                                    }, 
+                                    function(err, results, fields){
+                                    
+
+                                    if(err){
+                                        return connection.rollback(function(){
+                                            connection.release();
+                                            reject(err);
+                                        });
+                                    }
+
+                                    connection.query(query2, 
+                                            [
+                                                {
+                                                    clicked: 1
+                                                },
+                                                searchData.id
+                                            ], 
+                                            function(err, results, fields){
+
+                                            if(err){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(err);
+                                                });
+                                            }
+
+                                            connection.commit(function(err){
+                                                if(err){
+                                                    return connection.rollback(function(){
+                                                        connection.release();
+                                                        reject(err);
+                                                    });
+                                                }
+
+                                                resolve(results);
+                                            });
+                                        }
+                                    );
+                                }
+                            );
+
+
                         });
+                                
                         
                     },function(error){
-                        return reject(error);
+                         reject(error);
                     });
 
                         
                 }, 
                 function(error){
-
+                    reject(error);
                 }
             );
 
