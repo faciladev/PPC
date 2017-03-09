@@ -589,9 +589,9 @@ var ppcModel = {
                 'ppc_ad_searches.id = ppc_analytics.item_id '+
                 'WHERE ' +
                 'ppc_ad_searches.id = ? AND ' +
-                'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_date BETWEEN ' +
+                'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_time BETWEEN ' +
                 'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
-                'ppc_analytics.activity_date BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))';
+                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))';
 
 
                 connection.query(query, 
