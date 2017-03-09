@@ -62,11 +62,13 @@ var clickSponsoredAd = function(req, res, next){
 							//No available fund remains
 							if(response.hasPassed === 0){
 								console.log(response);
+								console.log(1)
 								// res.redirect(Util.decodeUrl(redirectUrl));
 								//Do not track click
 								//Update 'available_since' field so future searches won't include this ad
 								ppcModel.postponeAdAvailability(searchData.ad_id).then(
 									function(response){
+										console.log(2)
 										console.log(response);
 										res.redirect(Util.decodeUrl(redirectUrl));
 									},
@@ -76,7 +78,7 @@ var clickSponsoredAd = function(req, res, next){
 								);
 
 							} else {
-
+								console.log(3)
 								if(response.low_budget === 1){
 
 									ppcModel.sendLowBudgetNotification(searchData.ad_id).then(
