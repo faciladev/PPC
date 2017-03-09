@@ -637,24 +637,26 @@ var ppcModel = {
 
                         var budget_period = rows[0].budget_period;
 
-                        var query = 'UPDATE ppc_ads SET available_since = ? WHERE ppc_ads.id = ?';
+                        var query = '';
                         var queryParams = [];
 
                         switch(budget_period){
                             case DAILY_BUDGET_PERIOD:
-                                queryParams.push('(DATE_ADD(available_since, INTERVAL 1 DAY))');
+                                query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(available_since, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
                                 break;
                             case WEEKLY_BUDGET_PERIOD:
-                                queryParams.push('(DATE_ADD('+ Util.lastDay() +',INTERVAL 1 DAY))');
+                                query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(?, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
+                                queryParams.push(Util.lastDay);
                                 break;
                             default:
                                 break;
                         }
 
-                        if(queryParams.length === 0)
+                        if(query === '')
                             return reject(new Error('Sponsored ad must have a valid budget period.'));
 
                         queryParams.push(adId);
+                        
                         console.log(query)
                         console.log(queryParams)
                         connection.query(query, 
