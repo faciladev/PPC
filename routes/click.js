@@ -77,7 +77,7 @@ var clickSponsoredAd = function(req, res, next){
 								console.log(response);
 								if(response.low_budget === 1){
 
-									ppcModel.sendLowBudgetNotification(searchData).then(
+									ppcModel.sendLowBudgetNotification(searchData.ad_id).then(
 										function(response){
 											console.log(response);
 											ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
