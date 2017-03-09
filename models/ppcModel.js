@@ -660,25 +660,29 @@ var ppcModel = {
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(
                 function(connection){
+                    console.log(1)
                     connection.query(
                         'SELECT advertiser_id FROM ppc_ads WHERE id = ?',
                         [adId],
                         function(err, rows, fields){
+                            console.log(2)
                             if(err){
                                 connection.release();
                                 return reject(err);
                             }
-
+                            console.log(3)
                             if(rows.length <= 0)
                                 return reject(new Error('No advertiser found for this sponsor ad.'));
-
+                            console.log(4)
                             var userId = rows[0].advertiser_id;
+                            console.log(5)
                             connection.beginTransaction(
                                 function(err) {
                                     if(err){
                                         connection.release();
                                         reject(err);
                                     }
+                                    console.log(6)
                                     var query1 = "INSERT INTO admin_notifications SET ?";
                                     var query2 = "INSERT INTO admin_notifications_user SET ?";
                                     connection.query(query1,
@@ -688,33 +692,36 @@ var ppcModel = {
                                             for_user_group: "Advertizer"
                                         }, 
                                         function(err, rows, fields){
+                                            console.log(7)
                                             if(err){
                                                 return connection.rollback(function(){
                                                     connection.release();
                                                     reject(err);
                                                 });
                                             }
-
+                                            console.log(8)
                                             var notificationId = rows.insertId;
-
+                                            console.log(9)
                                             connection.query(query2, 
                                                 {user_id: userId, notification_id: notificationId}, 
                                                 function(err, rows, fields){
+                                                    console.log(10)
                                                     if(err){
                                                         return connection.rollback(function(){
                                                             connection.release();
                                                             reject(err);
                                                         });
                                                     }
-
+                                                    console.log(11)
                                                     connection.commit(function(err){
+                                                        console.log(12)
                                                         if(err){
                                                             return connection.rollback(function(){
                                                                 connection.release();
                                                                 reject(err);
                                                             });
                                                         }
-
+                                                        console.log(13)
                                                         connection.release();
                                                         resolve(rows);
                                                     });
