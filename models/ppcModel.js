@@ -159,16 +159,16 @@ var ppcModel = {
                 var query = '';
 
                 for (var i = 0; i < searchData.length; i++) {
-                    query += "INSERT INTO ppc_ad_searches (ad_id, keyword_id, " + 
-                    "keyword_category_id, ad_location_id, ad_subpage_id, price, " +
-                    "url, title, address, lat, lng, phone_no, ad_text, ad_keyword_id) " +
-                    "VALUES ("+ searchData[i].ad_id +", "+ searchData[i].keyword_id +
-                    ", "+ searchData[i].keyword_category_id +", "+ 
-                    searchData[i].ad_location_id +","+ searchData[i].ad_subpage_id +","+ 
-                    searchData[i].price +", '"+ searchData[i].url +"', '"+ searchData[i].title + 
-                    ",'"+ searchData[i].address +"', "+ searchData[i].lat +", "+ searchData[i].lng + 
-                    ",'"+ searchData[i].phone_no +"','"+ searchData[i].ad_text +"'," + 
-                    searchData[i].ad_keyword_id +");";
+                    query += 'INSERT INTO ppc_ad_searches (ad_id, keyword_id, ' + 
+                    'keyword_category_id, ad_location_id, ad_subpage_id, price, ' +
+                    'url, title, address, lat, lng, phone_no, ad_text, ad_keyword_id) ' +
+                    'VALUES ('+ connection.escape(searchData[i].ad_id) +', '+ connection.escape(searchData[i].keyword_id) +
+                    ', '+ connection.escape(searchData[i].keyword_category_id) +', '+ 
+                    connection.escape(searchData[i].ad_location_id) +','+ connection.escape(searchData[i].ad_subpage_id) +','+ 
+                    connection.escape(searchData[i].price) +', \''+ connection.escape(searchData[i].url) +'\', \''+ connection.escape(searchData[i].title) + 
+                    '\',\''+ connection.escape(searchData[i].address) +'\', '+ connection.escape(searchData[i].lat) +', '+ connection.escape(searchData[i].lng) + 
+                    ',\''+ connection.escape(searchData[i].phone_no) +'\',\''+ connection.escape(searchData[i].ad_text) +'\',' + 
+                    connection.escape(searchData[i].ad_keyword_id) +');';
                 }
 
                 //Run multiple statement query
