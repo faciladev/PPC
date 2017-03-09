@@ -581,6 +581,7 @@ var ppcModel = {
             DbHelper.getConnection().then(function(connection){
                 var query = 'SELECT ' + 
                 '(ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) AS available_fund, ' +
+                '((ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) < (ppc_ads.budget_limit * 0.1)) AS low_budget, ' +
                 'SUM(ppc_ad_searches.price) <= ppc_ads.budget_limit AS has_passed ' +
                 'FROM ppc_ad_searches JOIN available_ad_keywords ON ' +
                 'available_ad_keywords.ad_keyword_id = ppc_ad_searches.ad_keyword_id JOIN ppc_ads ON ' +
@@ -589,14 +590,12 @@ var ppcModel = {
                 'WHERE ' +
                 'ppc_ad_searches.id = ? AND ' +
                 'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_date BETWEEN ' +
-                'CURRENT_DATE() AND CURRENT_DATE(), ' +
-                'ppc_analytics.activity_date BETWEEN ? AND ?)';
+                'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
+                'ppc_analytics.activity_date BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))';
 
 
                 connection.query(query, 
                     [
-                        searchData.price, 
-                        searchData.price, 
                         searchData.id, 
                         Util.firstDay(), 
                         Util.lastDay()
@@ -607,11 +606,10 @@ var ppcModel = {
                     if(err)
                         return reject(err);
 
-                    if(results.length > 0 && results[0].has_passed !== 0){
-                        resolve(true);
-                    }
+                    if(results.length > 0)
+                        return resolve(results[0]);
 
-                    resolve(false);
+                    reject(new Error('Failed to check budget for sponsor ad.'));
                 });
 
                 
@@ -633,9 +631,6 @@ var ppcModel = {
                         break;
                     case WEEKLY_BUDGET_PERIOD:
                         queryParams = 'DATE_ADD(available_since,INTERVAL 7 DAY)';
-                        break;
-                    case MONTHLY_BUDGET_PERIOD:
-                        queryParams = 'DATE_ADD(available_since,INTERVAL 30 DAY)';
                         break;
                     default:
                         break;
