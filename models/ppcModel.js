@@ -642,10 +642,10 @@ var ppcModel = {
 
                         switch(budget_period){
                             case DAILY_BUDGET_PERIOD:
-                                queryParams.push('DATE_ADD(available_since, INTERVAL 1 DAY)');
+                                queryParams.push('(DATE_ADD(available_since, INTERVAL 1 DAY))');
                                 break;
                             case WEEKLY_BUDGET_PERIOD:
-                                queryParams.push('DATE_ADD('+ Util.lastDay() +',INTERVAL 1 DAY)');
+                                queryParams.push('(DATE_ADD('+ Util.lastDay() +',INTERVAL 1 DAY))');
                                 break;
                             default:
                                 break;
