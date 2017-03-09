@@ -171,6 +171,7 @@ var ppcModel = {
                     connection.escape(searchData[i].ad_keyword_id) +');';
                 }
 
+                console.log(query);
                 //Run multiple statement query
                 connection.query(query, function(err, results, fields){
                     connection.release();
