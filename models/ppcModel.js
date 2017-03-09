@@ -305,8 +305,10 @@ var ppcModel = {
                 return reject(new Error('subpage id or keyword is required.'));
 
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
+            query += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
+            'iziphub_flexoffer_link.flexoffer_name ASC';
 
-            PaginationHelper.paginate(query, page, null, queryParams).then(
+            PaginationHelper.paginate(query, page, 12, queryParams).then(
                 function(response){
                     resolve(response);
                 }, 
@@ -672,20 +674,27 @@ var ppcModel = {
                     }
 
                   
-                    var query = 'INSERT INTO ppc_analytics SET ?';
+                    var query = 'INSERT INTO ppc_analytics SET ? ;';
+                    query += "UPDATE ppc_ad_searches SET ? WHERE id = ?";
 
                     DbHelper.getConnection().then(function(connection){
                         connection.query(query, 
-                            {
-                                actor_type_id: actor_type_id,
-                                item_type_id: ITEM_SPONSORED_AD,
-                                activity_type_id: ACTIVITY_CLICK,
-                                item_id: searchData.id,
-                                actor_id: userId,
-                                ip_address: ip,
-                                user_agent: userAgent.user_agent,
-                                device_version: userAgent.device_version
-                            }, 
+                            [
+                                {
+                                    actor_type_id: actor_type_id,
+                                    item_type_id: ITEM_SPONSORED_AD,
+                                    activity_type_id: ACTIVITY_CLICK,
+                                    item_id: searchData.id,
+                                    actor_id: userId,
+                                    ip_address: ip,
+                                    user_agent: userAgent.user_agent,
+                                    device_version: userAgent.device_version
+                                },
+                                {
+                                    clicked: 1
+                                },
+                                searchData.id
+                            ], 
                             function(err, results, fields){
                             connection.release();
 
