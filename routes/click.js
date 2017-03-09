@@ -61,7 +61,7 @@ var clickSponsoredAd = function(req, res, next){
 						function(response){
 							console.log(response)
 							//No available fund remains
-							if(response.hasPassed === 0){
+							if(response.has_passed === 0){
 								console.log(response);
 								console.log(1)
 								// res.redirect(Util.decodeUrl(redirectUrl));
