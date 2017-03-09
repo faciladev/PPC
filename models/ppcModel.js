@@ -589,12 +589,12 @@ var ppcModel = {
                 'available_ad_keywords.ad_id = ppc_ads.id JOIN ppc_analytics ON ' +
                 'ppc_ad_searches.id = ppc_analytics.item_id '+
                 'WHERE ' +
-                'ppc_ad_searches.ad_id = ? AND ' +
+                'ppc_ads.id = ? AND ' +
                 'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_time BETWEEN ' +
                 'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
                 'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))';
 
-
+                console.log(query);
                 connection.query(query, 
                     [
                         searchData.ad_id, 
