@@ -669,35 +669,71 @@ var ppcModel = {
                     }
 
                   
-                    var query = 'INSERT INTO ppc_analytics SET ? ;';
-                    query += "UPDATE ppc_ad_searches SET ? WHERE id = ?";
+                    var query1 = 'INSERT INTO ppc_analytics SET ?';
+                    var query2 = "UPDATE ppc_ad_searches SET ? WHERE id = ?";
 
                     DbHelper.getConnection().then(function(connection){
-                        connection.query(query, 
-                            [
-                                {
-                                    actor_type_id: actor_type_id,
-                                    item_type_id: ITEM_SPONSORED_AD,
-                                    activity_type_id: ACTIVITY_CLICK,
-                                    item_id: searchData.id,
-                                    actor_id: userId,
-                                    ip_address: ip,
-                                    user_agent: userAgent.user_agent,
-                                    device_version: userAgent.device_version
-                                },
-                                {
-                                    clicked: 1
-                                },
-                                searchData.id
-                            ], 
-                            function(err, results, fields){
-                            connection.release();
+                        connection.beginTransaction(function(err) {
+                            if(err){
+                                connection.release();
+                                reject(err);
+                            }
 
-                            if(err)
-                                return reject(err);
+                            connection.query(query1, 
+                                    {
+                                        actor_type_id: actor_type_id,
+                                        item_type_id: ITEM_SPONSORED_AD,
+                                        activity_type_id: ACTIVITY_CLICK,
+                                        item_id: searchData.id,
+                                        actor_id: userId,
+                                        ip_address: ip,
+                                        user_agent: userAgent.user_agent,
+                                        device_version: userAgent.device_version
+                                    }, 
+                                    function(err, results, fields){
+                                    
 
-                            resolve(results);
+                                    if(err){
+                                        return connection.rollback(function(){
+                                            connection.release();
+                                            reject(err);
+                                        });
+                                    }
+
+                                    connection.query(query2, 
+                                            [
+                                                {
+                                                    clicked: 1
+                                                },
+                                                searchData.id
+                                            ], 
+                                            function(err, results, fields){
+
+                                            if(err){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(err);
+                                                });
+                                            }
+
+                                            connection.commit(function(err){
+                                                if(err){
+                                                    return connection.rollback(function(){
+                                                        connection.release();
+                                                        reject(err);
+                                                    });
+                                                }
+
+                                                resolve(results);
+                                            });
+                                        }
+                                    );
+                                }
+                            );
+
+
                         });
+                                
                         
                     },function(error){
                         return reject(error);
