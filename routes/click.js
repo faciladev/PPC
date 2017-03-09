@@ -61,6 +61,7 @@ var clickSponsoredAd = function(req, res, next){
 						function(response){
 							//No available fund
 							if(response.hasPassed === 0){
+								console.log(response);
 								res.redirect(Util.decodeUrl(redirectUrl));
 								//Do not track click
 								//Update 'available_since' field so future searches won't include this ad
@@ -73,28 +74,37 @@ var clickSponsoredAd = function(req, res, next){
 								// 	}
 								// );
 							} else {
-								
+								console.log(response);
 								if(response.low_budget === 1){
 
 									ppcModel.sendLowBudgetNotification(searchData).then(
 										function(response){
-											//DO NOTHING
 											console.log(response);
+											ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
+												function(response){
+													res.redirect(Util.decodeUrl(redirectUrl));
+												},
+												function(error){
+													next(error);
+												}
+											);
 										}, 
 										function(error){
 											console.error(error);
 										}
 									);
+								} else {
+									ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
+										function(response){
+											res.redirect(Util.decodeUrl(redirectUrl));
+										},
+										function(error){
+											next(error);
+										}
+									);
 								}
 
-								ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId).then(
-									function(response){
-										res.redirect(Util.decodeUrl(redirectUrl));
-									},
-									function(error){
-										next(error);
-									}
-								);
+									
 							}
 								
 						}, 
