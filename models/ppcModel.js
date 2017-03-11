@@ -171,7 +171,7 @@ var ppcModel = {
                     connection.escape(searchData[i].ad_keyword_id) +');';
                 }
 
-                console.log(query);
+
                 //Run multiple statement query
                 connection.query(query, function(err, results, fields){
                     connection.release();
@@ -309,7 +309,7 @@ var ppcModel = {
             query += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
             'iziphub_flexoffer_link.flexoffer_name ASC';
 
-            PaginationHelper.paginate(query, page, 12, queryParams).then(
+            PaginationHelper.paginate(query, page, 16, queryParams).then(
                 function(response){
                     resolve(response);
                 }, 
@@ -508,34 +508,45 @@ var ppcModel = {
         });
     },
 
-    requestMeetsClickPolicy: function(ip, userAgent){
+    requestMeetsClickPolicy: function(ip, userAgent, data, userId){
         return new Promise(function(resolve, reject){
+
             DbHelper.getConnection().then(function(connection){
-                var query = 'SELECT COUNT(id) AS count FROM one_hour_analytics ' +
-                'WHERE (activity_type_id = ? AND item_type_id = ?) ' +
-                ' OR (activity_type_id = ? AND item_type_id = ?) '+
+
+                var MAX_COUNT = 1;
+                var TWENTY_FOUR_HOUR_POLICY = 'twenty_four_hour_analytics';
+                var ONE_HOUR_POLICY = 'one_hour_analytics';
+
+                var query = 'SELECT COUNT(id) AS count FROM ' + 
+                TWENTY_FOUR_HOUR_POLICY + ' ' +
+                'WHERE activity_type_id = ? AND item_type_id = ? ' +
                 'AND ip_address =  ? ' +
                 'AND user_agent = ? ' +
-                'AND device_version = ?';
-                connection.query(query, 
-                    [
-                        ACTIVITY_DOWNLOAD,
-                        ITEM_DAILY_DEAL,
-                        ACTIVITY_CLICK,
-                        ITEM_SPONSORED_AD,
-                        ip,
-                        userAgent.user_agent,
-                        userAgent.device_version
+                'AND device_version = ? ';
 
-                    ],
+                var queryParams = [
+                    data.activity_type_id,
+                    data.item_type_id,
+                    ip,
+                    userAgent.user_agent,
+                    userAgent.device_version
+                ];
+
+                if(typeof data.actor_id !== "undefined"){
+                    queryParams.push(data.actor_id);
+                    query += ' AND actor_id = ? ';
+                }
+
+                connection.query(query, 
+                    queryParams,
                     function(err, results, fields){
                     connection.release();
 
 
                     if(err)
                         return reject(err);
-
-                    resolve(results[0].count < 6 ? true : false);
+                    
+                    resolve(results[0].count < MAX_COUNT ? true : false);
                 });
 
                 
@@ -583,21 +594,26 @@ var ppcModel = {
                 var query = 'SELECT ' + 
                 '(ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) AS available_fund, ' +
                 '((ppc_ads.budget_limit - SUM(ppc_ad_searches.price)) < (ppc_ads.budget_limit * 0.1)) AS low_budget, ' +
-                'SUM(ppc_ad_searches.price) <= ppc_ads.budget_limit AS has_passed ' +
-                'FROM ppc_ad_searches JOIN available_ad_keywords ON ' +
-                'available_ad_keywords.ad_keyword_id = ppc_ad_searches.ad_keyword_id JOIN ppc_ads ON ' +
-                'available_ad_keywords.ad_id = ppc_ads.id JOIN ppc_analytics ON ' +
+                'SUM(ppc_ad_searches.price) < ppc_ads.budget_limit AS has_passed ' +
+                'FROM ppc_ad_searches ' + 
+                
+                'JOIN ppc_analytics ON ' +
                 'ppc_ad_searches.id = ppc_analytics.item_id '+
-                'WHERE ' +
-                'ppc_ad_searches.id = ? AND ' +
+                'JOIN ppc_ads ON ppc_ad_searches.ad_id = ppc_ads.id ' +
+                ' WHERE ' +
+                'ppc_analytics.item_type_id = ' + ITEM_SPONSORED_AD + 
+                ' AND ppc_analytics.activity_type_id = ' + ACTIVITY_CLICK +
+                ' AND ppc_ad_searches.clicked = 1 ' +
+                ' AND ppc_ads.budget_limit >= 1 AND ' +
                 'IF(ppc_ads.budget_period = \'daily\', ppc_analytics.activity_time BETWEEN ' +
                 'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
-                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))';
+                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))' +
+                ' GROUP BY ppc_ads.id';
 
 
                 connection.query(query, 
                     [
-                        searchData.id, 
+                        searchData.ad_id, 
                         Util.firstDay(), 
                         Util.lastDay()
                     ], 
@@ -607,8 +623,13 @@ var ppcModel = {
                     if(err)
                         return reject(err);
 
+                    //Query result returned and result is set
                     if(results.length > 0)
                         return resolve(results[0]);
+
+                    //No click data found for this available ad
+                    if(results.length === 0)
+                        return resolve({has_passed: 1, low_budget: 0});
 
                     reject(new Error('Failed to check budget for sponsor ad.'));
                 });
@@ -616,7 +637,60 @@ var ppcModel = {
                 
                 
             },function(error){
-                return reject(error);
+                reject(error);
+            });
+        });
+    },
+
+    dealBudgetLimitCheck: function(deal){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                var query = 'SELECT ' + 
+                'COUNT(ppc_analytics.id) AS downloads,' +
+                'dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price) AS available_fund, ' +
+                '((dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price)) < (dd.budget_limit * 0.1)) AS low_budget, ' +
+                '(COUNT(ppc_analytics.id) * dd.download_price) < dd.budget_limit AS has_passed ' +
+                'FROM ppc_daily_deal AS dd ' + 
+                
+                'JOIN ppc_analytics ON ' +
+                'dd.id = ppc_analytics.item_id '+
+                ' WHERE ' +
+                'ppc_analytics.item_type_id = ' + ITEM_DAILY_DEAL + 
+                ' AND ppc_analytics.activity_type_id = ' + ACTIVITY_DOWNLOAD +
+                ' AND dd.budget_limit >= 1 AND ' +
+                'IF(dd.budget_period = \'daily\', ppc_analytics.activity_time BETWEEN ' +
+                'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
+                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))' +
+                ' GROUP BY dd.id';
+
+
+                connection.query(query, 
+                    [
+                        deal.deal_id, 
+                        Util.firstDay(), 
+                        Util.lastDay()
+                    ], 
+                    function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        return reject(err);
+
+                    //Query result returned and result is set
+                    if(results.length > 0)
+                        return resolve(results[0]);
+
+                    //No click data found for this available ad
+                    if(results.length === 0)
+                        return resolve({has_passed: 1, low_budget: 0});
+
+                    reject(new Error('Failed to check budget for daily deal.'));
+                });
+
+                
+                
+            },function(error){
+                reject(error);
             });
         });
     },
@@ -642,7 +716,7 @@ var ppcModel = {
 
                         switch(budget_period){
                             case DAILY_BUDGET_PERIOD:
-                                query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(available_since, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
+                                query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(NOW(), INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
                                 break;
                             case WEEKLY_BUDGET_PERIOD:
                                 query += 'UPDATE ppc_ads SET available_since = (DATE_ADD(?, INTERVAL 1 DAY)) WHERE ppc_ads.id = ?';
@@ -657,8 +731,64 @@ var ppcModel = {
 
                         queryParams.push(adId);
 
-                        console.log(query)
-                        console.log(queryParams)
+                        connection.query(query, 
+                            queryParams, 
+                            function(err, results, fields){
+                            connection.release();
+
+                            if(err)
+                                return reject(err);
+
+                            resolve(results);
+                        });
+                    }
+                );
+                        
+
+                
+                
+            },function(error){
+                reject(error);
+            });
+        });
+    }, 
+
+    postponeDealAvailability: function(dealId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(function(connection){
+                connection.query("SELECT budget_period FROM ppc_daily_deal WHERE ppc_daily_deal.id = ?", 
+                    [dealId], 
+                    function(err, rows, fields){
+                        if(err){
+                            connection.release();
+                            return reject(err);
+                        }
+
+                        if(rows.length <= 0)
+                            return reject(new Error('No daily deal found to update budget_period'));
+
+                        var budget_period = rows[0].budget_period;
+
+                        var query = '';
+                        var queryParams = [];
+
+                        switch(budget_period){
+                            case DAILY_BUDGET_PERIOD:
+                                query += 'UPDATE ppc_daily_deal SET available_since = (DATE_ADD(NOW(), INTERVAL 1 DAY)) WHERE ppc_daily_deal.id = ?';
+                                break;
+                            case WEEKLY_BUDGET_PERIOD:
+                                query += 'UPDATE ppc_daily_deal SET available_since = (DATE_ADD(?, INTERVAL 1 DAY)) WHERE ppc_daily_deal.id = ?';
+                                queryParams.push(Util.lastDay());
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if(query === '')
+                            return reject(new Error('Daily deal must have a valid budget period.'));
+
+                        queryParams.push(dealId);
+
                         connection.query(query, 
                             queryParams, 
                             function(err, results, fields){
@@ -795,7 +925,8 @@ var ppcModel = {
                                         actor_id: userId,
                                         ip_address: ip,
                                         user_agent: userAgent.user_agent,
-                                        device_version: userAgent.device_version
+                                        device_version: userAgent.device_version,
+                                        fraudulent: searchData.fraudulent
                                     }, 
                                     function(err, results, fields){
                                     
@@ -1042,7 +1173,8 @@ var ppcModel = {
                                 user_agent: userAgent.user_agent,
                                 device_version: userAgent.device_version,
                                 activity_type_id: ACTIVITY_DOWNLOAD,
-                                item_type_id: ITEM_DAILY_DEAL
+                                item_type_id: ITEM_DAILY_DEAL,
+                                fraudulent: deal.fraudulent
                             }, 
                             function(err, results, fields){
                                 connection.release();

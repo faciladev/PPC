@@ -107,17 +107,22 @@ module.exports = {
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, ' +
                 'COUNT(ppc_ad_searches.id) AS clicks,' +
                 'ppc_ads.budget_limit - SUM(ppc_ad_searches.price) AS available_fund,' +
-                'advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
+                'advertisers.advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
                 'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.paused, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
                 'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
-                'FROM advertisers Inner join ppc_ads on ppc_ads.advertiser_id = advertisers.advertizer_id ' +
+                'FROM ppc_ads JOIN advertisers on ppc_ads.advertiser_id = advertisers.advertizer_id ' +
+                
+                'JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
                 'LEFT JOIN ppc_ad_searches ON ppc_ad_searches.ad_id = ppc_ads.id '+
                 'AND ppc_ad_searches.clicked = 1 ' +
-                'AND IF(ppc_ads.budget_period = \'daily\', ' +
-                'ppc_ad_searches.search_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
-                'ppc_ad_searches.search_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ' +   
-                'Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
+                'LEFT JOIN ppc_analytics ON ' +
+                'ppc_ad_searches.id = ppc_analytics.item_id '+
+                'AND ppc_analytics.item_type_id = ' + ppcModel.ITEM_SPONSORED_AD + 
+                ' AND ppc_analytics.activity_type_id = ' + ppcModel.ACTIVITY_CLICK +
+                ' AND IF(ppc_ads.budget_period = \'daily\', ' +
+                'ppc_analytics.activity_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
+                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ' +   
                 'WHERE ppc_ads.is_deleted = 0 ';
 
                 queryParams.push(
@@ -136,7 +141,7 @@ module.exports = {
                 queryParams.push(type);
             }
 
-            query += " GROUP BY ppc_ads.id, ppc_ad_microsites.id  ORDER BY id DESC";
+            query += " GROUP BY ppc_ads.id, ppc_ad_microsites.id ORDER BY ppc_ads.id DESC";
 
 
             PaginationHelper.paginate(query, page, null, queryParams).then(
@@ -187,13 +192,17 @@ module.exports = {
                 'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.paused, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
                 'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
-                'FROM advertisers Inner join ppc_ads on ppc_ads.advertiser_id = advertisers.advertizer_id ' +
+                'FROM ppc_ads JOIN advertisers on ppc_ads.advertiser_id = advertisers.advertizer_id ' +
+                'Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
                 'LEFT JOIN ppc_ad_searches ON ppc_ad_searches.ad_id = ppc_ads.id '+
                 'AND ppc_ad_searches.clicked = 1 ' +
-                'AND IF(ppc_ads.budget_period = \'daily\', ' +
-                'ppc_ad_searches.search_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
-                'ppc_ad_searches.search_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ' +                    
-                'Left outer JOIN ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id  ' +
+                'LEFT JOIN ppc_analytics ON ' +
+                'ppc_ad_searches.id = ppc_analytics.item_id '+
+                'AND ppc_analytics.item_type_id = ' + ppcModel.ITEM_SPONSORED_AD + 
+                ' AND ppc_analytics.activity_type_id = ' + ppcModel.ACTIVITY_CLICK +
+                ' AND IF(ppc_ads.budget_period = \'daily\', ' +
+                'ppc_analytics.activity_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
+                'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ' +    
                 'WHERE ppc_ads.is_deleted = 0 AND ppc_ads.advertiser_id = ?';
 
             queryParams.push(
