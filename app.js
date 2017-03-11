@@ -41,7 +41,7 @@ app.use(cors(corsOptionsDelegate));
 //Enable pre-flight mode
 app.options('*', cors()) 
 
-app.use(logger('combined'));
+app.use(logger('dev'));
 app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
