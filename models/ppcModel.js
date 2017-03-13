@@ -262,7 +262,7 @@ var ppcModel = {
         });
     },
 
-    findFlexOffers : function(subpageId, keyword, page){
+    findFlexOffers : function(subpageId, keyword, page, filter){
         return new Promise(function(resolve, reject) {
 
             var select = 'iziphub_flexoffer_link.flexoffer_link_id, \
@@ -302,6 +302,9 @@ var ppcModel = {
                 from += 'iziphub_flexoffer_link ';
             }
 
+            if(filter === "featured")
+                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 ';
+
             if(where === '' || from === '' || queryParams.length === 0)
                 return reject(new Error('subpage id or keyword is required.'));
 
@@ -309,14 +312,35 @@ var ppcModel = {
             query += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
             'iziphub_flexoffer_link.flexoffer_name ASC';
 
-            PaginationHelper.paginate(query, page, 16, queryParams).then(
-                function(response){
-                    resolve(response);
-                }, 
-                function(error){
-                    reject(error);
-                }
-            );
+            if(page === 'all'){
+                DbHelper.getConnection().then(
+                    function(connection){
+
+                        connection.query(query, queryParams, function(err, rows, fields){
+                            connection.release()
+
+                            if(err)
+                                return reject(err);
+
+                            return resolve(rows);
+                        });
+                    }, 
+                    function(error){
+                        return reject(error);
+                    }
+                );
+            } else {
+                
+                PaginationHelper.paginate(query, page, 16, queryParams).then(
+                    function(response){
+                        resolve(response);
+                    }, 
+                    function(error){
+                        reject(error);
+                    }
+                );
+            }
+                
         });
     },
 
