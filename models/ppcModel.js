@@ -64,7 +64,8 @@ var ppcModel = {
             'ppc_ads.lng, ' +
             'ppc_ads.phone_no, ' +
             'ppc_ads.ad_text, ' +
-            'ppc_keywords.price, ' +
+            'keywords.price, ' +
+            'keywords.keyword, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
             'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
@@ -72,7 +73,8 @@ var ppcModel = {
             'FROM ' +
             'available_ad_keywords ' +
             'JOIN ' +
-            'ppc_keywords ON available_ad_keywords.keyword_id = ppc_keywords.id ' +
+            '(SELECT id, keyword, max(price) AS price FROM ppc_keywords WHERE ppc_keywords.keyword LIKE ? group by id limit 1) AS keywords ' +
+            'ON available_ad_keywords.keyword_id = keywords.id ' +
             'JOIN ' + 
             'ppc_ads ON ppc_ads.id = available_ad_keywords.ad_id ' +
             'JOIN ' +
@@ -88,14 +90,14 @@ var ppcModel = {
 
 
             query += 'WHERE ' +
-            'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
+            '(ppc_ad_locations.city LIKE ? ' + 
             'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
             'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
 
             if(subPage)
                 query += 'AND ppc_ads_subpages.sub_page_id = ? ';
 
-            query += 'ORDER BY ppc_keywords.price DESC';
+            // query += 'ORDER BY keywords.price DESC ';
 
             var queryParams = ['%' + keyword + '%', '%' + location + '%', '%' + location + '%'];
             
@@ -330,7 +332,7 @@ var ppcModel = {
                     }
                 );
             } else {
-                
+
                 PaginationHelper.paginate(query, page, 16, queryParams).then(
                     function(response){
                         resolve(response);
