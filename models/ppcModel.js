@@ -64,8 +64,7 @@ var ppcModel = {
             'ppc_ads.lng, ' +
             'ppc_ads.phone_no, ' +
             'ppc_ads.ad_text, ' +
-            'keywords.price, ' +
-            'keywords.keyword, ' +
+            'ppc_keywords.price, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
             'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
@@ -73,8 +72,7 @@ var ppcModel = {
             'FROM ' +
             'available_ad_keywords ' +
             'JOIN ' +
-            '(SELECT id, keyword, max(price) AS price FROM ppc_keywords WHERE ppc_keywords.keyword LIKE ? group by id limit 1) AS keywords ' +
-            'ON available_ad_keywords.keyword_id = keywords.id ' +
+            'ppc_keywords ON available_ad_keywords.keyword_id = ppc_keywords.id ' +
             'JOIN ' + 
             'ppc_ads ON ppc_ads.id = available_ad_keywords.ad_id ' +
             'JOIN ' +
@@ -90,14 +88,14 @@ var ppcModel = {
 
 
             query += 'WHERE ' +
-            '(ppc_ad_locations.city LIKE ? ' + 
+            'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
             'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
             'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
 
             if(subPage)
                 query += 'AND ppc_ads_subpages.sub_page_id = ? ';
 
-            // query += 'ORDER BY keywords.price DESC ';
+            query += 'ORDER BY ppc_keywords.price DESC';
 
             var queryParams = ['%' + keyword + '%', '%' + location + '%', '%' + location + '%'];
             
@@ -277,6 +275,7 @@ var ppcModel = {
                     iziphub_flexoffer_link.flexoffer_name ';
             var where = '';
             var from = '';
+            var order = '';
             var queryParams = [];
 
             if(typeof subpageId !== 'undefined' && subpageId !== null){
@@ -304,15 +303,24 @@ var ppcModel = {
                 from += 'iziphub_flexoffer_link ';
             }
 
-            if(filter === "featured")
-                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 ';
+            if(filter === "featured"){
+                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 AND iziphub_flexoffer_link.flexoffer_list_order_asc != 1000 ';
+                order += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
+                    'iziphub_flexoffer_link.flexoffer_name ASC';
+            } else {
+                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 0 ' + 
+                'AND iziphub_flexoffer_link.flexoffer_list_order_asc = 1000';
+            }
 
+            
             if(where === '' || from === '' || queryParams.length === 0)
                 return reject(new Error('subpage id or keyword is required.'));
 
+
+            query += order;
+
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
-            query += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
-            'iziphub_flexoffer_link.flexoffer_name ASC';
+            
 
             if(page === 'all'){
                 DbHelper.getConnection().then(
