@@ -304,7 +304,7 @@ var ppcModel = {
             }
 
             if(filter === "featured"){
-                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 AND iziphub_flexoffer_link.flexoffer_list_order_asc != 1000 ';
+                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 ';
                 order += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
                     'iziphub_flexoffer_link.flexoffer_name ASC';
             } else {
