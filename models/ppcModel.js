@@ -262,7 +262,7 @@ var ppcModel = {
         });
     },
 
-    findFlexOffers : function(subpageId, keyword, page, filter){
+    findFlexOffers : function(subpageId, keyword, page, filter, letter){
         return new Promise(function(resolve, reject) {
 
             var select = 'iziphub_flexoffer_link.flexoffer_link_id, \
@@ -312,11 +312,11 @@ var ppcModel = {
                 'AND iziphub_flexoffer_link.flexoffer_list_order_asc = 1000';
             }
 
+            if(typeof letter === "string" && letter.length === 1){
+                where += " AND iziphub_flexoffer_link.flexoffer_name LIKE ? ";
+                queryParams.push(letter + '%');
+            }
             
-            if(where === '' || from === '' || queryParams.length === 0)
-                return reject(new Error('subpage id or keyword is required.'));
-
-
             query += order;
 
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;

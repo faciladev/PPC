@@ -75,8 +75,9 @@ var searchFlex = function(req, res, next){
 	var keyword = req.params.keyword;
 	var page = req.query.page;
 	var filter = req.query.filter;
+	var letter = req.query.letter;
 
-    ppcModel.findFlexOffers(subpageId, keyword, page, filter).then(function(response){
+    ppcModel.findFlexOffers(subpageId, keyword, page, filter, letter).then(function(response){
         var paginatedSearchData = response;
         var flexoffers = (typeof response.result === "undefined") ? 
         					response : response.result;

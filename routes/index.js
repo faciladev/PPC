@@ -6,6 +6,7 @@ var subPageModel = require('../models/subPageModel');
 var usaStateModel = require('../models/usaStateModel');
 var advertiserModel = require('../models/advertiserModel');
 var businessModel = require('../models/businessModel');
+var flexModel = require('../models/flexModel');
 var ads = require('../models/ads');
 var Util = require('../lib/util');
 
@@ -126,6 +127,17 @@ router.post('/categoryKeywords', function(req, res, next) {
         res.json(response);
     }, function(error){
         error.message = 'Error';
+        next(error);
+    });
+});
+
+router.get('/flexoffers/letters', function(req, res, next) {
+    var filter = req.query.filter;
+    var subPage = req.query.subpage;
+
+    flexModel.getFlexLetters(filter, subPage).then(function(response){
+        res.json(response);
+    }, function(error){
         next(error);
     });
 });
