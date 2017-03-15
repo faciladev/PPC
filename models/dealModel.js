@@ -6,20 +6,92 @@ var Util = require('../lib/util');
 var ppcModel = require('./ppcModel');
 
 var dealModel = {
-    approveDeal: function(dealId, deal){
+    
+    partialUpdateDeal: function(dealId, deal, microsite){
         return new Promise(function(resolve, reject){
-            
+            microsite = microsite || false;
+
             DbHelper.getConnection().then(
                 function(connection){
-                    connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?',
-                        [deal, dealId],
-                        function(err, results, fields){
-                            if(err)
-                                return reject(err);
 
-                            resolve(results);
+                    connection.beginTransaction(function(err){
+                        if(err){
+                            connection.release();
+                            return reject(err);
                         }
-                    );
+
+                        connection.query('UPDATE ppc_daily_deal SET ? WHERE id = ?', 
+                            [deal, dealId], 
+                            function (error, results, fields) {
+                                if(error){
+                                    return connection.rollback(function(){
+                                        connection.release();
+                                        reject(error);
+                                    });
+                                }
+
+                                if(microsite){
+                                    //Update with microsite data
+                                    connection.query('SELECT daily_deal_microsite_id FROM ppc_daily_deal WHERE id = ?', 
+                                        [dealId], 
+                                        function(error, results, fields){
+                                            if(error){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(error);
+                                                });
+                                            }
+
+                                            if(results.length <= 0){
+                                                return connection.rollback(function(){
+                                                    connection.release();
+                                                    reject(new Error('No microsite to update.'));
+                                                });
+                                            }
+
+                                            var micrositeId = results[0].daily_deal_microsite_id;
+                                            connection.query('UPDATE ppc_deal_microsites SET ? WHERE id = ?', 
+                                                [microsite, micrositeId], 
+                                                function (error, results, fields) {
+                                                    if(error){
+                                                        return connection.rollback(function(){
+                                                            connection.release();
+                                                            reject(error);
+                                                        });
+                                                    }
+
+                                                    connection.commit(function(err){
+                                                        if(err){
+                                                            return connection.rollback(function(){
+                                                                connection.release();
+                                                                reject(err);
+                                                            });
+                                                        }
+
+                                                        resolve(results);
+                                                    });
+                                                }
+                                            );
+                                        }
+                                    )
+                                } else {
+                                    //Update without microsite data
+                                    connection.commit(function(err){
+                                        if(err){
+                                            return connection.rollback(function(){
+                                                connection.release();
+                                                reject(err);
+                                            });
+                                        }
+
+                                        connection.release();
+                                        resolve(results);
+                                    });
+                                }
+                            }
+                        );
+
+                    });
                 }, 
                 function(error){
                     reject(error);
@@ -242,6 +314,7 @@ var dealModel = {
                 'dd.coupon_image, ' +
                 'dd.budget_period, '+
                 'dd.advertiser_id, ' +
+                'dd.paused, ' +
                 'm.image, ' +
                 'm.image_1, ' +
                 'm.image_2, ' +
@@ -299,14 +372,47 @@ var dealModel = {
     getAllDeals : function(page){
 
         return new Promise(function(resolve, reject) {
+            var query = '\
+            SELECT \
+                dd.id,\
+                dd.deal_image AS image,\
+                mi.name,\
+                dd.budget_limit,\
+                dd.budget_period,\
+                dd.paused,\
+                COUNT(ppc_analytics.id) AS downloads,\
+                dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price) AS available_fund,\
+                dd.approved_category_id,\
+                dd.download_price,\
+                dd.date_created,\
+                dd.is_approved\
+            FROM\
+                ppc_daily_deal AS dd\
+                    LEFT JOIN\
+                ppc_analytics ON ppc_analytics.item_id = dd.id\
+                    AND ppc_analytics.item_type_id = ?\
+                    AND ppc_analytics.activity_type_id = ?\
+                    AND IF(dd.budget_period = \'daily\',\
+                    ppc_analytics.activity_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),\
+                    ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))\
+                    JOIN\
+                ppc_deal_microsites AS mi ON dd.daily_deal_microsite_id = mi.id\
+            WHERE\
+                dd.is_deleted = 0\
+            GROUP BY dd.id\
+            ORDER BY dd.id DESC';
 
-            var query = 'SELECT dd.id, dd.deal_image AS image, mi.name, dd.approved_category_id, ' + 
-            'dd.download_price, dd.date_created, dd.is_approved ' +
-            'FROM ppc_daily_deal AS dd JOIN ppc_deal_microsites AS mi ON ' +
-            'dd.daily_deal_microsite_id = mi.id ' +
-            'WHERE dd.is_deleted=0 ORDER BY dd.id DESC';
-
-            PaginationHelper.paginate(query, page).then(
+            PaginationHelper.paginate(
+                query, 
+                page, 
+                null, 
+                [
+                    ppcModel.ITEM_DAILY_DEAL, 
+                    ppcModel.ACTIVITY_DOWNLOAD,
+                    Util.firstDay(), 
+                    Util.lastDay()
+                ]
+                ).then(
                 function(result){
                     resolve(result);
                 }, 
@@ -339,6 +445,7 @@ var dealModel = {
             'm.name, '+
             'dd.discount_price, ' +
             'dd.budget_limit, ' +
+            'dd.budget_period, '+
             'm.image, ' +
             'm.image_1, ' +
             'm.image_2, ' +
@@ -350,6 +457,9 @@ var dealModel = {
             'dd.discount_rate, '+
             'dd.coupon_name, '+
             'dd.coupon_generated_code, '+
+            'dd.paused, ' +
+            'COUNT(ppc_analytics.id) AS downloads, ' +
+            'dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price) AS available_fund, ' +
             'dd.is_approved, ' +
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
@@ -357,12 +467,25 @@ var dealModel = {
             'm.discount_description, '+
             'm.daily_deal_description, '+
             'dd.approved_category_id '+
-            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+            'FROM ppc_daily_deal AS dd ' +
+            'LEFT JOIN ' +
+            'ppc_analytics ON ppc_analytics.item_id = dd.id '+
+            'AND ppc_analytics.item_type_id = ? AND ppc_analytics.activity_type_id = ? ' +
+            'AND IF(dd.budget_period = \'daily\',' +
+            'ppc_analytics.activity_time BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY),' +
+            'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))' +
+            'JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id ' +
             'JOIN ppc_daily_deal_categories AS cat ON cat.category_id = dd.approved_category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? ORDER BY dd.id DESC';
+            'WHERE dd.is_deleted=0 AND dd.advertiser_id=? GROUP BY dd.id ORDER BY dd.id DESC';
 
-            var queryParams = [advertiserId];
+            var queryParams = [
+            ppcModel.ITEM_DAILY_DEAL, 
+            ppcModel.ACTIVITY_DOWNLOAD, 
+            Util.firstDay(), 
+            Util.lastDay(),
+            advertiserId
+            ];
             
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){

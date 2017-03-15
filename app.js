@@ -98,7 +98,7 @@ app.use(function(err, req, res, next) {
   }
   else{
     //Error in non-production environment
-    console.log(err);
+    console.error(err);
     res.status(err.status || 500);
     res.json({error: err});
   }
