@@ -513,36 +513,52 @@ module.exports = {
 
     saveAd: function(ad) {
         return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function(connection){
-                if(ad.id == 0 ) {
-                    ad.created_at = DateHelper.today();
-                    ad.updated_at = DateHelper.today();
-                    ad.available_since = DateHelper.today();
-                    connection.query('INSERT INTO ppc_ads SET ?', [ad],
-                        function (err, rows, fields) {
-                            connection.release();
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                } else {
-                    ad.updated_at = DateHelper.today();
-                    connection.query('Update ppc_ads SET ? WHERE id = ?', [ad, ad.id],
-                        function (err, rows, fields) {
-                            connection.release();
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                }
 
-            }, function(error){
-                reject(error);
-            });
+                Util.getAddressLatLng(ad.address).then(
+                    function(location){
+                        if(location !== false){
+                            ad.lat = location.lat;
+                            ad.lng = location.lng;
+                        }
+
+                        DbHelper.getConnection().then(function(connection){
+                            if(ad.id == 0 ) {
+                                ad.created_at = DateHelper.today();
+                                ad.updated_at = DateHelper.today();
+                                ad.available_since = DateHelper.today();
+                                connection.query('INSERT INTO ppc_ads SET ?', [ad],
+                                    function (err, rows, fields) {
+                                        connection.release();
+                                        if(err){
+                                            reject(err);
+                                        }
+                                        resolve(rows);
+                                    }
+                                );
+                            } else {
+                                ad.updated_at = DateHelper.today();
+                                connection.query('Update ppc_ads SET ? WHERE id = ?', [ad, ad.id],
+                                    function (err, rows, fields) {
+                                        connection.release();
+                                        if(err){
+                                            reject(err);
+                                        }
+                                        resolve(rows);
+                                    }
+                                );
+                            }
+
+                        }, function(error){
+                            reject(error);
+                        });
+
+                    },
+                    function(error){
+                        reject(error);
+                    }
+                );
+
+
         });
     },
     saveAdMicrosite: function(ad_id, ad_microsite) {
