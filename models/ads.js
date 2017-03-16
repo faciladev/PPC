@@ -726,7 +726,12 @@ module.exports = {
     saveAdOffers: function(ad_id,ad_offers) {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
+
+            if(! (ad_offers instanceof Array)  || ad_offers.length <= 0 || isNaN(ad_id))
+                return resolve(new Error('Invalid ad id or empty ad offer array.'));
+
             DbHelper.getConnection().then(function(connection){
+
                 connection.query('DELETE FROM ppc_ad_offers WHERE ad_id = ?', [ad_id], function(err, rows, fields){
                     if(err){
                         connection.release();
@@ -740,7 +745,7 @@ module.exports = {
                             function (err, result) {
                                 if(err){
                                     connection.release();
-                                    reject(err);
+                                    return reject(err);
                                 }
                                 post.id = result.insertId;
                                 insertedData.push(post.offer_id);
@@ -834,6 +839,9 @@ module.exports = {
     saveAdFiles: function(ad_id,ad_files) {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
+            if(! (ad_offers instanceof Array) || ad_offers.length <= 0 || isNaN(ad_id))
+                return resolve(new Error('Invalid ad id or empty ad offer array.'));
+
             DbHelper.getConnection().then(function(connection){
                 ad_files.forEach(function(objFile, i){
                     var post = {ad_id: objFile.ad_id, file_id: objFile.file_id };
