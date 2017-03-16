@@ -108,7 +108,7 @@ module.exports = {
                 'COUNT(ppc_ad_searches.id) AS clicks,' +
                 'ppc_ads.budget_limit - SUM(ppc_ad_searches.price) AS available_fund,' +
                 'advertisers.advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
-                'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.paused, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
+                'ppc_ads.lat, ppc_ads.lng,ppc_ads.is_featured, ppc_ads.phone_no, ppc_ads.paused, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
                 'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
                 'FROM ppc_ads JOIN advertisers on ppc_ads.advertiser_id = advertisers.advertizer_id ' +
@@ -251,7 +251,7 @@ module.exports = {
                 'COUNT(ppc_ad_searches.id) AS clicks,' +
                 'ppc_ads.budget_limit - SUM(ppc_ad_searches.price) AS available_fund,' +
                 'advertizer_business_name, ppc_ads.business_id, ppc_ads.ad_type, ppc_ads.url, ppc_ads.budget_limit, ppc_ads.budget_period, ppc_ads.target_audience, ppc_ads.title, ppc_ads.address, ' +
-                'ppc_ads.lat, ppc_ads.lng, ppc_ads.phone_no, ppc_ads.paused, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
+                'ppc_ads.lat, ppc_ads.lng, ppc_ads.is_featured, ppc_ads.phone_no, ppc_ads.paused, ppc_ads.ad_text, ppc_ads.is_approved, ppc_ad_microsites.name, ppc_ad_microsites.business_name, ppc_ad_microsites.address_1, ' +
                 'ppc_ad_microsites.address_2, ppc_ad_microsites.state, ppc_ad_microsites.city, ppc_ad_microsites.zipcode, ppc_ad_microsites.phone_number, ppc_ad_microsites.start_day, ' +
                 'ppc_ad_microsites.end_day, ppc_ad_microsites.start_hour, ppc_ad_microsites.end_hour, ppc_ad_microsites.weekend_start_day, ppc_ad_microsites.weekend_end_day, ppc_ad_microsites.weekend_start_hour, ppc_ad_microsites.weekend_end_hour ' +
                 'FROM ppc_ads JOIN advertisers on ppc_ads.advertiser_id = advertisers.advertizer_id ' +
