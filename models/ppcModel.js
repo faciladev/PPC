@@ -316,6 +316,9 @@ var ppcModel = {
 
             if(typeof letter === "string" && letter.length === 1){
                 where += " AND iziphub_flexoffer_link.flexoffer_name LIKE ? ";
+                order = (order.length > 0)? order : 
+                ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
+                'iziphub_flexoffer_link.flexoffer_name ASC';
                 queryParams.push(letter + '%');
             }
             
