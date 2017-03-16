@@ -182,6 +182,68 @@ module.exports = {
         });
     },
 
+    getFeatured: function(subPage){
+        return new Promise(function(resolve, reject){
+
+            if(isNaN(subPage))
+                return reject(new Error('Invalid subpage id.'));
+
+            var query = 'SELECT ' +
+            'usa_states.usa_state_code, ' +
+            'usa_states.usa_state_name, ' +
+            'ppc_ad_microsites.city, ' +
+            'ppc_ad_microsites.zipcode, ' +
+            'ppc_ads.id AS ad_id, ' +
+            'ppc_ads.url, ' +
+            'ppc_ads.title, ' +
+            'ppc_ads.address, ' +
+            'ppc_ads.lat, ' +
+            'ppc_ads.lng, ' +
+            'ppc_ads.phone_no, ' +
+            'ppc_ads_subpages.sub_page_id,' +
+            'ppc_ads.ad_text ' +
+            'FROM ' +
+            'ppc_ads ' +
+            'JOIN ' +
+            'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id '+
+            'JOIN ' +
+            '(SELECT DISTINCT ad_id FROM available_ad_keywords) AS available_ad_keywords ' +
+            'ON available_ad_keywords.ad_id = ppc_ads.id ' +
+            'JOIN ' +
+            '(SELECT DISTINCT ad_id, sub_page_id FROM ppc_ads_subpages WHERE sub_page_id = ? GROUP BY ad_id) AS ppc_ads_subpages ' +
+            'ON ppc_ads_subpages.ad_id = ppc_ads.id ' +
+            'JOIN ' +
+            'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+            'WHERE ' +
+            'ppc_ads.is_featured=0 AND ppc_ads.is_approved = 1 ' +
+            'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 '
+            // 'AND ppc_ads_subpages.sub_page_id = ?'
+            ;
+
+
+            var queryParams = [subPage, subPage];
+
+            DbHelper.getConnection().then(
+                function(connection){
+                    connection.query(query, queryParams, 
+                        function(err, rows, fields){
+                            connection.release();
+                            if(err)
+                                return reject(err);
+
+                            resolve(rows);
+                        }
+                    );
+                }, 
+                function(error){
+                    next(error);
+                }
+            );
+                
+            
+        });
+    },
+
     getAllByAdvertiser : function(page, advertiserId, search, type){
         return new Promise(function(resolve, reject) {
             var queryParams = [];
@@ -224,9 +286,6 @@ module.exports = {
             queryParams.push(advertiserId);
 
             query += " GROUP BY ppc_ads.id, ppc_ad_microsites.id ORDER BY ppc_ads.id DESC";
-
-            console.log(query);
-            console.log(queryParams);
             
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(result){
@@ -668,6 +727,7 @@ module.exports = {
         var insertedData = [];
         return new Promise(function(resolve, reject){
 			if(keywords != null){
+
 				DbHelper.getConnection().then(function(connection){
 			
 					keywords.forEach(function(objKeyword, i){
@@ -728,7 +788,7 @@ module.exports = {
         return new Promise(function(resolve, reject) {
 
             if(! (ad_offers instanceof Array)  || ad_offers.length <= 0 || isNaN(ad_id))
-                return resolve(new Error('Invalid ad id or empty ad offer array.'));
+                return reject(new Error('Invalid ad id or empty ad offer array.'));
 
             DbHelper.getConnection().then(function(connection){
 
@@ -840,7 +900,7 @@ module.exports = {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
             if(! (ad_offers instanceof Array) || ad_offers.length <= 0 || isNaN(ad_id))
-                return resolve(new Error('Invalid ad id or empty ad offer array.'));
+                return reject(new Error('Invalid ad id or empty ad offer array.'));
 
             DbHelper.getConnection().then(function(connection){
                 ad_files.forEach(function(objFile, i){
@@ -934,6 +994,9 @@ module.exports = {
     saveCategoryKeywords: function(categoryKeywords) {
         var insertedData = [];
         return new Promise(function(resolve, reject){
+            if(! (categoryKeywords instanceof Array)  || categoryKeywords.length <= 0)
+                return reject(new Error('categoryKeywords not a valid array.'));
+
             DbHelper.getConnection().then(function(connection){
                 categoryKeywords.forEach(function(objCategoryKeyword, i){
                     var post = {category_id: objCategoryKeyword.category_id, keyword_id: objCategoryKeyword.keyword_id};

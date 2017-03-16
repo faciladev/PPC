@@ -347,6 +347,54 @@ router.put('/:adId/unpause', function(req, res, next){
     );
 });
 
+//Get featured ads
+router.get('/:subpage/featured', function(req, res, next){
+
+    var subPage = parseInt(req.params.subpage);
+
+    ads.getFeatured(subPage).then(
+        function(response){
+            res.json(response);
+        }, function(error){
+            next(error);
+        }
+    );
+});
+
+//Make sponsor ad featured
+router.put('/:adId/featured', function(req, res, next){
+    
+    var ad = {
+        is_featured: 1
+    }
+
+    ads.partialUpdateAd(req.params.adId, ad).then(
+        function(result){
+            res.json(result);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
+//Remove sponsor ad from being featured
+router.put('/:adId/notfeatured', function(req, res, next){
+    
+    var ad = {
+        is_featured: 0
+    }
+
+    ads.partialUpdateAd(req.params.adId, ad).then(
+        function(result){
+            res.json(result);
+        }, 
+        function(error){
+            next(error);
+        }
+    );
+});
+
 //Approve sponsor ad
 router.put('/:adId/approve', function(req, res, next){
     
