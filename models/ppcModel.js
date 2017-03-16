@@ -307,9 +307,11 @@ var ppcModel = {
                 where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 ';
                 order += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
                     'iziphub_flexoffer_link.flexoffer_name ASC';
-            } else {
+            } else if(filter === "all") {
                 where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 0 ' + 
                 'AND iziphub_flexoffer_link.flexoffer_list_order_asc = 1000';
+            } else {
+
             }
 
             if(typeof letter === "string" && letter.length === 1){
@@ -322,7 +324,7 @@ var ppcModel = {
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
             
 
-            if(page === 'all'){
+            if(filter === 'all' || typeof letter === "string" && letter.length === 1){
                 DbHelper.getConnection().then(
                     function(connection){
 
