@@ -727,32 +727,41 @@ module.exports = {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                ad_offers.forEach(function(objOffer, i){
-                    var post = {ad_id: objOffer.ad_id, offer_id: objOffer.offer_id };
+                connection.query('DELETE FROM ppc_ad_offers WHERE ad_id = ?', [ad_id], function(err, rows, fields){
+                    if(err){
+                        connection.release();
+                        return reject(err);
+                    }
 
-                    connection.query('INSERT INTO ppc_ad_offers SET ?', [post],
-                        function (err, result) {
-                            if(err){
-                                connection.release();
-                                reject(err);
-                            }
-                            post.id = result.insertId;
-                            insertedData.push(post.offer_id);
+                    ad_offers.forEach(function(objOffer, i){
+                        var post = {ad_id: objOffer.ad_id, offer_id: objOffer.offer_id };
 
-                            if(i== ad_offers.length - 1) {
-                                connection.query('SELECT ppc_offers.*, ppc_ad_offers.ad_id from ppc_offers inner join ppc_ad_offers on ppc_offers.id = ppc_ad_offers.offer_id WHERE ppc_ad_offers.offer_id IN (?)', [insertedData],
-                                    function(err, rows, fields) {
-                                        connection.release();
-                                        if(err) {
-                                            return reject(err);
+                        connection.query('INSERT INTO ppc_ad_offers SET ?', [post],
+                            function (err, result) {
+                                if(err){
+                                    connection.release();
+                                    reject(err);
+                                }
+                                post.id = result.insertId;
+                                insertedData.push(post.offer_id);
+
+                                if(i== ad_offers.length - 1) {
+                                    connection.query('SELECT ppc_offers.*, ppc_ad_offers.ad_id from ppc_offers inner join ppc_ad_offers on ppc_offers.id = ppc_ad_offers.offer_id WHERE ppc_ad_offers.offer_id IN (?)', [insertedData],
+                                        function(err, rows, fields) {
+                                            connection.release();
+                                            if(err) {
+                                                return reject(err);
+                                            }
+                                            resolve(rows);
                                         }
-                                        resolve(rows);
-                                    }
-                                );
+                                    );
+                                }
                             }
-                        }
-                    );
+                        );
+                    });
                 });
+
+
             }, function(error){
                 reject(error);
             });
