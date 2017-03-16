@@ -171,7 +171,8 @@ router.post('/:id/locations', function(req, res, next) {
 
 //Creates Ad offers
 router.post('/:id/offers', function(req, res, next) {
-    ads.saveAdOffers(req.params.id, req.body).then(function(response){
+    var ad_id = parseInt(req.params.id);
+    ads.saveAdOffers(ad_id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
         error.message = 'Error';
@@ -240,7 +241,8 @@ router.post('/advertiserFiles/:advertiserId', function(req, res, next) {
 
 //Upload ad files
 router.post('/:id/adFiles', function(req, res, next) {
-    ads.saveAdFiles(req.params.id, req.body).then(function(response){
+    var ad_id = parseInt(req.params.id);
+    ads.saveAdFiles(ad_id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
         next(error);

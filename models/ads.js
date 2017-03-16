@@ -726,7 +726,12 @@ module.exports = {
     saveAdOffers: function(ad_id,ad_offers) {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
+
+            if(typeof ad_offers !== "object" || ad_offers.length <= 0 || isNaN(ad_id))
+                return resolve(new Error('Invalid ad id or empty ad offer array.'));
+
             DbHelper.getConnection().then(function(connection){
+
                 ad_offers.forEach(function(objOffer, i){
                     var post = {ad_id: objOffer.ad_id, offer_id: objOffer.offer_id };
 
@@ -825,6 +830,9 @@ module.exports = {
     saveAdFiles: function(ad_id,ad_files) {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
+            if(typeof ad_offers !== "object" || ad_offers.length <= 0 || isNaN(ad_id))
+                return resolve(new Error('Invalid ad id or empty ad offer array.'));
+
             DbHelper.getConnection().then(function(connection){
                 ad_files.forEach(function(objFile, i){
                     var post = {ad_id: objFile.ad_id, file_id: objFile.file_id };
