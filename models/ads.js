@@ -915,7 +915,7 @@ module.exports = {
     saveAdFiles: function(ad_id,ad_files) {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
-            if(! (ad_offers instanceof Array) || ad_offers.length <= 0 || isNaN(ad_id))
+            if(! (ad_files instanceof Array) || ad_files.length <= 0 || isNaN(ad_id))
                 return reject(new Error('Invalid ad id or empty ad offer array.'));
 
             DbHelper.getConnection().then(function(connection){
