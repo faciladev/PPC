@@ -652,7 +652,6 @@ var ppcModel = {
 
                 connection.query(query, 
                     [
-                        searchData.ad_id, 
                         Util.firstDay(), 
                         Util.lastDay()
                     ], 
@@ -705,7 +704,6 @@ var ppcModel = {
 
                 connection.query(query, 
                     [
-                        deal.deal_id, 
                         Util.firstDay(), 
                         Util.lastDay()
                     ], 
