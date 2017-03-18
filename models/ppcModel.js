@@ -51,6 +51,26 @@ var ppcModel = {
                 ? false : subPage;
 
             var query = 'SELECT ' +
+            'first_result.ad_keyword_id, '+ 
+            'first_result.usa_state_code, ' +
+            'first_result.usa_state_name, ' +
+            'first_result.city, ' +
+            'first_result.zipcode, ' +
+            'first_result.ad_id, ' +
+            'first_result.url, ' +
+            'first_result.title, ' +
+            'first_result.address, ' +
+            'first_result.lat, ' +
+            'first_result.lng, ' +
+            'first_result.phone_no, ' +
+            'first_result.ad_text, ' +
+            'MAX(first_result.price) price, ' +
+            'first_result.keyword_category_id,' +
+            'first_result.ad_location_id, ' +
+            'first_result.ad_subpage_id, ' +
+            'first_result.keyword_id ' +
+            'FROM ' +
+            '(SELECT ' +
             'available_ad_keywords.ad_keyword_id, '+ 
             'usa_states.usa_state_code, ' +
             'usa_states.usa_state_name, ' +
@@ -95,12 +115,24 @@ var ppcModel = {
             if(subPage)
                 query += 'AND ppc_ads_subpages.sub_page_id = ? ';
 
-            query += 'ORDER BY ppc_keywords.price DESC';
+            query += 'ORDER BY ppc_keywords.price DESC) AS first_result ';
+            query += 'GROUP BY ad_id ' +
+            ', ad_keyword_id, ' +
+            'usa_state_code, ' +
+            'usa_state_name, ' +
+            'city, ' +
+            'zipcode, ' +
+            'ad_location_id, ' +
+            'ad_subpage_id, ' +
+            'keyword_id ';
+            query += 'ORDER BY price DESC';
 
             var queryParams = ['%' + keyword + '%', '%' + location + '%', '%' + location + '%'];
             
             if(subPage)
                 queryParams.push(subPage);
+
+            console.log(DbHelper.prepare(query, queryParams));
 
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
@@ -648,7 +680,12 @@ var ppcModel = {
                 'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
                 'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))' +
                 ' GROUP BY ppc_ads.id';
-
+                var x = DbHelper.prepare(query, [
+                        searchData.ad_id, 
+                        Util.firstDay(), 
+                        Util.lastDay()
+                    ]);
+                console.log(x);
 
                 connection.query(query, 
                     [
