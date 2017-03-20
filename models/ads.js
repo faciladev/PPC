@@ -502,7 +502,8 @@ module.exports = {
     getCategoryKeywords: function(category_id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
-                connection.query('Select * from ppc_keywords_categories INNER JOIN ppc_keywords ON ppc_keywords_categories.keyword_id = ppc_keywords.id WHERE ppc_keywords_categories.category_id = ?', [category_id],
+                connection.query('Select * from ppc_keywords_categories INNER JOIN ppc_keywords ON ppc_keywords_categories.keyword_id = ppc_keywords.id ' +
+                    'WHERE ppc_keywords_categories.category_id = ? ORDER BY keyword', [category_id],
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
@@ -658,8 +659,17 @@ module.exports = {
 										return reject(err);
 									}
 									if(i === ad_keywords.length - 1){
-										connection.release();
-										resolve(rows);
+										connection.query('SELECT ppc_ads_keywords.*, ppc_keywords.keyword, ppc_keywords.price, ppc_keywords.created_by ' +
+                                            'FROM ppc_keywords INNER JOIN ppc_ads_keywords ON ppc_keywords.id = ppc_ads_keywords.keyword_id ' +
+                                            'WHERE ad_id = ? ORDER BY keyword', [ad_id],
+                                            function(err, rows, fields) {
+                                                if(err) {
+                                                    connection.release();
+                                                    return reject(err);
+                                                }
+                                                resolve(rows);
+                                            }
+                                        );
 									}
 								}
 							);
