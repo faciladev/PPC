@@ -327,34 +327,42 @@ var ppcModel = {
             var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
             
 
-            if(filter === 'all' || typeof letter === "string" && letter.length === 1){
-                DbHelper.getConnection().then(
-                    function(connection){
+            // if(filter === 'all' || typeof letter === "string" && letter.length === 1){
+            //     DbHelper.getConnection().then(
+            //         function(connection){
 
-                        connection.query(query, queryParams, function(err, rows, fields){
-                            connection.release()
+            //             connection.query(query, queryParams, function(err, rows, fields){
+            //                 connection.release()
 
-                            if(err)
-                                return reject(err);
+            //                 if(err)
+            //                     return reject(err);
 
-                            return resolve(rows);
-                        });
-                    }, 
-                    function(error){
-                        return reject(error);
-                    }
-                );
-            } else {
+            //                 return resolve(rows);
+            //             });
+            //         }, 
+            //         function(error){
+            //             return reject(error);
+            //         }
+            //     );
+            // } else {
 
-                PaginationHelper.paginate(query, page, 16, queryParams).then(
-                    function(response){
-                        resolve(response);
-                    }, 
-                    function(error){
-                        reject(error);
-                    }
-                );
-            }
+            //     PaginationHelper.paginate(query, page, 16, queryParams).then(
+            //         function(response){
+            //             resolve(response);
+            //         }, 
+            //         function(error){
+            //             reject(error);
+            //         }
+            //     );
+            // }
+            PaginationHelper.paginate(query, page, 16, queryParams).then(
+                function(response){
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
                 
         });
     },
