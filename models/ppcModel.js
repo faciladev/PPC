@@ -306,7 +306,7 @@ var ppcModel = {
             if(filter === "featured"){
                 where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 1 ';
                 order += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
-                    '(iziphub_flexoffer_link.flexoffer_name = ""),' +
+                    '(iziphub_flexoffer_link.flexoffer_name = "" || iziphub_flexoffer_link.flexoffer_name IS NULL),' +
                     'iziphub_flexoffer_link.flexoffer_name ASC';
             } else if(filter === "all") {
                 where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 0 ' + 
@@ -319,7 +319,7 @@ var ppcModel = {
                 where += " AND iziphub_flexoffer_link.flexoffer_name LIKE ? ";
                 order = (order.length > 0)? order : 
                 ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
-                '(iziphub_flexoffer_link.flexoffer_name = ""),' +
+                '(iziphub_flexoffer_link.flexoffer_name = "" || iziphub_flexoffer_link.flexoffer_name IS NULL),' +
                 'iziphub_flexoffer_link.flexoffer_name ASC';
                 queryParams.push(letter + '%');
             }
