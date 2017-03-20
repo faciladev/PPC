@@ -664,7 +664,6 @@ module.exports = {
                                             'WHERE ad_id = ? ORDER BY keyword', [ad_id],
                                             function(err, rows, fields) {
                                                 connection.release();
-                                                
                                                 if(err) {
                                                     return reject(err);
                                                 }
