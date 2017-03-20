@@ -432,7 +432,10 @@ module.exports = {
     getAdKeywords: function(ad_id) {
       return new Promise(function(resolve, reject) {
          DbHelper.getConnection().then(function(connection) {
-            connection.query('SELECT * from ppc_ads_keywords where ad_id = ?', [ad_id],
+            connection.query('SELECT ppc_ads_keywords.*, ppc_keywords.keyword, ppc_keywords.price, ppc_keywords.created_by ' +
+                'FROM ppc_keywords INNER JOIN ppc_ads_keywords ON ppc_keywords.id = ppc_ads_keywords.keyword_id ' +
+                'WHERE ad_id = ? ORDER BY keyword', [ad_id],
+
                 function(err, rows, fields) {
                     connection.release();
                     if(err) {
@@ -502,7 +505,8 @@ module.exports = {
     getCategoryKeywords: function(category_id) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
-                connection.query('Select * from ppc_keywords_categories INNER JOIN ppc_keywords ON ppc_keywords_categories.keyword_id = ppc_keywords.id WHERE ppc_keywords_categories.category_id = ?', [category_id],
+                connection.query('Select * from ppc_keywords_categories INNER JOIN ppc_keywords ON ppc_keywords_categories.keyword_id = ppc_keywords.id ' +
+                    'WHERE ppc_keywords_categories.category_id = ? ORDER BY keyword', [category_id],
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
@@ -572,36 +576,52 @@ module.exports = {
 
     saveAd: function(ad) {
         return new Promise(function(resolve, reject) {
-            DbHelper.getConnection().then(function(connection){
-                if(ad.id == 0 ) {
-                    ad.created_at = DateHelper.today();
-                    ad.updated_at = DateHelper.today();
-                    ad.available_since = DateHelper.today();
-                    connection.query('INSERT INTO ppc_ads SET ?', [ad],
-                        function (err, rows, fields) {
-                            connection.release();
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                } else {
-                    ad.updated_at = DateHelper.today();
-                    connection.query('Update ppc_ads SET ? WHERE id = ?', [ad, ad.id],
-                        function (err, rows, fields) {
-                            connection.release();
-                            if(err){
-                                reject(err);
-                            }
-                            resolve(rows);
-                        }
-                    );
-                }
 
-            }, function(error){
-                reject(error);
-            });
+                Util.getAddressLatLng(ad.address).then(
+                    function(location){
+                        if(location !== false){
+                            ad.lat = location.lat;
+                            ad.lng = location.lng;
+                        }
+
+                        DbHelper.getConnection().then(function(connection){
+                            if(ad.id == 0 ) {
+                                ad.created_at = DateHelper.today();
+                                ad.updated_at = DateHelper.today();
+                                ad.available_since = DateHelper.today();
+                                connection.query('INSERT INTO ppc_ads SET ?', [ad],
+                                    function (err, rows, fields) {
+                                        connection.release();
+                                        if(err){
+                                            reject(err);
+                                        }
+                                        resolve(rows);
+                                    }
+                                );
+                            } else {
+                                ad.updated_at = DateHelper.today();
+                                connection.query('Update ppc_ads SET ? WHERE id = ?', [ad, ad.id],
+                                    function (err, rows, fields) {
+                                        connection.release();
+                                        if(err){
+                                            reject(err);
+                                        }
+                                        resolve(rows);
+                                    }
+                                );
+                            }
+
+                        }, function(error){
+                            reject(error);
+                        });
+
+                    },
+                    function(error){
+                        reject(error);
+                    }
+                );
+
+
         });
     },
     saveAdMicrosite: function(ad_id, ad_microsite) {
@@ -642,8 +662,17 @@ module.exports = {
 										return reject(err);
 									}
 									if(i === ad_keywords.length - 1){
-										connection.release();
-										resolve(rows);
+										connection.query('SELECT ppc_ads_keywords.*, ppc_keywords.keyword, ppc_keywords.price, ppc_keywords.created_by ' +
+                                            'FROM ppc_keywords INNER JOIN ppc_ads_keywords ON ppc_keywords.id = ppc_ads_keywords.keyword_id ' +
+                                            'WHERE ad_id = ? ORDER BY keyword', [ad_id],
+                                            function(err, rows, fields) {
+                                                connection.release();
+                                                if(err) {
+                                                    return reject(err);
+                                                }
+                                                resolve(rows);
+                                            }
+                                        );
 									}
 								}
 							);
