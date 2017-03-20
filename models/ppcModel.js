@@ -355,12 +355,21 @@ var ppcModel = {
             //         }
             //     );
             // }
-            PaginationHelper.paginate(query, page, 16, queryParams).then(
-                function(response){
-                    resolve(response);
+            
+            DbHelper.getConnection().then(
+                function(connection){
+
+                    connection.query(query, queryParams, function(err, rows, fields){
+                        connection.release()
+
+                        if(err)
+                            return reject(err);
+
+                        return resolve(rows);
+                    });
                 }, 
                 function(error){
-                    reject(error);
+                    return reject(error);
                 }
             );
                 
