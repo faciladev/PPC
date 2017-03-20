@@ -432,7 +432,10 @@ module.exports = {
     getAdKeywords: function(ad_id) {
       return new Promise(function(resolve, reject) {
          DbHelper.getConnection().then(function(connection) {
-            connection.query('SELECT * from ppc_ads_keywords where ad_id = ?', [ad_id],
+            connection.query('SELECT ppc_ads_keywords.*, ppc_keywords.keyword, ppc_keywords.price, ppc_keywords.created_by ' +
+                'FROM ppc_keywords INNER JOIN ppc_ads_keywords ON ppc_keywords.id = ppc_ads_keywords.keyword_id ' +
+                'WHERE ad_id = ? ORDER BY keyword', [ad_id],
+
                 function(err, rows, fields) {
                     connection.release();
                     if(err) {
