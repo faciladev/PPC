@@ -663,8 +663,8 @@ module.exports = {
                                             'FROM ppc_keywords INNER JOIN ppc_ads_keywords ON ppc_keywords.id = ppc_ads_keywords.keyword_id ' +
                                             'WHERE ad_id = ? ORDER BY keyword', [ad_id],
                                             function(err, rows, fields) {
+                                                connection.release();
                                                 if(err) {
-                                                    connection.release();
                                                     return reject(err);
                                                 }
                                                 resolve(rows);
