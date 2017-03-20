@@ -324,7 +324,7 @@ var ppcModel = {
             
             query += order;
 
-            var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where;
+            var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where + order;
             
 
             // if(filter === 'all' || typeof letter === "string" && letter.length === 1){
