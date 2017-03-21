@@ -44,95 +44,186 @@ var ppcModel = {
     DAILY_BUDGET_PERIOD : DAILY_BUDGET_PERIOD,
     MONTHLY_BUDGET_PERIOD : MONTHLY_BUDGET_PERIOD,
 
-    findSponsoredAds : function(keyword, location, subPage, page){
+    findSponsoredAds : function(keyword, location, subPage, page, filter){
         return new Promise(function(resolve, reject) {
             //set default argument value
-            subPage = (typeof subPage === 'undefined' || subPage === null) 
-                ? false : subPage;
+            subPage = parseInt(subPage) || false;
+            page = parseInt(page) || false;
+            filter = filter || false;
+            
+            var queryParams = [];
 
             var query = 'SELECT ' +
-            'first_result.ad_keyword_id, '+ 
-            'first_result.usa_state_code, ' +
-            'first_result.usa_state_name, ' +
-            'first_result.city, ' +
-            'first_result.zipcode, ' +
-            'first_result.ad_id, ' +
-            'first_result.url, ' +
-            'first_result.title, ' +
-            'first_result.address, ' +
-            'first_result.lat, ' +
-            'first_result.lng, ' +
-            'first_result.phone_no, ' +
-            'first_result.ad_text, ' +
-            'MAX(first_result.price) price, ' +
-            'first_result.keyword_category_id,' +
-            'first_result.ad_location_id, ' +
-            'first_result.ad_subpage_id, ' +
-            'first_result.keyword_id ' +
-            'FROM ' +
-            '(SELECT ' +
-            'available_ad_keywords.ad_keyword_id, '+ 
-            'usa_states.usa_state_code, ' +
-            'usa_states.usa_state_name, ' +
-            'ppc_ad_microsites.city, ' +
-            'ppc_ad_microsites.zipcode, ' +
-            'ppc_ads.id AS ad_id, ' +
-            'ppc_ads.url, ' +
-            'ppc_ads.title, ' +
-            'ppc_ads.address, ' +
-            'ppc_ads.lat, ' +
-            'ppc_ads.lng, ' +
-            'ppc_ads.phone_no, ' +
-            'ppc_ads.ad_text, ' +
-            'ppc_keywords.price, ' +
-            'available_ad_keywords.keyword_category_id,' +
-            'ppc_ad_locations.id AS ad_location_id, ' +
-            'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
-            'available_ad_keywords.keyword_id ' +
-            'FROM ' +
-            'available_ad_keywords ' +
-            'JOIN ' +
-            'ppc_keywords ON available_ad_keywords.keyword_id = ppc_keywords.id ' +
-            'JOIN ' + 
-            'ppc_ads ON ppc_ads.id = available_ad_keywords.ad_id ' +
-            'JOIN ' +
-            'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id '+
-            'JOIN ' +
-            'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
-            'JOIN ' +
-            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
-            ;
+                    'final_ads.ad_id,' +
+                    'ppc_ad_locations.id as ad_location_id,' +
+                    'avak.price,' +
+                    'usa_states.usa_state_code, ' +
+                    'usa_states.usa_state_name, ' +
+                    'ppc_ad_microsites.city, ' +
+                    'ppc_ad_microsites.zipcode, ' +
+                    'ppc_ads.id AS ad_id, ' +
+                    'ppc_ads.url, ' +
+                    'ppc_ads.title, ' +
+                    'ppc_ads.address, ' +
+                    'ppc_ads.lat, ' +
+                    'ppc_ads.lng, ' +
+                    'ppc_ads.phone_no, ' +
+                    'ppc_ads.ad_text, ' +
+                    'avak.keyword_category_id,' +
+                    'avak.ad_keyword_id,' +
+                    'avak.keyword_id, ' +
+                    'ppc_ads_subpages.sub_page_id AS ad_subpage_id ' +
+                'FROM ' +
+                    '(SELECT ' + 
+                        'unique_ads.ad_id, MAX(kwd.price) AS price ' +
+                    'FROM ' +
+                        'ppc_keywords AS kwd ' +
+                    'JOIN (SELECT  ' +
+                        'ad_id, keyword_id, ad_keyword_id ' +
+                    'FROM ' +
+                        'available_ad_keywords ' +
+                    'WHERE ' +
+                        'ad_id IN (SELECT DISTINCT ' +
+                                'unsorted.ad_id ' +
+                            'FROM ' +
+                                '(SELECT ' + 
+                                '* ' +
+                            'FROM ' +
+                                'available_ad_keywords ' +
+                            'WHERE ' +
+                                'available_ad_keywords.keyword_id IN (SELECT  ' +
+                                        'id ' +
+                                    'FROM ' +
+                                        'ppc_keywords ' +
+                                    'WHERE ' +
+                                        'keyword LIKE ?)) AS unsorted)) AS unique_ads ON kwd.id = unique_ads.keyword_id ';
+                    queryParams.push('%' + keyword + '%');
+                    query+= 'AND price = kwd.price ' +
+                    'JOIN ppc_ad_microsites ON ppc_ad_microsites.ad_id = unique_ads.ad_id ' +
+                    'JOIN usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+                    'JOIN ppc_ad_locations ON ppc_ad_locations.ad_id = unique_ads.ad_id ';
+                    
+                    if(subPage)
+                        query += 'JOIN ppc_ads_subpages ON ppc_ads_subpages.ad_id = unique_ads.ad_id ';
+                    
+                    query += 'JOIN ppc_ads ON ppc_ads.id = unique_ads.ad_id ' +
+                    'WHERE ';
 
-            if(subPage)
-                query += 'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ';
+                    if(filter)
+                        query += 'ppc_ads.is_featured = 1 ';
+
+                    if(subPage){
+                        if(filter){
+                            query += 'AND ppc_ads_subpages.sub_page_id = ? '; 
+                        } else {
+                            query += ' ppc_ads_subpages.sub_page_id = ? ';
+                        }
+
+                        queryParams.push(subPage);
+
+                    }
+
+                    if(filter || subPage){
+                        query += ' AND ';
+                    }
+
+                    query += ' (ppc_ad_locations.city LIKE ? ' +
+                    '|| ppc_ad_locations.zip_code LIKE ?) ';
+                    queryParams.push('%' + location + '%', '%' + location + '%');
+                    
+                    query += 'GROUP BY unique_ads.ad_id ' +
+                    'ORDER BY price DESC) AS final_ads ' +
+                        'JOIN ' +
+                    'available_ad_keywords avak ON avak.ad_id = final_ads.ad_id ' +
+                        'AND avak.price = final_ads.price ' +
+                        'JOIN ' +
+                    'ppc_ads ON ppc_ads.id = final_ads.ad_id ' +
+                        'JOIN ' +
+                    'ppc_ad_microsites ON ppc_ad_microsites.ad_id = final_ads.ad_id ' +
+                        'JOIN ' +
+                    'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+                        'JOIN ' +
+                    'ppc_ad_locations ON ppc_ad_locations.ad_id = final_ads.ad_id ';
+                    
+                    if(subPage)
+                        query += 'JOIN ppc_ads_subpages ON ppc_ads_subpages.ad_id = final_ads.ad_id ';
+                    
+                    query += 'WHERE ';
+                    
+                    if(filter)
+                        query += 'ppc_ads.is_featured = 1 ';
+
+                    if(subPage){
+                        query += (filter === 'featured')? 
+                        'AND ppc_ads_subpages.sub_page_id = ? ' :
+                        'ppc_ads_subpages.sub_page_id = ? ' ;
+                        queryParams.push(subPage);
+                    }
+                    
+                    query += 'AND (ppc_ad_locations.city LIKE ?  ' +
+                        '|| ppc_ad_locations.zip_code LIKE ?) ' +
+                        'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ' +
+                        ' AND ppc_ads.is_approved = 1 ' +
+                    ' ORDER BY final_ads.price DESC ';
+
+                    queryParams.push('%' + location + '%', '%' + location + '%');
+            //set default argument value
+            // subPage = (typeof subPage === 'undefined' || subPage === null) 
+            //     ? false : subPage;
+
+            // var query = 
+            // 'SELECT ' +
+            // 'available_ad_keywords.ad_keyword_id, '+ 
+            // 'usa_states.usa_state_code, ' +
+            // 'usa_states.usa_state_name, ' +
+            // 'ppc_ad_microsites.city, ' +
+            // 'ppc_ad_microsites.zipcode, ' +
+            // 'ppc_ads.id AS ad_id, ' +
+            // 'ppc_ads.url, ' +
+            // 'ppc_ads.title, ' +
+            // 'ppc_ads.address, ' +
+            // 'ppc_ads.lat, ' +
+            // 'ppc_ads.lng, ' +
+            // 'ppc_ads.phone_no, ' +
+            // 'ppc_ads.ad_text, ' +
+            // 'ppc_keywords.price, ' +
+            // 'available_ad_keywords.keyword_category_id,' +
+            // 'ppc_ad_locations.id AS ad_location_id, ' +
+            // 'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
+            // 'available_ad_keywords.keyword_id ' +
+            // 'FROM ' +
+            // 'available_ad_keywords ' +
+            // 'JOIN ' +
+            // 'ppc_keywords ON available_ad_keywords.keyword_id = ppc_keywords.id ' +
+            // 'JOIN ' + 
+            // 'ppc_ads ON ppc_ads.id = available_ad_keywords.ad_id ' +
+            // 'JOIN ' +
+            // 'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id '+
+            // 'JOIN ' +
+            // 'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+            // 'JOIN ' +
+            // 'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
+            // ;
+
+            // if(subPage)
+            //     query += 'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ';
 
 
-            query += 'WHERE ' +
-            'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
-            'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
-            'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
+            // query += 'WHERE ' +
+            // 'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
+            // 'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
+            // 'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
 
-            if(subPage)
-                query += 'AND ppc_ads_subpages.sub_page_id = ? ';
+            // if(subPage)
+            //     query += 'AND ppc_ads_subpages.sub_page_id = ? ';
 
-            query += 'ORDER BY ppc_keywords.price DESC) AS first_result ';
-            query += 'GROUP BY ad_id ' +
-            ', ad_keyword_id, ' +
-            'usa_state_code, ' +
-            'usa_state_name, ' +
-            'city, ' +
-            'zipcode, ' +
-            'ad_location_id, ' +
-            'ad_subpage_id, ' +
-            'keyword_id ';
-            query += 'ORDER BY price DESC';
+            // query += 'ORDER BY ppc_keywords.price DESC';
 
-            var queryParams = ['%' + keyword + '%', '%' + location + '%', '%' + location + '%'];
             
-            if(subPage)
-                queryParams.push(subPage);
+            // if(subPage)
+            //     queryParams.push(subPage);
 
-            console.log(DbHelper.prepare(query, queryParams));
+            // console.log(query, queryParams)
 
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
