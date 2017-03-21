@@ -146,7 +146,6 @@ var searchAds = function(req, res, next){
 
 	ppcModel.findSponsoredAds(keyword, location, subPage, page, filter).then(
 		function(searchData){
-			console.log(searchData)
 			var paginatedSearchData = searchData;
 			searchData = searchData.result;
 

@@ -50,7 +50,7 @@ var ppcModel = {
             subPage = parseInt(subPage) || false;
             page = parseInt(page) || false;
             filter = filter || false;
-            
+
             var queryParams = [];
 
             var query = 'SELECT ' +
@@ -223,7 +223,6 @@ var ppcModel = {
             // if(subPage)
             //     queryParams.push(subPage);
 
-            // console.log(query, queryParams)
 
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
