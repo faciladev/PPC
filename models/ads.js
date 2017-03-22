@@ -276,9 +276,10 @@ module.exports = {
                                 'WHERE '+
                                     'ppc_ads.id = ? '+
                                         'AND ppc_ads_subpages.sub_page_id = ? '+
+                                        'AND ppc_ads.is_featured = 1 ' +
                                 'ORDER BY price DESC '+
                                 'LIMIT 1';
-                                
+
                     connection.query(query, 
                         [adId, subPageId], 
                         function(err, rows, fields){
