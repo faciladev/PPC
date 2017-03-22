@@ -44,13 +44,135 @@ var ppcModel = {
     DAILY_BUDGET_PERIOD : DAILY_BUDGET_PERIOD,
     MONTHLY_BUDGET_PERIOD : MONTHLY_BUDGET_PERIOD,
 
-    findSponsoredAds : function(keyword, location, subPage, page){
+    findSponsoredAds : function(keyword, location, subPage, page, filter){
         return new Promise(function(resolve, reject) {
+            //set default argument value
+            // subPage = parseInt(subPage) || false;
+            // page = parseInt(page) || false;
+            // filter = filter || false;
+
+            // var queryParams = [];
+
+            // var query = 'SELECT ' +
+            //         'final_ads.ad_id,' +
+            //         'ppc_ad_locations.id as ad_location_id,' +
+            //         'avak.price,' +
+            //         'usa_states.usa_state_code, ' +
+            //         'usa_states.usa_state_name, ' +
+            //         'ppc_ad_microsites.city, ' +
+            //         'ppc_ad_microsites.zipcode, ' +
+            //         'ppc_ads.id AS ad_id, ' +
+            //         'ppc_ads.url, ' +
+            //         'ppc_ads.title, ' +
+            //         'ppc_ads.address, ' +
+            //         'ppc_ads.lat, ' +
+            //         'ppc_ads.lng, ' +
+            //         'ppc_ads.phone_no, ' +
+            //         'ppc_ads.ad_text, ' +
+            //         'avak.keyword_category_id,' +
+            //         'avak.ad_keyword_id,' +
+            //         'avak.keyword_id, ' +
+            //         'ppc_ads_subpages.sub_page_id AS ad_subpage_id ' +
+            //     'FROM ' +
+            //         '(SELECT ' + 
+            //             'unique_ads.ad_id, MAX(kwd.price) AS price ' +
+            //         'FROM ' +
+            //             'ppc_keywords AS kwd ' +
+            //         'JOIN (SELECT  ' +
+            //             'ad_id, keyword_id, ad_keyword_id ' +
+            //         'FROM ' +
+            //             'available_ad_keywords ' +
+            //         'WHERE ' +
+            //             'ad_id IN (SELECT DISTINCT ' +
+            //                     'unsorted.ad_id ' +
+            //                 'FROM ' +
+            //                     '(SELECT ' + 
+            //                     '* ' +
+            //                 'FROM ' +
+            //                     'available_ad_keywords ' +
+            //                 'WHERE ' +
+            //                     'available_ad_keywords.keyword_id IN (SELECT  ' +
+            //                             'id ' +
+            //                         'FROM ' +
+            //                             'ppc_keywords ' +
+            //                         'WHERE ' +
+            //                             'keyword LIKE ?)) AS unsorted)) AS unique_ads ON kwd.id = unique_ads.keyword_id ';
+            //         queryParams.push('%' + keyword + '%');
+            //         query+= 'AND price = kwd.price ' +
+            //         'JOIN ppc_ad_microsites ON ppc_ad_microsites.ad_id = unique_ads.ad_id ' +
+            //         'JOIN usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+            //         'JOIN ppc_ad_locations ON ppc_ad_locations.ad_id = unique_ads.ad_id ';
+                    
+            //         if(subPage)
+            //             query += 'JOIN ppc_ads_subpages ON ppc_ads_subpages.ad_id = unique_ads.ad_id ';
+                    
+            //         query += 'JOIN ppc_ads ON ppc_ads.id = unique_ads.ad_id ' +
+            //         'WHERE ';
+
+            //         if(filter)
+            //             query += 'ppc_ads.is_featured = 1 ';
+
+            //         if(subPage){
+            //             if(filter){
+            //                 query += 'AND ppc_ads_subpages.sub_page_id = ? '; 
+            //             } else {
+            //                 query += ' ppc_ads_subpages.sub_page_id = ? ';
+            //             }
+
+            //             queryParams.push(subPage);
+
+            //         }
+
+            //         if(filter || subPage){
+            //             query += ' AND ';
+            //         }
+
+            //         query += ' (ppc_ad_locations.city LIKE ? ' +
+            //         '|| ppc_ad_locations.zip_code LIKE ?) ';
+            //         queryParams.push('%' + location + '%', '%' + location + '%');
+                    
+            //         query += 'GROUP BY unique_ads.ad_id ' +
+            //         'ORDER BY price DESC) AS final_ads ' +
+            //             'JOIN ' +
+            //         'available_ad_keywords avak ON avak.ad_id = final_ads.ad_id ' +
+            //             'AND avak.price = final_ads.price ' +
+            //             'JOIN ' +
+            //         'ppc_ads ON ppc_ads.id = final_ads.ad_id ' +
+            //             'JOIN ' +
+            //         'ppc_ad_microsites ON ppc_ad_microsites.ad_id = final_ads.ad_id ' +
+            //             'JOIN ' +
+            //         'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+            //             'JOIN ' +
+            //         'ppc_ad_locations ON ppc_ad_locations.ad_id = final_ads.ad_id ';
+                    
+            //         if(subPage)
+            //             query += 'JOIN ppc_ads_subpages ON ppc_ads_subpages.ad_id = final_ads.ad_id ';
+                    
+            //         query += 'WHERE ';
+                    
+            //         if(filter)
+            //             query += 'ppc_ads.is_featured = 1 ';
+
+            //         if(subPage){
+            //             query += (filter === 'featured')? 
+            //             'AND ppc_ads_subpages.sub_page_id = ? ' :
+            //             'ppc_ads_subpages.sub_page_id = ? ' ;
+            //             queryParams.push(subPage);
+            //         }
+                    
+            //         query += 'AND (ppc_ad_locations.city LIKE ?  ' +
+            //             '|| ppc_ad_locations.zip_code LIKE ?) ' +
+            //             'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ' +
+            //             ' AND ppc_ads.is_approved = 1 ' +
+            //         ' ORDER BY final_ads.price DESC ';
+
+            //         queryParams.push('%' + location + '%', '%' + location + '%');
             //set default argument value
             subPage = (typeof subPage === 'undefined' || subPage === null) 
                 ? false : subPage;
 
-            var query = 'SELECT ' +
+            var query = 
+            'SELECT ' +
             'available_ad_keywords.ad_keyword_id, '+ 
             'usa_states.usa_state_code, ' +
             'usa_states.usa_state_name, ' +
@@ -101,6 +223,7 @@ var ppcModel = {
             
             if(subPage)
                 queryParams.push(subPage);
+
 
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
@@ -667,7 +790,12 @@ var ppcModel = {
                 'CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' +
                 'ppc_analytics.activity_time BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY))' +
                 ' GROUP BY ppc_ads.id';
-
+                var x = DbHelper.prepare(query, [
+                        searchData.ad_id, 
+                        Util.firstDay(), 
+                        Util.lastDay()
+                    ]);
+                console.log(x);
 
                 connection.query(query, 
                     [
@@ -946,9 +1074,9 @@ var ppcModel = {
         });
     },
 
-    trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
+    trackSponsoredAdClick : function(searchData, ip, userAgent, userId, isFeatured){
         return new Promise(function(resolve, reject){
-            
+            isFeatured = isFeatured || false;
             userModel.getUserGroup(userId).then(
                 function(group){
 
@@ -961,19 +1089,15 @@ var ppcModel = {
                     }
 
                   
-                    var query1 = 'INSERT INTO ppc_analytics SET ?';
-                    var query2 = "UPDATE ppc_ad_searches SET ? WHERE id = ?";
+                    var query1 = (! isFeatured) ? 
+                        'INSERT INTO ppc_analytics SET ?' :
+                        'INSERT INTO ppc_ad_searches SET ?';
 
-                    DbHelper.getConnection().then(function(connection){
+                    var query2 = (! isFeatured) ? 
+                    "UPDATE ppc_ad_searches SET ? WHERE id = ?" :
+                    "INSERT INTO ppc_analytics SET ?";
 
-                        connection.beginTransaction(function(err) {
-                            if(err){
-                                connection.release();
-                                reject(err);
-                            }
-
-                            connection.query(query1, 
-                                    {
+                    var query1Params = (! isFeatured) ? {
                                         actor_type_id: actor_type_id,
                                         item_type_id: ITEM_SPONSORED_AD,
                                         activity_type_id: ACTIVITY_CLICK,
@@ -983,7 +1107,45 @@ var ppcModel = {
                                         user_agent: userAgent.user_agent,
                                         device_version: userAgent.device_version,
                                         fraudulent: searchData.fraudulent
-                                    }, 
+                                    } : 
+                                    {
+                                        ad_id: searchData.ad_id,
+                                        keyword_id: searchData.keyword_id,
+                                        keyword_category_id: searchData.keyword_category_id,
+                                        price: searchData.price,
+                                        ad_subpage_id: searchData.ad_subpage_id,
+                                        clicked: 1
+                                    };
+
+
+
+                    var query2Params = (! isFeatured) ?  [
+                                            {
+                                                clicked: 1
+                                            },
+                                            searchData.id
+                                        ] :
+                                        {
+                                            actor_type_id: actor_type_id,
+                                            item_type_id: ITEM_SPONSORED_AD,
+                                            activity_type_id: ACTIVITY_CLICK,
+                                            //item_id: assigned from analytics table transaction return
+                                            actor_id: userId,
+                                            ip_address: ip,
+                                            user_agent: userAgent.user_agent,
+                                            device_version: userAgent.device_version,
+                                            fraudulent: searchData.fraudulent
+                                        };
+
+                    DbHelper.getConnection().then(function(connection){
+
+                        connection.beginTransaction(function(err) {
+                            if(err){
+                                connection.release();
+                                reject(err);
+                            }
+
+                            connection.query(query1, query1Params,
                                     function(err, results, fields){
                                     
 
@@ -994,13 +1156,10 @@ var ppcModel = {
                                         });
                                     }
 
-                                    connection.query(query2, 
-                                            [
-                                                {
-                                                    clicked: 1
-                                                },
-                                                searchData.id
-                                            ], 
+                                    if(isFeatured)
+                                        query2Params.item_id = results.insertId;
+
+                                    connection.query(query2, query2Params,
                                             function(err, results, fields){
 
                                             if(err){

@@ -189,39 +189,44 @@ module.exports = {
                 return reject(new Error('Invalid subpage id.'));
 
             var query = 'SELECT ' +
-            'usa_states.usa_state_code, ' +
-            'usa_states.usa_state_name, ' +
-            'ppc_ad_microsites.city, ' +
-            'ppc_ad_microsites.zipcode, ' +
-            'ppc_ads.id AS ad_id, ' +
-            'ppc_ads.url, ' +
-            'ppc_ads.title, ' +
-            'ppc_ads.address, ' +
-            'ppc_ads.lat, ' +
-            'ppc_ads.lng, ' +
-            'ppc_ads.phone_no, ' +
-            'ppc_ads_subpages.sub_page_id,' +
-            'ppc_ads.ad_text ' +
+                'usa_states.usa_state_code, ' +
+                'usa_states.usa_state_name, ' +
+                'ppc_ad_microsites.city, ' +
+                'ppc_ad_microsites.zipcode, ' +
+                'ppc_ads.id AS ad_id, ' +
+                'ppc_ads.url, ' +
+                'ppc_ads.title, ' +
+                'ppc_ads.address, ' +
+                'ppc_ads.lat, ' +
+                'ppc_ads.lng, ' +
+                'ppc_ads.phone_no, ' +
+                'ppc_ads_subpages.sub_page_id, ' +
+                'ppc_ads.ad_text ' +
             'FROM ' +
-            'ppc_ads ' +
-            'JOIN ' +
-            'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id '+
-            'JOIN ' +
-            '(SELECT DISTINCT ad_id FROM available_ad_keywords) AS available_ad_keywords ' +
-            'ON available_ad_keywords.ad_id = ppc_ads.id ' +
-            'JOIN ' +
-            '(SELECT DISTINCT ad_id, sub_page_id FROM ppc_ads_subpages WHERE sub_page_id = ? GROUP BY ad_id) AS ppc_ads_subpages ' +
-            'ON ppc_ads_subpages.ad_id = ppc_ads.id ' +
-            'JOIN ' +
-            'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
+                'ppc_ads ' +
+                    'JOIN ' +
+                'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id ' +
+                    'JOIN ' +
+                '(SELECT DISTINCT ' +
+                    'ad_id ' +
+                'FROM ' +
+                    'available_ad_keywords) AS available_ad_keywords ON available_ad_keywords.ad_id = ppc_ads.id ' +
+                    'JOIN ' +
+                '(SELECT  ' +
+                    'ad_id, sub_page_id ' +
+                'FROM ' +
+                    'ppc_ads_subpages) AS ppc_ads_subpages ON ppc_ads_subpages.ad_id = ppc_ads.id ' +
+                    'JOIN ' +
+                'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
             'WHERE ' +
-            'ppc_ads.is_featured=0 AND ppc_ads.is_approved = 1 ' +
-            'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 '
-            // 'AND ppc_ads_subpages.sub_page_id = ?'
-            ;
+                'ppc_ads.is_featured = 1 ' +
+                    'AND ppc_ads.is_approved = 1 ' +
+                    'AND ppc_ads.is_deleted = 0 ' +
+                    'AND ppc_ads.paused = 0 ' +
+                    'AND ppc_ads_subpages.sub_page_id = ? ';
 
 
-            var queryParams = [subPage, subPage];
+            var queryParams = [subPage];
 
             DbHelper.getConnection().then(
                 function(connection){
@@ -241,6 +246,55 @@ module.exports = {
             );
                 
             
+        });
+    },
+
+    getOneFeaturedAd: function(adId, subPageId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(
+                function(connection){
+                    var query = 'SELECT '+
+                                    'ppc_ads.id AS ad_id, '+
+                                    'high_keywords.price, '+
+                                    'high_keywords.keyword_id, '+
+                                    'available_ad_keywords.keyword_category_id, '+
+                                    'ppc_ads_subpages.sub_page_id AS ad_subpage_id '+
+                                'FROM '+
+                                    'ppc_ads '+
+                                        'JOIN '+
+                                    'available_ad_keywords ON available_ad_keywords.ad_id = ppc_ads.id '+
+                                        'JOIN '+
+                                    'ppc_ads_subpages ON ppc_ads_subpages.ad_id = ppc_ads.id '+
+                                        'JOIN '+
+                                    '(SELECT  '+
+                                        'available_ad_keywords.keyword_id, '+
+                                            'MAX(available_ad_keywords.price) AS price '+
+                                    'FROM '+
+                                        'available_ad_keywords '+
+                                    'GROUP BY available_ad_keywords.keyword_id '+
+                                    'ORDER BY price DESC) AS high_keywords ON high_keywords.keyword_id = available_ad_keywords.keyword_id '+
+                                'WHERE '+
+                                    'ppc_ads.id = ? '+
+                                        'AND ppc_ads_subpages.sub_page_id = ? '+
+                                        'AND ppc_ads.is_featured = 1 ' +
+                                'ORDER BY price DESC '+
+                                'LIMIT 1';
+
+                    connection.query(query, 
+                        [adId, subPageId], 
+                        function(err, rows, fields){
+                            connection.release();
+                            if(err)
+                                return reject(err);
+
+                            resolve((rows.length > 0)? rows[0] : {});
+                        }
+                    );
+                }, 
+                function(error){
+                    next(error);
+                }
+            );
         });
     },
 

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var ppcModel = require('../models/ppcModel');
 var userModel = require('../models/userModel');
+var adModel = require('../models/ads');
 var Util = require('../lib/util');
 
 //Deal click for members
@@ -24,6 +25,16 @@ router.get('/ads/:searchId/:redirectUrl', function(req, res, next){
 	clickSponsoredAd(req, res, next);
 });
 
+//Featured sponsored ad click tracking for non-members
+router.get('/f_ads/:adId/:subPageId/:redirectUrl', function(req, res, next){
+	clickFeaturedAd(req, res, next);
+});
+
+//Featured sponsored ad click tracking for members
+router.get('/f_ads/:adId/:subPageId/:redirectUrl/:userId', function(req, res, next){
+	clickFeaturedAd(req, res, next);
+});
+
 //Flex offer click tracking for non-members
 router.get('/flexoffers/:flexSearchId/:redirectUrl', function(req, res, next){
 	clickFlexOffer(req, res, next);
@@ -33,6 +44,124 @@ router.get('/flexoffers/:flexSearchId/:redirectUrl', function(req, res, next){
 router.get('/flexoffers/:flexSearchId/:redirectUrl/:userId', function(req, res, next){
 	clickFlexOffer(req, res, next);
 });
+
+var clickFeaturedAd = function(req, res, next){
+	var adId = parseInt(req.params.adId) || null;
+	var subPageId = parseInt(req.params.subPageId) || null;
+	var redirectUrl = req.params.redirectUrl;
+	var userId = req.params.userId;
+
+	adModel.getOneFeaturedAd(adId, subPageId).then(function(searchData){
+
+		if(! searchData.ad_id)
+			return next(new Error('No featured ad found with that id or in that subpage.'));
+
+		var userAgent = Util.getUserAgent(req);
+		var ip = Util.getClientIp(req);
+
+		var data = {
+			activity_type_id: ppcModel.ACTIVITY_CLICK,
+			item_type_id: ppcModel.ITEM_SPONSORED_AD,
+		};
+
+		if(! isNaN(userId))
+			data.actor_id = parseInt(userId);
+
+		//Make sure if click meets click policy
+		ppcModel.requestMeetsClickPolicy(
+			ip, 
+			userAgent, 
+			data, 
+			userId).then(
+			function(hasPassed){
+
+				//Check if click failed click policy.
+				if(! hasPassed){
+					//Set fraudulent flag to 1
+					searchData.fraudulent = 1;
+				} else {
+					//Set fraudulent flag to 0
+					searchData.fraudulent = 0;
+				}
+
+				//Checks if ad has available budget for its budget period
+				// to allow trackable clicks
+				ppcModel.adBudgetLimitCheck(searchData).then(
+					function(response){
+
+						//No available fund remains
+						if(response.has_passed === 0){
+							
+							//Do not track click
+							//Update 'available_since' field so future searches won't include this ad
+							ppcModel.postponeAdAvailability(searchData.ad_id).then(
+								function(response){
+									
+									res.redirect(Util.decodeUrl(redirectUrl));
+								},
+								function(error){
+									next(error);
+								}
+							);
+
+						} 
+						//Ad has available funds for clicks
+						else {
+
+							//Ad's available fund is below 10% of budget limit.
+							if(response.low_budget === 1){
+
+								//TODO
+
+								//Check if notification is sent regarding this ad's budget availability
+								//If it hasn't been sent then send one.
+								//If it has been sent do nothing.
+
+								ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId, true).then(
+									function(response){
+										res.redirect(Util.decodeUrl(redirectUrl));
+									},
+									function(error){
+										next(error);
+									}
+								);
+
+								
+
+							} 
+
+							//Ad's availble fund is greater than 10% of budget limit.
+							else {
+								
+								ppcModel.trackSponsoredAdClick(searchData, ip, userAgent, userId, true).then(
+									function(response){
+										res.redirect(Util.decodeUrl(redirectUrl));
+									},
+									function(error){
+										next(error);
+									}
+								);
+							}
+
+								
+						}
+							
+					}, 
+					function(error){
+						next(error);
+					}
+				);
+			},
+			function(error){
+				next(error);
+			}
+		);
+	});
+
+		
+
+
+}
 
 var clickSponsoredAd = function(req, res, next){
 	var searchId = req.params.searchId;

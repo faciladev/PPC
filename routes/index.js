@@ -134,7 +134,7 @@ router.post('/categoryKeywords', function(req, res, next) {
 router.get('/flexoffers/letters', function(req, res, next) {
     var filter = req.query.filter;
     var subPage = req.query.subpage;
-
+    
     flexModel.getFlexLetters(filter, subPage).then(function(response){
         res.json(response);
     }, function(error){
