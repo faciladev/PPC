@@ -1073,9 +1073,9 @@ var ppcModel = {
         });
     },
 
-    trackSponsoredAdClick : function(searchData, ip, userAgent, userId){
+    trackSponsoredAdClick : function(searchData, ip, userAgent, userId, isFeatured){
         return new Promise(function(resolve, reject){
-            
+            isFeatured = isFeatured || false;
             userModel.getUserGroup(userId).then(
                 function(group){
 
@@ -1088,19 +1088,15 @@ var ppcModel = {
                     }
 
                   
-                    var query1 = 'INSERT INTO ppc_analytics SET ?';
-                    var query2 = "UPDATE ppc_ad_searches SET ? WHERE id = ?";
+                    var query1 = (! isFeatured) ? 
+                        'INSERT INTO ppc_analytics SET ?' :
+                        'INSERT INTO ppc_ad_searches SET ?';
 
-                    DbHelper.getConnection().then(function(connection){
+                    var query2 = (! isFeatured) ? 
+                    "UPDATE ppc_ad_searches SET ? WHERE id = ?" :
+                    "INSERT INTO ppc_analytics SET ?";
 
-                        connection.beginTransaction(function(err) {
-                            if(err){
-                                connection.release();
-                                reject(err);
-                            }
-
-                            connection.query(query1, 
-                                    {
+                    var query1Params = (! isFeatured) ? {
                                         actor_type_id: actor_type_id,
                                         item_type_id: ITEM_SPONSORED_AD,
                                         activity_type_id: ACTIVITY_CLICK,
@@ -1110,7 +1106,45 @@ var ppcModel = {
                                         user_agent: userAgent.user_agent,
                                         device_version: userAgent.device_version,
                                         fraudulent: searchData.fraudulent
-                                    }, 
+                                    } : 
+                                    {
+                                        ad_id: searchData.ad_id,
+                                        keyword_id: searchData.keyword_id,
+                                        keyword_category_id: searchData.keyword_category_id,
+                                        price: searchData.price,
+                                        ad_subpage_id: searchData.ad_subpage_id,
+                                        clicked: 1
+                                    };
+
+
+
+                    var query2Params = (! isFeatured) ?  [
+                                            {
+                                                clicked: 1
+                                            },
+                                            searchData.id
+                                        ] :
+                                        {
+                                            actor_type_id: actor_type_id,
+                                            item_type_id: ITEM_SPONSORED_AD,
+                                            activity_type_id: ACTIVITY_CLICK,
+                                            //item_id: assigned from analytics table transaction return
+                                            actor_id: userId,
+                                            ip_address: ip,
+                                            user_agent: userAgent.user_agent,
+                                            device_version: userAgent.device_version,
+                                            fraudulent: searchData.fraudulent
+                                        };
+
+                    DbHelper.getConnection().then(function(connection){
+
+                        connection.beginTransaction(function(err) {
+                            if(err){
+                                connection.release();
+                                reject(err);
+                            }
+
+                            connection.query(query1, query1Params,
                                     function(err, results, fields){
                                     
 
@@ -1121,13 +1155,10 @@ var ppcModel = {
                                         });
                                     }
 
-                                    connection.query(query2, 
-                                            [
-                                                {
-                                                    clicked: 1
-                                                },
-                                                searchData.id
-                                            ], 
+                                    if(isFeatured)
+                                        query2Params.item_id = results.insertId;
+
+                                    connection.query(query2, query2Params,
                                             function(err, results, fields){
 
                                             if(err){

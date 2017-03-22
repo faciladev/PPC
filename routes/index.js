@@ -134,39 +134,12 @@ router.post('/categoryKeywords', function(req, res, next) {
 router.get('/flexoffers/letters', function(req, res, next) {
     var filter = req.query.filter;
     var subPage = req.query.subpage;
-    res.json([
-    	'A',
-    	'B',
-    	'C',
-    	'D',
-    	'E',
-    	'F',
-    	'G',
-    	'H',
-    	'I',
-    	'J',
-    	'K',
-    	'L',
-    	'M',
-    	'N',
-    	'O',
-    	'P',
-    	'Q',
-    	'R',
-    	'S',
-    	'T',
-    	'U',
-    	'V',
-    	'W',
-    	'X',
-    	'Y',
-    	'Z'
-	]);
-    // flexModel.getFlexLetters(filter, subPage).then(function(response){
-    //     res.json(response);
-    // }, function(error){
-    //     next(error);
-    // });
+    
+    flexModel.getFlexLetters(filter, subPage).then(function(response){
+        res.json(response);
+    }, function(error){
+        next(error);
+    });
 });
 
 module.exports = router;
