@@ -278,14 +278,13 @@ module.exports = {
                                         'AND ppc_ads_subpages.sub_page_id = ? '+
                                 'ORDER BY price DESC '+
                                 'LIMIT 1';
-
+                                
                     connection.query(query, 
                         [adId, subPageId], 
                         function(err, rows, fields){
                             connection.release();
                             if(err)
                                 return reject(err);
-
 
                             resolve((rows.length > 0)? rows[0] : {});
                         }
