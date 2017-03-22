@@ -555,6 +555,24 @@ module.exports = {
         });
     },
 
+    getAdvertiserOffers: function(advertiser_id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('SELECT * FROM ppc_offers WHERE advertiser_id = ?', [advertiser_id],
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                reject(error);
+            });
+        });
+    },
+
     //Gets Category Keywords
     getCategoryKeywords: function(category_id) {
         return new Promise(function(resolve, reject) {

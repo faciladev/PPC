@@ -97,6 +97,14 @@ router.get('/keywords/:categoryId', function(req, res, next) {
         next(error);
     });
 });
+router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
+    ads.getAdvertiserOffers(req.params.advertiserId).then(function(response){
+        res.json(response);
+    }, function(error) {
+        error.message = 'Error';
+        next(error);
+    });
+});
 
 
 /**
