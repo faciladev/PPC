@@ -1,9 +1,11 @@
 var express = require('express');
 var config = require('config');
 
-var router = express.Router();
 var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
+var Util = require('../lib/util');
+
+var router = express.Router();
 
 router.get('/', function(req, res, next) {
     var search = req.query.search;
@@ -353,8 +355,20 @@ router.get('/:subpage/featured', function(req, res, next){
     var subPage = parseInt(req.params.subpage);
 
     ads.getFeatured(subPage).then(
-        function(response){
-            res.json(response);
+        function(featuredAds){
+            if(! (featuredAds.length > 0))
+                return res.json([]);
+
+            for(var i=0; i<featuredAds.length;i++){
+                var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                                'Categories/listing_microsite/' + featuredAds[i].ad_id);
+                featuredAds[i].redirectUrl = config.get('project_url') + 
+                    '/api/click/f_ads/' + featuredAds[i].ad_id + '/' + subPage + '/' +
+                    redirectUrl;
+            }
+
+            res.json(featuredAds);
+
         }, function(error){
             next(error);
         }
