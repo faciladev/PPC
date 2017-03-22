@@ -52,8 +52,8 @@ var clickFeaturedAd = function(req, res, next){
 	var userId = req.params.userId;
 
 	adModel.getOneFeaturedAd(adId, subPageId).then(function(searchData){
-		console.log(searchData);
-		if(!searchData.ad_id)
+
+		if(typeof searchData.ad_id === "undefined")
 			return next(new Error('No featured ad found with that id or in that subpage.'));
 
 		var userAgent = Util.getUserAgent(req);

@@ -287,7 +287,7 @@ module.exports = {
                                 return reject(err);
 
 
-                            resolve((rows.length > 0)? rows[0] : []);
+                            resolve((rows.length > 0)? rows[0] : {});
                         }
                     );
                 }, 
