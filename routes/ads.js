@@ -541,7 +541,7 @@ router.put('/:adId/notfeatured', function(req, res, next){
  * @apiName ApproveSponsoredAds
  * @apiGroup Sponsored Ads
  *
- * @apiParam {Number} adId     Sponsored Ad Id
+ * @apiParam {Number} adId Sponsored Ad Id
  *
  * @apiSuccess {Boolean} status True if approve operation succeeds else False.
  *
