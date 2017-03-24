@@ -316,7 +316,7 @@ router.delete('/offers/:offerId', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/:adId/pause Pause A Sponsored Ad.
+ * @api {put} /ads/:adId/pause Pause A Sponsored Ad.
  * @apiVersion 0.1.0
  * @apiName pauseASponsoredAd
  * @apiGroup Sponsored Ads
@@ -349,7 +349,7 @@ router.put('/:adId/pause', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/:adId/unpause Unpause A Sponsored Ad.
+ * @api {put} /ads/:adId/unpause Unpause A Sponsored Ad.
  * @apiVersion 0.1.0
  * @apiName UnpauseASponsoredAd
  * @apiGroup Sponsored Ads
@@ -457,7 +457,7 @@ router.get('/:subpage/featured', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/:adId/featured Make A Sponsored Ad featured.
+ * @api {put} /ads/:adId/featured Make A Sponsored Ad featured.
  * @apiVersion 0.1.0
  * @apiName FeaturedponsoredAds
  * @apiGroup Sponsored Ads
@@ -492,7 +492,7 @@ router.put('/:adId/featured', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/:adId/notfeatured Make A Sponsored Ad not featured.
+ * @api {put} /ads/:adId/notfeatured Make A Sponsored Ad not featured.
  * @apiVersion 0.1.0
  * @apiName NotFeaturedponsoredAds
  * @apiGroup Sponsored Ads
@@ -528,7 +528,7 @@ router.put('/:adId/notfeatured', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/:adId/approve Approve Sponsored Ads
+ * @api {put} /ads/:adId/approve Approve Sponsored Ads
  * @apiVersion 0.1.0
  * @apiName ApproveSponsoredAds
  * @apiGroup Sponsored Ads
@@ -564,7 +564,7 @@ router.put('/:adId/approve', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/:adId/disapprove Disapprove Sponsored Ads
+ * @api {put} /ads/:adId/disapprove Disapprove Sponsored Ads
  * @apiVersion 0.1.0
  * @apiName DisapproveSponsoredAds
  * @apiGroup Sponsored Ads
