@@ -108,20 +108,20 @@ app.use(function(err, req, res, next) {
   //Not Found pages
   if(err.status === 404){
     res.status(404);
-    res.json({error: err});
+    return res.json({error: err});
   }
 
   else if(req.app.get('env') === 'production'){
     //Error in production environment
     console.error(err);
     res.status(err.status || 500);
-    res.json('Something went wrong!');
+    return res.json('Something went wrong!');
   }
   else{
     //Error in non-production environment
     console.error(err);
     res.status(err.status || 500);
-    res.json({error: err});
+    return res.json({error: err});
   }
 
 });
