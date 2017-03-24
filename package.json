@@ -27,5 +27,8 @@
     "request-ip": "^1.2.3",
     "useragent": "^2.1.11",
     "yamlparser": "0.0.2"
+  },
+  "devDependencies": {
+    "apidoc": "^0.17.5"
   }
 }

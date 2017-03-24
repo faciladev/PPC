@@ -5,42 +5,112 @@ var userModel = require('../models/userModel');
 var adModel = require('../models/ads');
 var Util = require('../lib/util');
 
-//Deal click for members
+/**
+ * @api {get} /click/deals/:dealId/:redirectUrl/:userId Member Click Tracking of Daily Deals
+ * @apiVersion 0.1.0
+ * @apiName MemberClickTrackingofDailyDeals
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {Number} dealId  Daily Deal Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ * @apiParam {Number} userId  User Id.
+ */
 router.get('/deals/:dealId/:redirectUrl/:userId', function(req, res, next){
 	clickDeal(req, res, next);
 });
 
-//Deal click for non-members
+/**
+ * @api {get} /click/deals/:dealId/:redirectUrl Non-Member Click Tracking of Daily Deals
+ * @apiVersion 0.1.0
+ * @apiName Non-MemberClickTrackingofDailyDeals
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {Number} dealId  Daily Deal Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ */
 router.get('/deals/:dealId/:redirectUrl', function(req, res, next){
 	clickDeal(req, res, next);
 });
 
-//Sponsored ad click tracking for members
+/**
+ * @api {get} /click/ads/:searchId/:redirectUrl/:userId Member Click Tracking of Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName MemberClickTrackingofSponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} searchId  Search Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ * @apiParam {Number} userId  User Id.
+ */
 router.get('/ads/:searchId/:redirectUrl/:userId', function(req, res, next){
 	clickSponsoredAd(req, res, next);
 });
 
-//Sponsored ad click tracking for non-members
+/**
+ * @api {get} /click/ads/:searchId/:redirectUrl Non-Member Click Tracking of Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName NonMemberClickTrackingofSponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} searchId  Search Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ */
 router.get('/ads/:searchId/:redirectUrl', function(req, res, next){
 	clickSponsoredAd(req, res, next);
 });
 
-//Featured sponsored ad click tracking for non-members
+/**
+ * @api {get} /click/f_ads/:adId/:subpageId/:redirectUrl Non-Member Click Tracking of Featured Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName NonMemberClickTrackingofFeaturedSponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId  Sponsored Ad Id.
+ * @apiParam {Number} subpageId  Subpage Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ */
 router.get('/f_ads/:adId/:subPageId/:redirectUrl', function(req, res, next){
 	clickFeaturedAd(req, res, next);
 });
 
-//Featured sponsored ad click tracking for members
+/**
+ * @api {get} /click/f_ads/:adId/:subpageId/:redirectUrl/:userId Member Click Tracking of Featured Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName MemberClickTrackingofFeaturedSponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId  Sponsored Ad Id.
+ * @apiParam {Number} subpageId  Subpage Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ * @apiParam {Number} userId  User Id.
+ */
 router.get('/f_ads/:adId/:subPageId/:redirectUrl/:userId', function(req, res, next){
 	clickFeaturedAd(req, res, next);
 });
 
-//Flex offer click tracking for non-members
+/**
+ * @api {get} /click/flexoffers/:flexSearchId/:redirectUrl Non-Member Click Tracking of Flex Offers
+ * @apiVersion 0.1.0
+ * @apiName Non-MemberClickTrackingofFlexOffers
+ * @apiGroup Flex Offers
+ *
+ * @apiParam {Number} flexSearchId  Flex Search Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ */
 router.get('/flexoffers/:flexSearchId/:redirectUrl', function(req, res, next){
 	clickFlexOffer(req, res, next);
 });
 
-//Flex offer click tracking for members
+/**
+ * @api {get} /click/flexoffers/:flexSearchId/:redirectUrl/:userId Member Click Tracking of Flex Offers
+ * @apiVersion 0.1.0
+ * @apiName MemberClickTrackingofFlexOffers
+ * @apiGroup Flex Offers
+ *
+ * @apiParam {Number} flexSearchId  Flex Search Id.
+ * @apiParam {String} redirectUrl  Redirect URL After Click Tracking.
+ * @apiParam {Number} userId User Id.
+ */
 router.get('/flexoffers/:flexSearchId/:redirectUrl/:userId', function(req, res, next){
 	clickFlexOffer(req, res, next);
 });

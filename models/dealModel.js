@@ -68,7 +68,7 @@ var dealModel = {
                                                             });
                                                         }
 
-                                                        resolve(results);
+                                                        resolve(results.affectedRows);
                                                     });
                                                 }
                                             );
@@ -85,7 +85,7 @@ var dealModel = {
                                         }
 
                                         connection.release();
-                                        resolve(results);
+                                        resolve(results.affectedRows);
                                     });
                                 }
                             }
@@ -110,7 +110,7 @@ var dealModel = {
                             return reject(err);
                         }
 
-                        resolve(rows);
+                        resolve(rows.affectedRows);
                     }
                 );
             }, function(error){
@@ -168,7 +168,7 @@ var dealModel = {
                                   });
                                 }
                                 connection.release();
-                                resolve(results);
+                                resolve(results.insertId);
                               });
                             });
                           });
@@ -243,7 +243,7 @@ var dealModel = {
                                   });
                                 }
                                 connection.release();
-                                resolve(results);
+                                resolve(results.affectedRows);
                               });
                             });
                           });

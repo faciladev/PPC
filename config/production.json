@@ -14,5 +14,6 @@
     "cors_whitelist" : [
     	"http://ziphub.com"
     ],
-    "google_map_api_key": "AIzaSyCScrZhqgWrCJACbnr_frSVCaEQoBCLRM8"
+    "google_map_api_key": "AIzaSyCScrZhqgWrCJACbnr_frSVCaEQoBCLRM8",
+    "apidoc" : "apidoc"
 }

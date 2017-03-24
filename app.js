@@ -51,6 +51,9 @@ app.use(cookieParser());
 //Used to serve image assets and directory is outside project root
 app.use(express.static(config.get('upload_path')));
 
+//Apidoc 
+app.use('/apidoc', express.static(config.get('apidoc')));
+
 //Sponsored ad api
 app.use('/api/ads', ads);
 
