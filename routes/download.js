@@ -4,12 +4,47 @@ var ppcModel = require('../models/ppcModel');
 var userModel = require('../models/userModel');
 var Util = require('../lib/util');
 
-//Track deal download for non-members
+/**
+ * @api {get} /download/deals/:dealId Track Non-member Deal Download
+ * @apiVersion 0.1.0
+ * @apiName TrackNonMemberDealDownload
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {Number} dealId     Daily Deal Id
+ *
+ * @apiSuccess {Boolean} status  True if download operation succeeds else False.
+ * @apiSuccess {String} message  Confirmation message about the operation.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *     		"status": true, 
+ *     		"message": "download tracked."
+ *     }
+ */
 router.get('/deals/:dealId', function(req, res, next){
 	downloadDeal(req, res, next);
 });
 
-//Track deal download
+/**
+ * @api {get} /download/deals/:dealId/:userId Track Member Deal Download
+ * @apiVersion 0.1.0
+ * @apiName TrackMemberDealDownload
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {Number} dealId     Daily Deal Id
+ * @apiParam {Number} userId     User Id
+ *
+ * @apiSuccess {Boolean} status  True if download operation succeeds else False.
+ * @apiSuccess {String} message  Confirmation message about the operation.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *     		"status": true, 
+ *     		"message": "download tracked."
+ *     }
+ */
 router.get('/deals/:dealId/:userId', function(req, res, next){
 	downloadDeal(req, res, next);
 });

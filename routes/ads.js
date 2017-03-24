@@ -315,7 +315,23 @@ router.delete('/offers/:offerId', function(req, res, next){
     );
 });
 
-//Pause sponsor ad
+/**
+ * @api {get} /ads/:adId/pause Pause A Sponsored Ad.
+ * @apiVersion 0.1.0
+ * @apiName pauseASponsoredAd
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ *
+ * @apiSuccess {Boolean} status True if approve operation succeeds else False.
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "status": true
+ *     }
+ *       
+ */
 router.put('/:adId/pause', function(req, res, next){
     
     var ad = {
@@ -332,7 +348,23 @@ router.put('/:adId/pause', function(req, res, next){
     );
 });
 
-//Unpause sponsor ad
+/**
+ * @api {get} /ads/:adId/unpause Unpause A Sponsored Ad.
+ * @apiVersion 0.1.0
+ * @apiName UnpauseASponsoredAd
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ *
+ * @apiSuccess {Boolean} status True if approve operation succeeds else False.
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "status": true
+ *     }
+ *       
+ */
 router.put('/:adId/unpause', function(req, res, next){
     
     var ad = {
@@ -340,8 +372,10 @@ router.put('/:adId/unpause', function(req, res, next){
     }
 
     ads.partialUpdateAd(req.params.adId, ad).then(
-        function(result){
-            res.json(result);
+        function(affectedRows){
+            res.json(
+                (parseInt(affectedRows)) ? { status: true } : { status: false }
+            );
         }, 
         function(error){
             next(error);
@@ -349,7 +383,54 @@ router.put('/:adId/unpause', function(req, res, next){
     );
 });
 
-//Get featured ads
+/**
+ * @api {get} /ads/:subpageId/featured Get Featured Sponsored Ads By Subpage Id
+ * @apiVersion 0.1.0
+ * @apiName GetFeaturedponsoredAdsBySubpageId
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} subpageId Subpage ID
+ *
+ * @apiSuccess {Object[]} featuredAds List of Featured Ads In A Category.
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [
+ *        {
+ *          "usa_state_code": "NV",
+ *          "usa_state_name": "Nevada",
+ *          "city": "Las vegas",
+ *          "zipcode": "89146",
+ *          "ad_id": 148,
+ *          "url": "www.yyt.com",
+ *          "title": "test",
+ *          "address": "7865 w sahara",
+ *          "lat": null,
+ *          "lng": null,
+ *          "phone_no": "7023062676",
+ *          "sub_page_id": 1,
+ *          "ad_text": "test",
+ *          "redirectUrl": "http://54.67.28.43:8081/api/click/f_ads/148/1/http%3A%2F%2Fiziphub.com%2FCategories%2Flisting_microsite%2F148"
+ *        },
+ *        {
+ *          "usa_state_code": "NV",
+ *          "usa_state_name": "Nevada",
+ *          "city": "las vegas",
+ *          "zipcode": "89146",
+ *          "ad_id": 155,
+ *          "url": "http://www.actionprintingservice.com/",
+ *          "title": "Sport Events",
+ *          "address": "Bethole",
+ *          "lat": "17.5603359",
+ *          "lng": "79.99794109999999",
+ *          "phone_no": "251911448404",
+ *          "sub_page_id": 1,
+ *          "ad_text": "Sport Events",
+ *          "redirectUrl": "http://54.67.28.43:8081/api/click/f_ads/155/1/http%3A%2F%2Fiziphub.com%2FCategories%2Flisting_microsite%2F155"
+ *        }
+ *     ]
+ *       
+ */
 router.get('/:subpage/featured', function(req, res, next){
 
     var subPage = parseInt(req.params.subpage);
@@ -375,7 +456,23 @@ router.get('/:subpage/featured', function(req, res, next){
     );
 });
 
-//Make sponsor ad featured
+/**
+ * @api {get} /ads/:adId/featured Make A Sponsored Ad featured.
+ * @apiVersion 0.1.0
+ * @apiName FeaturedponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ *
+ * @apiSuccess {Boolean} status True if approve operation succeeds else False.
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "status": true
+ *     }
+ *       
+ */
 router.put('/:adId/featured', function(req, res, next){
     
     var ad = {
@@ -383,8 +480,10 @@ router.put('/:adId/featured', function(req, res, next){
     }
 
     ads.partialUpdateAd(req.params.adId, ad).then(
-        function(result){
-            res.json(result);
+        function(affectedRows){
+            res.json(
+                (parseInt(affectedRows)) ? { status: true } : { status: false }
+            );
         }, 
         function(error){
             next(error);
@@ -392,7 +491,23 @@ router.put('/:adId/featured', function(req, res, next){
     );
 });
 
-//Remove sponsor ad from being featured
+/**
+ * @api {get} /ads/:adId/notfeatured Make A Sponsored Ad not featured.
+ * @apiVersion 0.1.0
+ * @apiName NotFeaturedponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ *
+ * @apiSuccess {Boolean} status True if approve operation succeeds else False.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "status": true
+ *     }
+ *       
+ */
 router.put('/:adId/notfeatured', function(req, res, next){
     
     var ad = {
@@ -400,8 +515,11 @@ router.put('/:adId/notfeatured', function(req, res, next){
     }
 
     ads.partialUpdateAd(req.params.adId, ad).then(
-        function(result){
-            res.json(result);
+        function(affectedRows){
+
+            res.json(
+                (parseInt(affectedRows)) ? { status: true } : { status: false }
+            );
         }, 
         function(error){
             next(error);
@@ -409,7 +527,24 @@ router.put('/:adId/notfeatured', function(req, res, next){
     );
 });
 
-//Approve sponsor ad
+/**
+ * @api {get} /ads/:adId/approve Approve Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName ApproveSponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId     Sponsored Ad Id
+ *
+ * @apiSuccess {Boolean} status True if approve operation succeeds else False.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "status": true
+ *     }
+ *       
+ */
+
 router.put('/:adId/approve', function(req, res, next){
     
     var ad = {
@@ -417,8 +552,10 @@ router.put('/:adId/approve', function(req, res, next){
     }
 
     ads.partialUpdateAd(req.params.adId, ad).then(
-        function(result){
-            res.json(result);
+        function(affectedRows){
+            res.json(
+                (parseInt(affectedRows)) ? { status: true } : { status: false }
+            );
         }, 
         function(error){
             next(error);
@@ -426,7 +563,23 @@ router.put('/:adId/approve', function(req, res, next){
     );
 });
 
-//Disapprove sponsor ad
+/**
+ * @api {get} /ads/:adId/disapprove Disapprove Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName DisapproveSponsoredAds
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId     Sponsored Ad Id
+ *
+ * @apiSuccess {Boolean} status True if approve operation succeeds else False.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "status": true
+ *     }
+ *       
+ */
 router.put('/:adId/disapprove', function(req, res, next){
     
     var ad = {
@@ -434,8 +587,10 @@ router.put('/:adId/disapprove', function(req, res, next){
     }
 
     ads.partialUpdateAd(req.params.adId, ad).then(
-        function(result){
-            res.json(result);
+        function(affectedRows){
+            res.json(
+                (parseInt(affectedRows)) ? { status: true } : { status: false }
+            );
         }, 
         function(error){
             next(error);

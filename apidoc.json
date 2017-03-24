@@ -1,0 +1,15 @@
+{
+  "name": "PPC API DOCUMENTATION",
+  "version": "0.1.0",
+  "description": "Ziphub's ppc api documentation.",
+  "title": "PPC API DOC",
+  "url" : "http://54.67.28.43:8081/api",
+  "order": [
+    "GetDeal",
+    "PostDeal"
+  ],
+  "template": {
+  	"withCompare": true,
+  	"withGenerator": true
+  }
+}

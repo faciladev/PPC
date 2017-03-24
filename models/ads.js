@@ -69,7 +69,7 @@ module.exports = {
                                                             });
                                                         }
 
-                                                        resolve(results);
+                                                        resolve(results.affectedRows);
                                                     });
                                                 }
                                             );
@@ -86,7 +86,7 @@ module.exports = {
                                         }
 
                                         connection.release();
-                                        resolve(results);
+                                        resolve(results.affectedRows);
                                     });
                                 }
                             }
