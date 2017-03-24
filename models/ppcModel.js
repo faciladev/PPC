@@ -224,7 +224,6 @@ var ppcModel = {
             if(subPage)
                 queryParams.push(subPage);
 
-
             PaginationHelper.paginate(query, page, null, queryParams).then(
                 function(response){
                     resolve(response);
@@ -795,7 +794,6 @@ var ppcModel = {
                         Util.firstDay(), 
                         Util.lastDay()
                     ]);
-                console.log(x);
 
                 connection.query(query, 
                     [

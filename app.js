@@ -113,6 +113,7 @@ app.use(function(err, req, res, next) {
 
   else if(req.app.get('env') === 'production'){
     //Error in production environment
+    console.error(err);
     res.status(err.status || 500);
     res.json('Something went wrong!');
   }
