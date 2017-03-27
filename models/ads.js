@@ -556,6 +556,24 @@ module.exports = {
         });
     },
 
+    getAdvertiserOffers: function(advertiser_id) {
+        return new Promise(function(resolve, reject) {
+            DbHelper.getConnection().then(function(connection) {
+                connection.query('SELECT * FROM ppc_offers WHERE advertiser_id = ?', [advertiser_id],
+                    function(err, rows, fields) {
+                        connection.release();
+                        if(err) {
+                            reject(err);
+                        }
+                        resolve(rows);
+                    }
+                );
+            }, function(error) {
+                reject(error);
+            });
+        });
+    },
+
     //Gets Category Keywords
     getCategoryKeywords: function(category_id) {
         return new Promise(function(resolve, reject) {
@@ -701,6 +719,9 @@ module.exports = {
     },
     saveAdKeywords: function(ad_id, ad_keywords) {
         return new Promise(function(resolve, reject) {
+            if(! (ad_keywords instanceof Array) || ad_keywords.length <= 0 || isNaN(ad_id))
+                return reject(new Error('Invalid ad id or empty ad keyword array.'));
+
             DbHelper.getConnection().then(function(connection){
                 connection.query('DELETE FROM ppc_ads_keywords WHERE ad_id = ?', [ad_id], function(err, rows, fields){
 					if(err){
@@ -986,24 +1007,32 @@ module.exports = {
             if(! (ad_files instanceof Array) || ad_files.length <= 0 || isNaN(ad_id))
                 return reject(new appError('Invalid ad id or empty ad offer array.'));
 
-            DbHelper.getConnection().then(function(connection){
-                ad_files.forEach(function(objFile, i){
-                    var post = {ad_id: objFile.ad_id, file_id: objFile.file_id };
 
-                    connection.query('INSERT INTO ppc_ad_files SET ?', [post],
-                        function (err, result) {
-                            if(err){
-                                connection.release();
-                                reject(err);
+            DbHelper.getConnection().then(function(connection){
+                connection.query('DELETE FROM ppc_ad_files WHERE ad_id = ?', [ad_id], function(err, rows, fields){
+                    if(err){
+                        connection.release();
+                        return reject(err);
+                    }
+
+                    ad_files.forEach(function(objFile, i){
+                        var post = {ad_id: objFile.ad_id, file_id: objFile.file_id };
+
+                        connection.query('INSERT INTO ppc_ad_files SET ?', [post],
+                            function (err, result) {
+                                if(err){
+                                    connection.release();
+                                    reject(err);
+                                }
+                                post.id = result.insertId;
+                                insertedData.push(post);
+                                if(i== ad_files.length - 1) {
+                                    connection.release();
+                                    resolve(insertedData);
+                                }
                             }
-                            post.id = result.insertId;
-                            insertedData.push(post);
-                            if(i== ad_files.length - 1) {
-                                connection.release();
-                                resolve(insertedData);
-                            }
-                        }
-                    );
+                        );
+                    });
                 });
                 
             }, function(error){
