@@ -4,6 +4,7 @@ var DbHelper = require('../lib/DbHelper');
 var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
 var ppcModel = require('./ppcModel');
+var appError = require('../app_error');
 
 var dealModel = {
     
@@ -45,7 +46,7 @@ var dealModel = {
                                             if(results.length <= 0){
                                                 return connection.rollback(function(){
                                                     connection.release();
-                                                    reject(new Error('No microsite to update.'));
+                                                    reject(new appError('No microsite to update.'));
                                                 });
                                             }
 
@@ -114,8 +115,7 @@ var dealModel = {
                     }
                 );
             }, function(error){
-                if(error)
-                    reject(new Error('Connection error'));
+                    reject(error);
             });
         });
     },
@@ -203,7 +203,7 @@ var dealModel = {
 
                         if(results.length < 1){
                             connection.release();
-                            return reject(new Error('No microsite found for this ad.'));
+                            return reject(new appError('No microsite found for this ad.'));
                         }
 
                         var micrositeId = results[0].daily_deal_microsite_id;

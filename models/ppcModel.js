@@ -5,6 +5,7 @@ var DbHelper = require('../lib/DbHelper');
 var PaginationHelper = require('../lib/PaginationHelper');
 var Util = require('../lib/util');
 var userModel = require('./userModel');
+var appError = require('../app_error');
 
 const ACTIVITY_CLICK = 1;
 const ACTIVITY_IMPRESSION = 2;
@@ -240,7 +241,7 @@ var ppcModel = {
             DbHelper.getConnection().then(function(connection){
 
                 if(searchData.length <= 0)
-                    return reject(new Error('Cannot save empty search result.'));
+                    return reject(new appError('Cannot save empty search result.'));
 
                 var query = '';
 
@@ -276,7 +277,7 @@ var ppcModel = {
             DbHelper.getConnection().then(function(connection){
 
                 if(searchData.length <= 0)
-                    return reject(new Error('Cannot save empty search result.'));
+                    return reject(new appError('Cannot save empty search result.'));
 
                 var query = '';
 
@@ -656,7 +657,7 @@ var ppcModel = {
                     
 
                 } else {
-                    reject(new Error('No category found.'));
+                    reject(new appError('No category found.'));
                 }
 
             }, function(error){
@@ -814,7 +815,7 @@ var ppcModel = {
                     if(results.length === 0)
                         return resolve({has_passed: 1, low_budget: 0});
 
-                    reject(new Error('Failed to check budget for sponsor ad.'));
+                    reject(new appError('Failed to check budget for sponsor ad.'));
                 });
 
                 
@@ -866,7 +867,7 @@ var ppcModel = {
                     if(results.length === 0)
                         return resolve({has_passed: 1, low_budget: 0});
 
-                    reject(new Error('Failed to check budget for daily deal.'));
+                    reject(new appError('Failed to check budget for daily deal.'));
                 });
 
                 
@@ -889,7 +890,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No sponsor ad found to update budget_period'));
+                            return reject(new appError('No sponsor ad found to update budget_period'));
 
                         var budget_period = rows[0].budget_period;
 
@@ -909,7 +910,7 @@ var ppcModel = {
                         }
 
                         if(query === '')
-                            return reject(new Error('Sponsored ad must have a valid budget period.'));
+                            return reject(new appError('Sponsored ad must have a valid budget period.'));
 
                         queryParams.push(adId);
 
@@ -947,7 +948,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No daily deal found to update budget_period'));
+                            return reject(new appError('No daily deal found to update budget_period'));
 
                         var budget_period = rows[0].budget_period;
 
@@ -967,7 +968,7 @@ var ppcModel = {
                         }
 
                         if(query === '')
-                            return reject(new Error('Daily deal must have a valid budget period.'));
+                            return reject(new appError('Daily deal must have a valid budget period.'));
 
                         queryParams.push(dealId);
 
@@ -1007,7 +1008,7 @@ var ppcModel = {
                             }
 
                             if(rows.length <= 0)
-                                return reject(new Error('No advertiser found for this sponsor ad.'));
+                                return reject(new appError('No advertiser found for this sponsor ad.'));
 
                             var userId = rows[0].advertiser_id;
                             connection.beginTransaction(
@@ -1521,7 +1522,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No deal found.'));
+                            return reject(new appError('No deal found.'));
 
                         resolve(rows[0]);
                     }
@@ -1552,7 +1553,7 @@ var ppcModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No flex offer search found with this id.'));
+                            return reject(new appError('No flex offer search found with this id.'));
 
                         resolve(rows[0]);
                     }

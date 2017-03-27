@@ -2,6 +2,7 @@ var Promise = require('promise');
 
 var DbHelper = require('../lib/DbHelper');
 var Util = require('../lib/util');
+var appError = require('../app_error');
 
 //Approved advertiser status code
 const STATUS_APPROVED = 4;
@@ -57,7 +58,7 @@ var advertiserModel = {
                         if(rows.length > 0)
                             return resolve(rows[0]);
                         else
-                            return reject(new Error('Advertiser not found.'));
+                            return reject(new appError('Advertiser not found.'));
 
                     }
                 );

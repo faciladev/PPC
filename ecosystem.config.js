@@ -9,7 +9,6 @@ module.exports = {
     {
       name      : "PPC_DEV",
       script    : "./bin/www",
-      watch     : true,
 	  exec_mode : "cluster",
 	  instances : 0,
       env: {
@@ -32,6 +31,15 @@ module.exports = {
       env : {
         NODE_ENV: "production",
         PORT: "9000"
+      }
+    },
+
+    //Cron Job
+    {
+      name      : "PPC_CRON",
+      script    : "./cron/cron.js",
+      env : {
+        PORT: "3001"
       }
     }
   ],

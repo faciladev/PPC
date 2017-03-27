@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var userAgent = require('useragent');
@@ -8,6 +7,11 @@ var expressValidator = require('express-validator');
 var fileUpload = require('express-fileupload');
 var cors = require('cors');
 var config = require('config');
+var morgan = require('morgan');
+
+var errorHandler = require('./error_handler');
+var appError = require('./app_error');
+var logger = require('./logger');
 
 
 var ads = require('./routes/ads');
@@ -18,6 +22,7 @@ var deal = require('./routes/deal');
 var offer = require('./routes/offer');
 var analytic = require('./routes/analytic');
 var index = require('./routes/index');
+var logs = require('./routes/logs');
 
 var app = express();
 
@@ -41,7 +46,7 @@ app.use(cors(corsOptionsDelegate));
 //Enable pre-flight mode
 app.options('*', cors()) 
 
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -78,12 +83,12 @@ app.use('/api/analytics', analytic);
 //Other miscellaneous api
 app.use('/api/', index);
 
+app.use('/logs/', logs);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error();
-  err.message = 'Not Found.';
-  err.status = 404;
-  next(err);
+  res.status(appError.HttpErrorCodes.NotFound);
+  res.json({error: "Page Not Found"});
 });
 
 
@@ -103,27 +108,36 @@ Object.defineProperty(Error.prototype, 'toJSON', {
     writable: true
 });
 
-// error handler
+// Error handler middleware
 app.use(function(err, req, res, next) {
-  //Not Found pages
-  if(err.status === 404){
-    res.status(404);
-    return res.json({error: err});
+
+  //Delegate express default error handler
+  //for errors that occur when 
+  //headers have already been sent to the client
+  if (res.headersSent) {
+      return next(err)
   }
 
-  else if(req.app.get('env') === 'production'){
-    //Error in production environment
-    console.error(err);
-    res.status(err.status || 500);
-    return res.json('Something went wrong!');
-  }
-  else{
-    //Error in non-production environment
-    console.error(err);
-    res.status(err.status || 500);
-    return res.json({error: err});
-  }
+  errorHandler.handleErrorAsync(err).then(
+    function(isOperationalError){
+
+      if(! isOperationalError){
+        res.status(appError.HttpErrorCodes.InternalServerError);
+      } else {
+        res.status(err.httpErrorCode);
+      }
+
+      if(req.app.get('env') === 'production')
+        err = "Something went wrong.";
+
+      res.json({error: err});
+
+    }, function(error){
+      //Next to express default error handler
+      next(error);
+    });
 
 });
+
 
 module.exports = app;

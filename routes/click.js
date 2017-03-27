@@ -5,6 +5,8 @@ var userModel = require('../models/userModel');
 var adModel = require('../models/ads');
 var Util = require('../lib/util');
 
+var appError = require('../app_error');
+
 /**
  * @api {get} /click/deals/:dealId/:redirectUrl/:userId Member Click Tracking of Daily Deals
  * @apiVersion 0.1.0
@@ -124,7 +126,7 @@ var clickFeaturedAd = function(req, res, next){
 	adModel.getOneFeaturedAd(adId, subPageId).then(function(searchData){
 
 		if(! searchData.ad_id)
-			return next(new Error('No featured ad found with that id or in that subpage.'));
+			return next(new appError('No featured ad found with that id or in that subpage.'));
 
 		var userAgent = Util.getUserAgent(req);
 		var ip = Util.getClientIp(req);
@@ -243,7 +245,7 @@ var clickSponsoredAd = function(req, res, next){
 		function(searchData){
 
 			if(searchData.length <= 0)
-				return next(new Error('No search was found to generate this click.'));
+				return next(new appError('No search was found to generate this click.'));
 
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
