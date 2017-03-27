@@ -43,11 +43,32 @@ var EmailLogJob = new CronJob({
 		    if(bugs.length === 0)
 		    	return;
 
+		    let body = '';
+		    bugs.forEach(function(bug){
+		    	body += '<h2>' + bug.message + '</h2>';
+		    	body += '<p>' + bug.stack;
+		    	body += '<br> <small> Date: <b>' + bug.timestamp + '</b></small></p>';
+		    });
+
+
+
 		    jsonfile.writeFile(file, bugs, function(err) {
 			  if(err){
-			  	logger.error(err);
+			  	return logger.error(err);
 			  } else {
 			  	logger.info('Non-operational errors saved for review.');
+			  	Mailer.sendMail({
+						from: 'PPC CRON JOB',
+						to: 'abbifa@gmail.com',
+						subject: 'PPC Fatal Error Report',
+						html: body
+				    }, (error, info) => {
+					    if (error) {
+					        return console.error(error);
+					    }
+					    console.log('Message %s sent: %s', info.messageId, info.response);
+					}
+				);
 			  }
 			});
 
