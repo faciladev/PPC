@@ -398,7 +398,7 @@ router.get('/deals', function(req, res, next) {
  *     [
  *		  {
  *		    "flexoffer_link_id": 36057,
- *		    "flexoffer_link_content": "<embeddable/code",
+ *		    "flexoffer_link_content": "embeddable/code",
  *		    "flexoffer_link_subpage_id": 1,
  *		    "flexoffer_link_featured": 0,
  *		    "flexoffer_list_order": 0,
