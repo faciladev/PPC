@@ -94,13 +94,12 @@ function onListening() {
 process.on('SIGINT', function() {
   DbHelper.closeAllConnections().then(
     function(success){
-      logger.info('Closed all db connections');
-      process.exit(0);
+      var msg = 'SIGINT: Closed all db connections';
+      errorHandler.handleErrorAndExit(msg, 0, 'info');
     },
     function(err){
-      logger.error('Could not close all db connections.')
-      logger.error(err);
-      process.exit(1);
+      err.isOperational = false;
+      errorHandler.handleErrorAndExit(err, 1);
     }
   );
 });
@@ -109,33 +108,30 @@ process.on('message', function(msg) {
   if (msg == 'shutdown') {
     DbHelper.closeAllConnections().then(
       function(success){
-        logger.info('Closed all db connections');
-        process.exit(0);
+        var msg = 'message shutdown: Closed all db connections';
+        errorHandler.handleErrorAndExit(msg, 0, 'info');
       },
       function(err){
-        logger.error('Could not close all db connections.')
-        logger.error(err);
-        process.exit(1);
+        err.isOperational = false;
+        errorHandler.handleErrorAndExit(err, 1);
       }
     );
   }
 });
 
-process.on('uncaughtException', function(error) {
-  error.severe = true;
-  errorHandler.handleError(error, 
-    function(isOperationalError){
-      if(! isOperationalError){
-        process.exit(1);
-    }
-  });
-  
-});
 
 process.on('unhandledRejection', function (reason, p) {
-  throw reason;
+  reason.isOperational = false;
+  errorHandler.handleErrorAndExit(reason, 1);
 });
 
+process.on('uncaughtException', function(error) {
+  error.isOperational = false;
+  errorHandler.handleErrorAndExit(error, 1);  
+});
+
+
 process.on('warning', (warning) => {
+  warning.isOperational = false;
   logger.error(warning);
 });

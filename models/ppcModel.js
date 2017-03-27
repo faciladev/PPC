@@ -1,4 +1,4 @@
-var Promise = require('promise');
+var Promise = require('bluebird');
 var config = require('config');
 
 var DbHelper = require('../lib/DbHelper');

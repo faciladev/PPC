@@ -1,6 +1,9 @@
 var winston = require('winston');
 var moment = require('moment-timezone');
 
+//Library to support ayncronous file writes when process.exit() is called next.
+require('winston-log-and-exit');
+
 var timezone = 'America/Los_Angeles';
 var config = {
   levels: {

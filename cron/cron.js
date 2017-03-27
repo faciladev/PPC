@@ -15,7 +15,9 @@ var EmailLogJob = new CronJob({
 	//Run cron job every 30 seconds
 	cronTime: '0,30 0-59 * * * *',
 	onTick: function(){
+
 		var options = {
+			//start reading log from the last 31 seconds
 		    from: moment.tz(new Date - 31000, timezone).format(),    
 		    until: moment.tz(new Date, timezone).format(),    
 		    start: 0,
