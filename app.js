@@ -120,7 +120,7 @@ app.use(function(err, req, res, next) {
       return next(err)
   }
 
-  errorHandler.handleErrorAsync(err).then(
+  errorHandler.handleError(err).then(
     function(isOperationalError){
 
       if(! isOperationalError){

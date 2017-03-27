@@ -228,6 +228,8 @@ var clickFeaturedAd = function(req, res, next){
 				next(error);
 			}
 		);
+	}, function(error){
+		next(error);
 	});
 
 		

@@ -1,5 +1,5 @@
 var mysql = require('mysql');
-var Promise = require('promise');
+var Promise = require('bluebird');
 
 var DbHelper = require('../lib/DbHelper');
 var PaginationHelper = require('../lib/PaginationHelper');
