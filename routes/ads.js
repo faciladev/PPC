@@ -5,6 +5,7 @@ var ads = require('../models/ads');
 var UploadHelper = require('../lib/UploadHelper');
 var Util = require('../lib/util');
 
+var appError = require('../app_error');
 var router = express.Router();
 
 router.get('/', function(req, res, next) {
@@ -275,10 +276,10 @@ router.post('/weboffers', function(req, res, next){
     var url = req.body.url;
 
     if(typeof req.files.offerBanner === 'undefined' || req.files.offerBanner === null)
-        return next(new Error('No file was uploaded.'));
+        return next(new appError('No file was uploaded.'));
 
     if(typeof url === 'undefined' || url === null)
-        return next(new Error('No url provided.'));
+        return next(new appError('No url provided.'));
 
     var subDir = 'offer';
 

@@ -7,7 +7,9 @@
 var app = require('../app');
 // var debug = require('debug')('api:server');
 var http = require('http');
-
+var errorHandler = require('../error_handler');
+var logger = require('../logger');
+var DbHelper = require('../lib/DbHelper');
 /**
  * Get port from environment and store in Express.
  */
@@ -64,11 +66,11 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      logger.error(bind + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      logger.error(bind + ' is already in use');
       process.exit(1);
       break;
     default:
@@ -86,5 +88,54 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   // debug('Listening on ' + bind);
-  console.log('Listening on ' + bind);
+  logger.info('Listening on ' + bind);
 }
+
+process.on('SIGINT', function() {
+  DbHelper.closeAllConnections().then(
+    function(success){
+      logger.info('Closed all db connections');
+      process.exit(0);
+    },
+    function(err){
+      logger.error('Could not close all db connections.')
+      logger.error(err);
+      process.exit(1);
+    }
+  );
+});
+
+process.on('message', function(msg) {
+  if (msg == 'shutdown') {
+    DbHelper.closeAllConnections().then(
+      function(success){
+        logger.info('Closed all db connections');
+        process.exit(0);
+      },
+      function(err){
+        logger.error('Could not close all db connections.')
+        logger.error(err);
+        process.exit(1);
+      }
+    );
+  }
+});
+
+process.on('uncaughtException', function(error) {
+  error.severe = true;
+  errorHandler.handleError(error, 
+    function(isOperationalError){
+      if(! isOperationalError){
+        process.exit(1);
+    }
+  });
+  
+});
+
+process.on('unhandledRejection', function (reason, p) {
+  throw reason;
+});
+
+process.on('warning', (warning) => {
+  logger.error(warning);
+});

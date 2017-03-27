@@ -2,6 +2,7 @@ var Promise = require('promise');
 
 var DbHelper = require('../lib/DbHelper');
 var Util = require('../lib/util');
+var appError = require('../app_error');
 
 const ACTOR_CONSUMER = 1;
 const ACTOR_ADVERTISER = 2;
@@ -27,7 +28,7 @@ var userModel = {
                         }
 
                         if(rows.length <= 0)
-                            return reject(new Error('No user found.'));
+                            return reject(new appError('No user found.'));
                             
                         resolve(rows[0]);
                             
@@ -73,7 +74,7 @@ var userModel = {
                             return reject(err);
 
                         if(rows.length <= 0)
-                            return reject(new Error('User has no valid group'));
+                            return reject(new appError('User has no valid group'));
                         
                         resolve(rows[0]);
                         

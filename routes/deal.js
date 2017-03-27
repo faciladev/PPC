@@ -9,6 +9,7 @@ var Util = require('../lib/util');
 var UploadHelper = require('../lib/UploadHelper');
 var ppcModel = require('../models/ppcModel');
 
+var appError = require('../app_error');
 /**
  * @api {post} /deals Post Deal information
  * @apiVersion 0.1.0
@@ -345,10 +346,10 @@ router.post('/upload', function(req, res, next){
 	var uploadType = req.query.type;
 
 	if(Object.keys(req.files).length === 0)
-		return next(new Error('No file was uploaded.'));
+		return next(new appError('No file was uploaded.'));
 
 	if(!uploadType)
-		return next(new Error('Upload type not set.'));
+		return next(new appError('Upload type not set.'));
 
 	var subDir;
 
@@ -363,7 +364,7 @@ router.post('/upload', function(req, res, next){
 			subDir = uploadType;
 			break;
 		default:
-			return next(new Error('Invalid upload type.'));
+			return next(new appError('Invalid upload type.'));
 	}
 
 

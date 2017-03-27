@@ -6,6 +6,7 @@ var PaginationHelper = require('../lib/PaginationHelper');
 var DateHelper = require('../lib/DateHelper');
 var Util = require('../lib/util');
 var ppcModel = require('./ppcModel');
+var appError = require('../app_error');
 
 module.exports = {
     partialUpdateAd: function(adId, ad, microsite){
@@ -46,7 +47,7 @@ module.exports = {
                                             if(results.length <= 0){
                                                 return connection.rollback(function(){
                                                     connection.release();
-                                                    reject(new Error('No microsite to update.'));
+                                                    reject(new appError('No microsite to update.'));
                                                 });
                                             }
 
@@ -186,7 +187,7 @@ module.exports = {
         return new Promise(function(resolve, reject){
 
             if(isNaN(subPage))
-                return reject(new Error('Invalid subpage id.'));
+                return reject(new appError('Invalid subpage id.'));
 
             var query = 'SELECT ' +
                 'usa_states.usa_state_code, ' +
@@ -880,7 +881,7 @@ module.exports = {
 					reject(error);
 				});
 			} else {
-				reject(new Error("Empty Keyword"));
+				reject(new appError("Empty Keyword"));
 			}
             
         });
@@ -892,7 +893,7 @@ module.exports = {
         return new Promise(function(resolve, reject) {
 
             if(! (ad_offers instanceof Array)  || ad_offers.length <= 0 || isNaN(ad_id))
-                return reject(new Error('Invalid ad id or empty ad offer array.'));
+                return reject(new appError('Invalid ad id or empty ad offer array.'));
 
             DbHelper.getConnection().then(function(connection){
 
@@ -1004,7 +1005,8 @@ module.exports = {
         var insertedData = [];
         return new Promise(function(resolve, reject) {
             if(! (ad_files instanceof Array) || ad_files.length <= 0 || isNaN(ad_id))
-                return reject(new Error('Invalid ad id or empty ad file array.'));
+                return reject(new appError('Invalid ad id or empty ad offer array.'));
+
 
             DbHelper.getConnection().then(function(connection){
                 connection.query('DELETE FROM ppc_ad_files WHERE ad_id = ?', [ad_id], function(err, rows, fields){
@@ -1106,7 +1108,7 @@ module.exports = {
         var insertedData = [];
         return new Promise(function(resolve, reject){
             if(! (categoryKeywords instanceof Array)  || categoryKeywords.length <= 0)
-                return reject(new Error('categoryKeywords not a valid array.'));
+                return reject(new appError('categoryKeywords not a valid array.'));
 
             DbHelper.getConnection().then(function(connection){
                 categoryKeywords.forEach(function(objCategoryKeyword, i){

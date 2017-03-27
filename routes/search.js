@@ -5,6 +5,7 @@ var router = express.Router();
 var ppcModel = require('../models/ppcModel');
 var Util = require('../lib/util');
 
+var appError = require('../app_error');
 /**
  * @api {get} /search/ads/:keyword/:location/:subPage Non-member Sponsored Ad Search
  * @apiVersion 0.1.0
@@ -397,7 +398,7 @@ router.get('/deals', function(req, res, next) {
  *     [
  *		  {
  *		    "flexoffer_link_id": 36057,
- *		    "flexoffer_link_content": "<embeddable/code",
+ *		    "flexoffer_link_content": "embeddable/code",
  *		    "flexoffer_link_subpage_id": 1,
  *		    "flexoffer_link_featured": 0,
  *		    "flexoffer_list_order": 0,
@@ -576,7 +577,7 @@ var searchFlex = function(req, res, next){
                     }
 				}
 				else {
-					next(new Error('Matched and saved search data inconsistent.'));
+					next(new appError('Matched and saved search data inconsistent.'));
 				}
 
 				res.json(paginatedSearchData);
@@ -635,7 +636,7 @@ var searchAds = function(req, res, next){
 	                    }
 					}
 					else {
-						next(new Error('Matched and saved search data inconsistent.'));
+						next(new appError('Matched and saved search data inconsistent.'));
 					}
 
 					
