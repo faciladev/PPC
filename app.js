@@ -9,6 +9,7 @@ var cors = require('cors');
 var config = require('config');
 var morgan = require('morgan');
 var compression = require('compression');
+var helmet = require('helmet');
 
 var errorHandler = require('./error_handler');
 var appError = require('./app_error');
@@ -42,6 +43,10 @@ var corsOptionsDelegate = function(req, callback){
     }
     callback(null, corsOptions); // callback expects two parameters: error and options
 };
+
+//Adds security layer
+app.use(helmet());
+
 app.use(compression());
 app.use(cors(corsOptionsDelegate));
 
