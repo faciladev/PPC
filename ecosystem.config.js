@@ -34,11 +34,26 @@ module.exports = {
       }
     },
 
-    //Cron Job
+    //Cron Job for PPC_DEV
     {
-      name      : "PPC_CRON",
+      name      : "PPC_CRON_DEV",
       script    : "./cron/cron.js",
       env : {
+        NODE_ENV: "dev_remote",
+        PORT: "3002"
+      },
+      env_local : {
+        NODE_ENV: "development",
+        PORT: "3003"
+      }
+    },
+
+    //Cron Job for PPC_PROD
+    {
+      name      : "PPC_CRON_PROD",
+      script    : "./cron/cron.js",
+      env : {
+        NODE_ENV: "production",
         PORT: "3001"
       }
     }
