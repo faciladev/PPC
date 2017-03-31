@@ -315,6 +315,7 @@ var ppcModel = {
     findDailyDeals : function(keyword, categoryId, page){
 
         return new Promise(function(resolve, reject) {
+            const NUM_ROWS_PER_PAGE = 12;
             //TODO
             //Check deal availability
             var query = 
@@ -362,7 +363,7 @@ var ppcModel = {
                 queryParams.push('%' + keyword + '%');
             }            
             
-            PaginationHelper.paginate(query, page, null, queryParams).then(
+            PaginationHelper.paginate(query, page, NUM_ROWS_PER_PAGE, queryParams).then(
                 function(response){
                     
                     for(var i = 0; i<response.result.length; i++){
@@ -432,8 +433,10 @@ var ppcModel = {
                     '(iziphub_flexoffer_link.flexoffer_name = "" || iziphub_flexoffer_link.flexoffer_name IS NULL),' +
                     'iziphub_flexoffer_link.flexoffer_name ASC';
             } else if(filter === "all") {
-                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 0 ' + 
-                'AND iziphub_flexoffer_link.flexoffer_list_order_asc = 1000';
+                where += (where === '') ? '':' AND iziphub_flexoffer_link.flexoffer_link_featured = 0 ';
+                order += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
+                    '(iziphub_flexoffer_link.flexoffer_name = "" || iziphub_flexoffer_link.flexoffer_name IS NULL),' +
+                    'iziphub_flexoffer_link.flexoffer_name ASC';
             } else {
 
             }
