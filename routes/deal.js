@@ -456,7 +456,6 @@ router.put('/:dealId', function(req, res, next){
 			);
 		}, 
 		function(error){
-			console.log(error);
 			next(error);
 		}
 	);
