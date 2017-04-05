@@ -25,6 +25,7 @@ var offer = require('./routes/offer');
 var analytic = require('./routes/analytic');
 var index = require('./routes/index');
 var logs = require('./routes/logs');
+var flex = require('./routes/flex');
 
 var app = express();
 
@@ -86,6 +87,9 @@ app.use('/api/offers', offer);
 
 //Analytics
 app.use('/api/analytics', analytic);
+
+//Flex offers
+app.use('/api/flexoffers', flex);
 
 //Other miscellaneous api
 app.use('/api/', index);
