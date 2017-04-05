@@ -50,7 +50,7 @@ var offerModel = {
             DbHelper.getConnection().then(
                 function(connection){
 
-                    connection.query(query, [parseInt(flexId)], function(err, rows, fields){
+                    connection.query(query, [flexId], function(err, rows, fields){
                         connection.release()
 
                         if(err)

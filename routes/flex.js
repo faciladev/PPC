@@ -7,7 +7,7 @@ var Util = require('../lib/util');
 var appError = require('../app_error');
 
 /**
- * @api {get} /:flexId Get Flex Offers By Id
+ * @api {get} /flexoffers/:flexId Get Flex Offers By Id
  * @apiVersion 0.1.0
  * @apiName GetFlexOffersById
  * @apiGroup Flex Offers
@@ -35,13 +35,8 @@ router.get('/:flexId', function(req, res, next){
     var flexId = parseInt(req.params.flexId);
 	offerModel.getFlexOffersById(flexId).then(
 		function(flex){
-			if(!flex) return next(
-				new appError(
-					'No flex offer found.',
-					appError.ErrorTypes.NotFound,
-					appError.HttpErrorCodes.NotFound
-				)
-			);
+			if(!flex) 
+				return res.status(appError.HttpErrorCodes.NotFound).json({error: "Flex offer doesn't exist"});
 
 			res.json(flex);
 		}, 
