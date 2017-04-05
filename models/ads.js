@@ -856,7 +856,7 @@ module.exports = {
 											function (err, rows, fields) {
 												//log unreachable error 
 												if(err)
-													console.log(err);
+													console.error(err);
 											}
 										)
 									}
