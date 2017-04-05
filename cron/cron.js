@@ -17,8 +17,6 @@ var EmailLogJob = new CronJob({
 	cronTime: '0,30 0-59 * * * *',
 	onTick: function(){
 
-		logger.info('Running ' + env + ' cron job on port ' + port);
-
 		var options = {
 			//start reading log from the last 31 seconds
 		    from: moment.tz(new Date - 31000, timezone).format(),    
@@ -61,7 +59,6 @@ var EmailLogJob = new CronJob({
 			  if(err){
 			  	return logger.error(err);
 			  } else {
-			  	logger.info('Non-operational errors saved for review.');
 			  	Mailer.sendMail({
 						from: 'PPC CRON JOB',
 						to: 'abbifa@gmail.com',
@@ -71,7 +68,6 @@ var EmailLogJob = new CronJob({
 					    if (error) {
 					        return console.error(error);
 					    }
-					    console.log('Message %s sent: %s', info.messageId, info.response);
 					}
 				);
 			  }
