@@ -7,7 +7,7 @@ var Util = require('../lib/util');
 var appError = require('../app_error');
 
 /**
- * @api {get} /flexoffers/:flexId Get Flex Offers By Id
+ * @api {get} /flex/:flexId Get Flex Offers By Id
  * @apiVersion 0.1.0
  * @apiName GetFlexOffersById
  * @apiGroup Flex Offers
