@@ -89,7 +89,7 @@ app.use('/api/offers', offer);
 app.use('/api/analytics', analytic);
 
 //Flex offers
-app.use('/api/flexoffers', flex);
+app.use('/api/flex', flex);
 
 //Other miscellaneous api
 app.use('/api/', index);
