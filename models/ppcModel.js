@@ -250,10 +250,20 @@ var ppcModel = {
                     if(typeof searchData[i].keyword_id === 'undefined')
                         searchData[i].keyword_id = null;
 
-                    query += 'INSERT INTO ppc_flex_searches (ppc_flex_id, ppc_flex_keyword_id, ' + 
-                    'ppc_flex_subpage_id) ' +
-                    'VALUES ('+ searchData[i].flexoffer_link_id +', '+ searchData[i].keyword_id +
-                    ', '+ searchData[i].flexoffer_link_subpage_id +');';
+                    let hrefStartIdx = searchData[i].flexoffer_link_content.indexOf("href=");
+                    let hrefEndIdx = searchData[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+                    searchData[i]['url'] = searchData[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+                    
+                   
+                    
+                    query += DbHelper.prepare('INSERT INTO ppc_flex_searches (ppc_flex_id, ppc_flex_keyword_id, ' + 
+                    'ppc_flex_subpage_id, url) ' +
+                    'VALUES (?,?,?,?);', [
+                        searchData[i].flexoffer_link_id,
+                        searchData[i].keyword_id,
+                        searchData[i].flexoffer_link_subpage_id,
+                        searchData[i].url
+                    ]);
                 }
 
                 //Run multiple statement query
