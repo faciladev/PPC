@@ -393,9 +393,15 @@ var clickFlexOffer = function(req, res, next){
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
 
+            const link = searchData.url;
+            
+
 			ppcModel.trackFlexClick(searchData, ip, userAgent, userId).then(
 				function(response){
-					res.redirect(Util.decodeUrl(redirectUrl));
+					if(! link)
+						return res.status(appError.HttpErrorCodes.NotFound).json({error: "Flex offer doesn't have a valid link"});
+
+					res.redirect(link);
 				},
 				function(error){
 					next(error);

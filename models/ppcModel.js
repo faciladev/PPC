@@ -250,10 +250,20 @@ var ppcModel = {
                     if(typeof searchData[i].keyword_id === 'undefined')
                         searchData[i].keyword_id = null;
 
-                    query += 'INSERT INTO ppc_flex_searches (ppc_flex_id, ppc_flex_keyword_id, ' + 
-                    'ppc_flex_subpage_id) ' +
-                    'VALUES ('+ searchData[i].flexoffer_link_id +', '+ searchData[i].keyword_id +
-                    ', '+ searchData[i].flexoffer_link_subpage_id +');';
+                    let hrefStartIdx = searchData[i].flexoffer_link_content.indexOf("href=");
+                    let hrefEndIdx = searchData[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+                    searchData[i]['url'] = searchData[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+                    
+                   
+                    
+                    query += DbHelper.prepare('INSERT INTO ppc_flex_searches (ppc_flex_id, ppc_flex_keyword_id, ' + 
+                    'ppc_flex_subpage_id, url) ' +
+                    'VALUES (?,?,?,?);', [
+                        searchData[i].flexoffer_link_id,
+                        searchData[i].keyword_id,
+                        searchData[i].flexoffer_link_subpage_id,
+                        searchData[i].url
+                    ]);
                 }
 
                 //Run multiple statement query
@@ -438,7 +448,9 @@ var ppcModel = {
                     '(iziphub_flexoffer_link.flexoffer_name = "" || iziphub_flexoffer_link.flexoffer_name IS NULL),' +
                     'iziphub_flexoffer_link.flexoffer_name ASC';
             } else {
-
+                order += ' ORDER BY iziphub_flexoffer_link.flexoffer_list_order_asc ASC, ' +
+                    '(iziphub_flexoffer_link.flexoffer_name = "" || iziphub_flexoffer_link.flexoffer_name IS NULL),' +
+                    'iziphub_flexoffer_link.flexoffer_name ASC';
             }
 
             if(typeof letter === "string" && letter.length === 1){
@@ -450,9 +462,9 @@ var ppcModel = {
                 queryParams.push(letter + '%');
             }
             
-            // query += order;
+            where = (where === '')? '' : ' WHERE ' + where;
 
-            var query = 'SELECT ' + select + ' FROM ' + from + ' WHERE ' + where + order;
+            var query = 'SELECT ' + select + ' FROM ' + from + where + order;
             
 
             // if(filter === 'all' || typeof letter === "string" && letter.length === 1){
