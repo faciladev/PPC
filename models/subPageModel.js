@@ -36,7 +36,7 @@ var subPageModel = {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
                 connection.query('SELECT * FROM sub_page WHERE subpage_name=? OR subpage_name=? OR subpage_name=?',
-                    ['Local','Food and Restaurants','Business to Business'],
+                    ['Search by City & Zip Code','Food and Restaurants','Business to Business'],
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
