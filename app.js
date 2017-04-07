@@ -54,7 +54,8 @@ app.use(cors(corsOptionsDelegate));
 //Enable pre-flight mode
 app.options('*', cors()); 
 //logger for non-production environments only
-app.get("env") !== "production" && app.use(morgan('dev'));
+// app.get("env") !== "production" && app.use(morgan('dev'));
+app.use(morgan('dev'));
 app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
