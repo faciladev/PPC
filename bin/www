@@ -90,16 +90,17 @@ function onListening() {
 }
 
 process.on('SIGINT', function() {
-  DbHelper.closeAllConnections().then(
-    function(success){
-      var msg = 'SIGINT: Closed all db connections';
-      errorHandler.handleErrorAndExit(msg, 0, 'info');
-    },
-    function(err){
-      err.isOperational = false;
-      errorHandler.handleErrorAndExit(err, 1);
-    }
-  );
+  // DbHelper.closeAllConnections().then(
+  //   function(success){
+  //     var msg = 'SIGINT: Closed all db connections';
+  //     errorHandler.handleErrorAndExit(msg, 0, 'info');
+  //   },
+  //   function(err){
+  //     err.isOperational = false;
+  //     errorHandler.handleErrorAndExit(err, 1);
+  //   }
+  // );
+  process.exit();
 });
 
 process.on('message', function(msg) {
