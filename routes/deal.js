@@ -119,6 +119,8 @@ router.delete('/:id', function(req, res, next){
  * @apiName GetAllDeals
  * @apiGroup Daily Deals
  *
+ * @apiParam {String} include "downloads"
+ *
  * @apiSuccess {Object[]} result  List of Daily Deals.
  * @apiSuccess {Number} page  Pagination Page Number.
  * @apiSuccess {Number} numRowsPerPage  Pagination Number of Rows Per Page.
@@ -151,7 +153,7 @@ router.delete('/:id', function(req, res, next){
  */
 router.get('/', function(req, res, next){
 
-	dealModel.getAllDeals(req.query.page).then(
+	dealModel.getAllDeals(req.query.page, req.query.include).then(
 		function(deals){
 			res.json(deals);
 		}, 
