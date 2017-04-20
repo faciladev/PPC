@@ -609,6 +609,13 @@ var searchAds = function(req, res, next){
 			if(searchData.length <= 0)
 				return res.json(paginatedSearchData);
 
+			//Remove multiple keyword match for one sponsored ad
+			//aka removes duplicate sponsored ad results
+			searchData = searchData.filter( function( item, index, inputArray ) {
+		           return inputArray.indexOf(item) == index;
+		    });
+
+
 			//Save searches
 			ppcModel.saveSponsoredAdSearch(searchData).then(
 				function(savedSearchIds){
