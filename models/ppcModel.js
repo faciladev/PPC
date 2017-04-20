@@ -344,37 +344,7 @@ var ppcModel = {
             where = (where === '')? '' : ' WHERE ' + where;
 
             var query = 'SELECT ' + select + ' FROM ' + from + where + order;
-            
 
-            // if(filter === 'all' || typeof letter === "string" && letter.length === 1){
-            //     DbHelper.getConnection().then(
-            //         function(connection){
-
-            //             connection.query(query, queryParams, function(err, rows, fields){
-            //                 connection.release()
-
-            //                 if(err)
-            //                     return reject(err);
-
-            //                 return resolve(rows);
-            //             });
-            //         }, 
-            //         function(error){
-            //             return reject(error);
-            //         }
-            //     );
-            // } else {
-
-            //     PaginationHelper.paginate(query, page, 16, queryParams).then(
-            //         function(response){
-            //             resolve(response);
-            //         }, 
-            //         function(error){
-            //             reject(error);
-            //         }
-            //     );
-            // }
-            
             DbHelper.getConnection().then(
                 function(connection){
 
