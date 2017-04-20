@@ -611,9 +611,7 @@ var searchAds = function(req, res, next){
 
 			//Remove multiple keyword match for one sponsored ad
 			//aka removes duplicate sponsored ad results
-			searchData = searchData.filter( function( item, index, inputArray ) {
-		           return inputArray.indexOf(item) == index;
-		    });
+			searchData = Util.removeObjDupInArr(searchData, "ad_id");
 
 
 			//Save searches
