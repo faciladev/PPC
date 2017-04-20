@@ -609,64 +609,70 @@ var searchAds = function(req, res, next){
 			if(searchData.length <= 0)
 				return res.json(paginatedSearchData);
 
+			
 			//Remove multiple keyword match for one sponsored ad
 			//aka removes duplicate sponsored ad results
-			searchData = Util.removeObjDupInArr(searchData, "ad_id");
-
-
-			//Save searches
-			ppcModel.saveSponsoredAdSearch(searchData).then(
-				function(savedSearchIds){
-					
-					if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
-						//matched one result
-						searchData[0].search_id = savedSearchIds.insertId;
-						var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-	                            'Categories/listing_microsite/' + searchData[0].ad_id);
-						searchData[0].redirectUrl = config.get('project_url') + 
-	                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
-	                        redirectUrl
-	                        ;
-					}
-					else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
-						//matched multiple results
-						for(var i = 0; i<searchData.length; i++){
-	                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-	                            'Categories/listing_microsite/' + searchData[i].ad_id);
-
-	                        searchData[i].redirectUrl = config.get('project_url') + 
-	                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +
-	                        redirectUrl
-	                        ;
-	                    }
-					}
-					else {
-						next(new appError('Matched and saved search data inconsistent.'));
-					}
-
-					
-					
-
-					var ip = Util.getClientIp(req);
-					var userAgent = Util.getUserAgent(req);
-
-					//Log impression
-					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
-						function(response){
-							res.json(paginatedSearchData);
-						}, 
-						function(error){
-							next(error);
+			Util.removeObjDupInArr(searchData, "ad_id").then(function(searchData){
+				paginatedSearchData.result = searchData;
+				//Save searches
+				ppcModel.saveSponsoredAdSearch(searchData).then(
+					function(savedSearchIds){
+						
+						if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
+							//matched one result
+							searchData[0].search_id = savedSearchIds.insertId;
+							var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+		                            'Categories/listing_microsite/' + searchData[0].ad_id);
+							searchData[0].redirectUrl = config.get('project_url') + 
+		                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
+		                        redirectUrl
+		                        ;
 						}
-					);
+						else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
+							//matched multiple results
+							for(var i = 0; i<searchData.length; i++){
+		                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+		                            'Categories/listing_microsite/' + searchData[i].ad_id);
 
-					
-					
-				}, 
-				function(error){
-					next(error);
-				}
-			);
+		                        searchData[i].redirectUrl = config.get('project_url') + 
+		                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +
+		                        redirectUrl
+		                        ;
+		                    }
+						}
+						else {
+							next(new appError('Matched and saved search data inconsistent.'));
+						}
+
+						
+						
+
+						var ip = Util.getClientIp(req);
+						var userAgent = Util.getUserAgent(req);
+
+						//Log impression
+						ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
+							function(response){
+								res.json(paginatedSearchData);
+							}, 
+							function(error){
+								next(error);
+							}
+						);
+
+						
+						
+					}, 
+					function(error){
+						next(error);
+					}
+				);
+			}, function(error){
+				next(error);
+			});
+
+			
+			
 		}, 
 		function(error){			
 			next(error);
