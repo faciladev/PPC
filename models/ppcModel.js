@@ -204,7 +204,7 @@ var ppcModel = {
     findDailyDeals : function(keyword, categoryId, page){
 
         return new Promise(function(resolve, reject) {
-            const NUM_ROWS_PER_PAGE = 12;
+            const NUM_ROWS_PER_PAGE = 32;
             //TODO
             //Check deal availability
             var query = 
