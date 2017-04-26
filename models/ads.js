@@ -597,7 +597,7 @@ module.exports = {
     getCategories: function() {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection) {
-                connection.query('Select * from ppc_keyword_categories',
+                connection.query('Select * from ppc_keyword_categories ORDER BY name',
                     function(err, rows, fields) {
                         connection.release();
                         if(err) {
@@ -837,7 +837,7 @@ module.exports = {
 			
 					keywords.forEach(function(objKeyword, i){
 						var post = {keyword: objKeyword.keyword, price: objKeyword.price, created_by: objKeyword.created_by};
-						connection.query("SELECT id FROM ppc_keywords WHERE keyword = ?", [post.keyword], function(err, rows, fields){
+						connection.query("SELECT ppc_keywords.id, keyword, category_id FROM ppc_keywords inner join ppc_keywords_categories on ppc_keywords.id = ppc_keywords_categories.keyword_id where category_id = ? and keyword = ?", [category_id, post.keyword], function(err, rows, fields){
 							if(err){
 								connection.release();
 								return reject(err);
@@ -871,7 +871,7 @@ module.exports = {
 							} else {
 								if(i== keywords.length -1 && insertedData.length == 0) {
 									connection.release();
-									resolve({status: false, message: 'Duplicate Keyword'});
+									resolve({status: false, message: 'Keyword already exists for the selected category'});
 								}
 							}
 						});
