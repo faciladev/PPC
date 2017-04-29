@@ -48,7 +48,7 @@ var ppcModel = {
     findSponsoredAds : function(keyword, location, subPage, page, filter){
         return new Promise(function(resolve, reject) {
             
-            subPage = (typeof subPage === 'undefined' || subPage === null) 
+            subPage = (typeof subPage === 'undefined' || subPage === null || subPage === 0) 
                 ? false : subPage;
 
             var query = 
