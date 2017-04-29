@@ -48,9 +48,10 @@ var ppcModel = {
     findSponsoredAds : function(keyword, location, subPage, page, filter){
         return new Promise(function(resolve, reject) {
             
-            subPage = (typeof subPage === 'undefined' || subPage === null || subPage === 0) 
-                ? false : subPage;
-
+            subPage = parseInt(subPage);
+            if(isNaN(subPage) || subPage === 0)
+                subPage = false;
+            
             var query = 
             'SELECT ' +
             'available_ad_keywords.ad_keyword_id, '+ 
@@ -69,7 +70,9 @@ var ppcModel = {
             'ppc_keywords.price, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
+
             'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
+
             'available_ad_keywords.keyword_id ' +
             'FROM ' +
             'available_ad_keywords ' +
@@ -82,14 +85,12 @@ var ppcModel = {
             'JOIN ' +
             'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
             'JOIN ' +
-            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
-            ;
+            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id ' +
 
-            if(subPage)
-                query += 'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ';
+            'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ' +
 
 
-            query += 'WHERE ' +
+            'WHERE ' +
             'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
             'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
             'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
