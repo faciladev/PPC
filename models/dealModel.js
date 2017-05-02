@@ -305,6 +305,7 @@ var dealModel = {
                 'm.location,' +
                 'dd.end_date, ' +
                 'dd.start_date, ' +
+                'dd.keywords, ' +
                 'm.discount_daily_description, '+
                 'm.discount_percentage, '+
                 'dd.discount_type, '+
