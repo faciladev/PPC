@@ -160,7 +160,68 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
  *		  "totalPages": 1
  *		}
  */
-router.get('/deals/:categoryId', function(req, res, next) {
+router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
+	searchDeals(req, res, next);
+});
+
+/**
+ * @api {get} /search/deals/:keyword Search Deal By Keyword
+ * @apiVersion 0.1.0
+ * @apiName SearchDealByKeyword
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {String} keyword  Daily Deal Keyword.
+ *
+ * @apiSuccess {Object[]} result List of Daily Deals in a Category.
+ * @apiSuccess {Number} page  Pagination Page Number.
+ * @apiSuccess {Number} numRowsPerPage  Pagination Number of Rows Per Page.
+ * @apiSuccess {Number} totalPages  Pagination Total Pages.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *		  "result": [
+ *		    {
+ *		      "deal_id": 146,
+ *		      "microsite_id": 165,
+ *		      "company_name": null,
+ *		      "what_you_get": "<ul>\n\t<li>50% off all perfumes</li>\n\t<li>Free Facial</li>\n</ul>\n",
+ *		      "location": "10479 Brown Wolf St",
+ *		      "end_date": "2017-03-29T21:00:00.000Z",
+ *		      "start_date": "2017-03-07T21:00:00.000Z",
+ *		      "discount_daily_description": "",
+ *		      "discount_percentage": 0,
+ *		      "discount_type": "text",
+ *		      "name": "Discount Perfume",
+ *		      "discount_price": null,
+ *		      "image": "image_name",
+ *		      "image_1": "image_name",
+ *		      "image_2": "image_name",
+ *		      "code": "embeddable_code",
+ *		      "date_created": "2017-03-08T16:36:45.000Z",
+ *		      "download_price": 6,
+ *		      "discount_description": "50% off all perfumes",
+ *		      "regular_price": 0,
+ *		      "discount_rate": 0,
+ *		      "coupon_name": "Discount Perfume",
+ *		      "coupon_generated_code": "j016qgqq",
+ *		      "is_approved": 1,
+ *		      "is_deleted": 0,
+ *		      "list_rank": 0,
+ *		      "deal_image": "image_name",
+ *		      "paused": 0,
+ *		      "daily_deal_description": "<p>Discount Perfumes at our following locations:</p>\n\n<ul>\n\t<li>2820 S. Jones Blvd. Las Vegas NV 89146</li>\n\t<li>817 S. Main St. Las Vegas NV 89101</li>\n</ul>\n",
+ *		      "approved_category_id": 3,
+ *		      "url": "http://ppc.l/api/click/deals/146/http%3A%2F%2Fiziphub.com%2FCategories%2Fdaily_deals_microsite%2F146"
+ *		    }
+ *		  ],
+ *		  "page": 1,
+ *		  "numRowsPerPage": 10,
+ *		  "totalRows": 2,
+ *		  "totalPages": 1
+ *		}
+ */
+router.get('/deals/:keyword', function(req, res, next) {
 	searchDeals(req, res, next);
 });
 
@@ -690,7 +751,8 @@ var searchAds = function(req, res, next){
 
 var searchDeals = function(req, res, next) {
 	var keyword = req.params.keyword;
-	var categoryId = req.params.categoryId;
+	var categoryId = (typeof req.params[0] === "undefined")
+	? req.params.categoryId : req.params[0];
 	var userId = req.params.userId;
 	
 	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
