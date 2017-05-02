@@ -215,6 +215,10 @@ var ppcModel = {
             'm.company_name, ' +
             'm.what_you_get, '+
             'm.location,' +
+            'm.city,' +
+            'm.zip_code,' +
+            'usa_states.usa_state_code,' +
+            'usa_states.usa_state_name,' +
             'dd.end_date, ' +
             'dd.start_date, ' +
             'm.discount_daily_description, '+
@@ -244,6 +248,7 @@ var ppcModel = {
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
             'dd.approved_category_id = cat.category_id ' +
+            'JOIN usa_states ON usa_states.usa_state_id = m.state_id ' +
             'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 ';
 
             var queryParams = []; 
