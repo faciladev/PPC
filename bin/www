@@ -17,7 +17,7 @@ var DbHelper = require('../lib/DbHelper');
  * Get port from environment and store in Express.
  */
 var port = normalizePort(process.env.PORT || '3000');
-var sslPort = 443;
+var sslPort = 80;
 
   
 
@@ -43,7 +43,7 @@ if(process.env.NODE_ENV === "production"){
     key: fs.readFileSync(config.get("sslKey")),
     cert: fs.readFileSync(config.get("sslCert"))
   }
-  
+
   var sslServer = https.createServer(sslOptions, app);
   sslServer.listen(sslPort);
   sslServer.on('error', onErrorSsl);
