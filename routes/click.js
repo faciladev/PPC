@@ -22,6 +22,26 @@ router.get('/deals/:dealId/:redirectUrl/:userId', function(req, res, next){
 });
 
 /**
+ * @api {get} /click/adoffers/:offerId/:userId Member Save Sponsored Ad Offers
+ * @apiVersion 0.1.0
+ * @apiName MemberSaveSponsoredAdOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} offerId  Offer Id.
+ * @apiParam {Number} userId  User Id.
+ */
+router.get('/adoffers/:offerId/:userId', function(req, res, next){
+	ppcModel.saveConsumerAdOffer(req.params.userId, req.params.offerId).then(
+		(response)=>{
+			return res.json({status: true, message: "ad offer saved."});
+		}, 
+		(error)=>{
+			return next(error);
+		}
+	);
+});
+
+/**
  * @api {get} /click/deals/:dealId/:redirectUrl Non-Member Click Tracking of Daily Deals
  * @apiVersion 0.1.0
  * @apiName Non-MemberClickTrackingofDailyDeals
