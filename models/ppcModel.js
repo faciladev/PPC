@@ -116,6 +116,30 @@ var ppcModel = {
         });
     },
 
+    saveConsumerAdOffer: function(consumerId, offerId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(
+                function(connection){
+                    consumerId = parseInt(consumerId);
+                    offerId = parseInt(offerId);
+                    if(isNaN(consumerId) || isNaN(offerId))
+                        return reject(new appError('Invalid consumer id or offer id.'));
+
+                    const query = "INSERT INTO saved_offers (consumer_user_id, offer_id, item_type_id) VALUES (?,?,?)";
+                    connection.query(query, [consumerId, offerId, ITEM_SPONSORED_AD], function(err, results, fields){
+                        if(err)
+                            return reject(err);
+
+                        return resolve(results);
+                    })
+                }, 
+                function(error){
+                    return reject(error);
+                }
+            );
+        });
+    },
+
     saveFlexSearch : function(searchData){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
