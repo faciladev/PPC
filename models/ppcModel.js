@@ -47,131 +47,11 @@ var ppcModel = {
 
     findSponsoredAds : function(keyword, location, subPage, page, filter){
         return new Promise(function(resolve, reject) {
-            //set default argument value
-            // subPage = parseInt(subPage) || false;
-            // page = parseInt(page) || false;
-            // filter = filter || false;
-
-            // var queryParams = [];
-
-            // var query = 'SELECT ' +
-            //         'final_ads.ad_id,' +
-            //         'ppc_ad_locations.id as ad_location_id,' +
-            //         'avak.price,' +
-            //         'usa_states.usa_state_code, ' +
-            //         'usa_states.usa_state_name, ' +
-            //         'ppc_ad_microsites.city, ' +
-            //         'ppc_ad_microsites.zipcode, ' +
-            //         'ppc_ads.id AS ad_id, ' +
-            //         'ppc_ads.url, ' +
-            //         'ppc_ads.title, ' +
-            //         'ppc_ads.address, ' +
-            //         'ppc_ads.lat, ' +
-            //         'ppc_ads.lng, ' +
-            //         'ppc_ads.phone_no, ' +
-            //         'ppc_ads.ad_text, ' +
-            //         'avak.keyword_category_id,' +
-            //         'avak.ad_keyword_id,' +
-            //         'avak.keyword_id, ' +
-            //         'ppc_ads_subpages.sub_page_id AS ad_subpage_id ' +
-            //     'FROM ' +
-            //         '(SELECT ' + 
-            //             'unique_ads.ad_id, MAX(kwd.price) AS price ' +
-            //         'FROM ' +
-            //             'ppc_keywords AS kwd ' +
-            //         'JOIN (SELECT  ' +
-            //             'ad_id, keyword_id, ad_keyword_id ' +
-            //         'FROM ' +
-            //             'available_ad_keywords ' +
-            //         'WHERE ' +
-            //             'ad_id IN (SELECT DISTINCT ' +
-            //                     'unsorted.ad_id ' +
-            //                 'FROM ' +
-            //                     '(SELECT ' + 
-            //                     '* ' +
-            //                 'FROM ' +
-            //                     'available_ad_keywords ' +
-            //                 'WHERE ' +
-            //                     'available_ad_keywords.keyword_id IN (SELECT  ' +
-            //                             'id ' +
-            //                         'FROM ' +
-            //                             'ppc_keywords ' +
-            //                         'WHERE ' +
-            //                             'keyword LIKE ?)) AS unsorted)) AS unique_ads ON kwd.id = unique_ads.keyword_id ';
-            //         queryParams.push('%' + keyword + '%');
-            //         query+= 'AND price = kwd.price ' +
-            //         'JOIN ppc_ad_microsites ON ppc_ad_microsites.ad_id = unique_ads.ad_id ' +
-            //         'JOIN usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
-            //         'JOIN ppc_ad_locations ON ppc_ad_locations.ad_id = unique_ads.ad_id ';
-                    
-            //         if(subPage)
-            //             query += 'JOIN ppc_ads_subpages ON ppc_ads_subpages.ad_id = unique_ads.ad_id ';
-                    
-            //         query += 'JOIN ppc_ads ON ppc_ads.id = unique_ads.ad_id ' +
-            //         'WHERE ';
-
-            //         if(filter)
-            //             query += 'ppc_ads.is_featured = 1 ';
-
-            //         if(subPage){
-            //             if(filter){
-            //                 query += 'AND ppc_ads_subpages.sub_page_id = ? '; 
-            //             } else {
-            //                 query += ' ppc_ads_subpages.sub_page_id = ? ';
-            //             }
-
-            //             queryParams.push(subPage);
-
-            //         }
-
-            //         if(filter || subPage){
-            //             query += ' AND ';
-            //         }
-
-            //         query += ' (ppc_ad_locations.city LIKE ? ' +
-            //         '|| ppc_ad_locations.zip_code LIKE ?) ';
-            //         queryParams.push('%' + location + '%', '%' + location + '%');
-                    
-            //         query += 'GROUP BY unique_ads.ad_id ' +
-            //         'ORDER BY price DESC) AS final_ads ' +
-            //             'JOIN ' +
-            //         'available_ad_keywords avak ON avak.ad_id = final_ads.ad_id ' +
-            //             'AND avak.price = final_ads.price ' +
-            //             'JOIN ' +
-            //         'ppc_ads ON ppc_ads.id = final_ads.ad_id ' +
-            //             'JOIN ' +
-            //         'ppc_ad_microsites ON ppc_ad_microsites.ad_id = final_ads.ad_id ' +
-            //             'JOIN ' +
-            //         'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
-            //             'JOIN ' +
-            //         'ppc_ad_locations ON ppc_ad_locations.ad_id = final_ads.ad_id ';
-                    
-            //         if(subPage)
-            //             query += 'JOIN ppc_ads_subpages ON ppc_ads_subpages.ad_id = final_ads.ad_id ';
-                    
-            //         query += 'WHERE ';
-                    
-            //         if(filter)
-            //             query += 'ppc_ads.is_featured = 1 ';
-
-            //         if(subPage){
-            //             query += (filter === 'featured')? 
-            //             'AND ppc_ads_subpages.sub_page_id = ? ' :
-            //             'ppc_ads_subpages.sub_page_id = ? ' ;
-            //             queryParams.push(subPage);
-            //         }
-                    
-            //         query += 'AND (ppc_ad_locations.city LIKE ?  ' +
-            //             '|| ppc_ad_locations.zip_code LIKE ?) ' +
-            //             'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ' +
-            //             ' AND ppc_ads.is_approved = 1 ' +
-            //         ' ORDER BY final_ads.price DESC ';
-
-            //         queryParams.push('%' + location + '%', '%' + location + '%');
-            //set default argument value
-            subPage = (typeof subPage === 'undefined' || subPage === null) 
-                ? false : subPage;
-
+            
+            subPage = parseInt(subPage);
+            if(isNaN(subPage) || subPage === 0)
+                subPage = false;
+            
             var query = 
             'SELECT ' +
             'available_ad_keywords.ad_keyword_id, '+ 
@@ -190,7 +70,9 @@ var ppcModel = {
             'ppc_keywords.price, ' +
             'available_ad_keywords.keyword_category_id,' +
             'ppc_ad_locations.id AS ad_location_id, ' +
+
             'ppc_ads_subpages.sub_page_id AS ad_subpage_id, ' +
+
             'available_ad_keywords.keyword_id ' +
             'FROM ' +
             'available_ad_keywords ' +
@@ -203,14 +85,12 @@ var ppcModel = {
             'JOIN ' +
             'usa_states ON usa_states.usa_state_id = ppc_ad_microsites.state ' +
             'JOIN ' +
-            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id '
-            ;
+            'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id ' +
 
-            if(subPage)
-                query += 'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ';
+            'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ' +
 
 
-            query += 'WHERE ' +
+            'WHERE ' +
             'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
             'OR ppc_ad_locations.zip_code LIKE ? ) AND ppc_ads.is_approved = 1 ' +
             'AND ppc_ads.is_deleted = 0 AND ppc_ads.paused=0 ';
@@ -231,6 +111,30 @@ var ppcModel = {
                 }, 
                 function(error){
                     reject(error);
+                }
+            );
+        });
+    },
+
+    saveConsumerAdOffer: function(consumerId, offerId){
+        return new Promise(function(resolve, reject){
+            DbHelper.getConnection().then(
+                function(connection){
+                    consumerId = parseInt(consumerId);
+                    offerId = parseInt(offerId);
+                    if(isNaN(consumerId) || isNaN(offerId))
+                        return reject(new appError('Invalid consumer id or offer id.'));
+
+                    const query = "INSERT INTO saved_offers (consumer_user_id, offer_id, item_type_id) VALUES (?,?,?)";
+                    connection.query(query, [consumerId, offerId, ITEM_SPONSORED_AD], function(err, results, fields){
+                        if(err)
+                            return reject(err);
+
+                        return resolve(results);
+                    })
+                }, 
+                function(error){
+                    return reject(error);
                 }
             );
         });
@@ -325,7 +229,7 @@ var ppcModel = {
     findDailyDeals : function(keyword, categoryId, page){
 
         return new Promise(function(resolve, reject) {
-            const NUM_ROWS_PER_PAGE = 12;
+            const NUM_ROWS_PER_PAGE = 32;
             //TODO
             //Check deal availability
             var query = 
@@ -335,6 +239,10 @@ var ppcModel = {
             'm.company_name, ' +
             'm.what_you_get, '+
             'm.location,' +
+            'm.city,' +
+            'm.zip_code,' +
+            'usa_states.usa_state_code,' +
+            'usa_states.usa_state_name,' +
             'dd.end_date, ' +
             'dd.start_date, ' +
             'm.discount_daily_description, '+
@@ -364,13 +272,18 @@ var ppcModel = {
             'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
             'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
             'dd.approved_category_id = cat.category_id ' +
-            'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 AND dd.approved_category_id = ? ';
+            'JOIN usa_states ON usa_states.usa_state_id = m.state_id ' +
+            'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 ';
 
-            var queryParams = [categoryId];
-
+            var queryParams = []; 
+            if(! isNaN(parseInt(categoryId))){
+                query += 'AND dd.approved_category_id = ? ';
+                queryParams.push(categoryId);
+            }
+            
             if(typeof keyword !== "undefined" || keyword != null){
-                query += 'AND m.name LIKE ?';
-                queryParams.push('%' + keyword + '%');
+                query += 'AND m.name LIKE ? || dd.keywords LIKE ?';
+                queryParams.push('%' + keyword + '%', '%' + keyword + '%');
             }            
             
             PaginationHelper.paginate(query, page, NUM_ROWS_PER_PAGE, queryParams).then(
@@ -465,37 +378,7 @@ var ppcModel = {
             where = (where === '')? '' : ' WHERE ' + where;
 
             var query = 'SELECT ' + select + ' FROM ' + from + where + order;
-            
 
-            // if(filter === 'all' || typeof letter === "string" && letter.length === 1){
-            //     DbHelper.getConnection().then(
-            //         function(connection){
-
-            //             connection.query(query, queryParams, function(err, rows, fields){
-            //                 connection.release()
-
-            //                 if(err)
-            //                     return reject(err);
-
-            //                 return resolve(rows);
-            //             });
-            //         }, 
-            //         function(error){
-            //             return reject(error);
-            //         }
-            //     );
-            // } else {
-
-            //     PaginationHelper.paginate(query, page, 16, queryParams).then(
-            //         function(response){
-            //             resolve(response);
-            //         }, 
-            //         function(error){
-            //             reject(error);
-            //         }
-            //     );
-            // }
-            
             DbHelper.getConnection().then(
                 function(connection){
 

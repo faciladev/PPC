@@ -160,7 +160,68 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
  *		  "totalPages": 1
  *		}
  */
-router.get('/deals/:categoryId', function(req, res, next) {
+router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
+	searchDeals(req, res, next);
+});
+
+/**
+ * @api {get} /search/deals/:keyword Search Deal By Keyword
+ * @apiVersion 0.1.0
+ * @apiName SearchDealByKeyword
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {String} keyword  Daily Deal Keyword.
+ *
+ * @apiSuccess {Object[]} result List of Daily Deals in a Category.
+ * @apiSuccess {Number} page  Pagination Page Number.
+ * @apiSuccess {Number} numRowsPerPage  Pagination Number of Rows Per Page.
+ * @apiSuccess {Number} totalPages  Pagination Total Pages.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *		  "result": [
+ *		    {
+ *		      "deal_id": 146,
+ *		      "microsite_id": 165,
+ *		      "company_name": null,
+ *		      "what_you_get": "<ul>\n\t<li>50% off all perfumes</li>\n\t<li>Free Facial</li>\n</ul>\n",
+ *		      "location": "10479 Brown Wolf St",
+ *		      "end_date": "2017-03-29T21:00:00.000Z",
+ *		      "start_date": "2017-03-07T21:00:00.000Z",
+ *		      "discount_daily_description": "",
+ *		      "discount_percentage": 0,
+ *		      "discount_type": "text",
+ *		      "name": "Discount Perfume",
+ *		      "discount_price": null,
+ *		      "image": "image_name",
+ *		      "image_1": "image_name",
+ *		      "image_2": "image_name",
+ *		      "code": "embeddable_code",
+ *		      "date_created": "2017-03-08T16:36:45.000Z",
+ *		      "download_price": 6,
+ *		      "discount_description": "50% off all perfumes",
+ *		      "regular_price": 0,
+ *		      "discount_rate": 0,
+ *		      "coupon_name": "Discount Perfume",
+ *		      "coupon_generated_code": "j016qgqq",
+ *		      "is_approved": 1,
+ *		      "is_deleted": 0,
+ *		      "list_rank": 0,
+ *		      "deal_image": "image_name",
+ *		      "paused": 0,
+ *		      "daily_deal_description": "<p>Discount Perfumes at our following locations:</p>\n\n<ul>\n\t<li>2820 S. Jones Blvd. Las Vegas NV 89146</li>\n\t<li>817 S. Main St. Las Vegas NV 89101</li>\n</ul>\n",
+ *		      "approved_category_id": 3,
+ *		      "url": "http://ppc.l/api/click/deals/146/http%3A%2F%2Fiziphub.com%2FCategories%2Fdaily_deals_microsite%2F146"
+ *		    }
+ *		  ],
+ *		  "page": 1,
+ *		  "numRowsPerPage": 10,
+ *		  "totalRows": 2,
+ *		  "totalPages": 1
+ *		}
+ */
+router.get('/deals/:keyword', function(req, res, next) {
 	searchDeals(req, res, next);
 });
 
@@ -542,51 +603,59 @@ var searchFlex = function(req, res, next){
         if(flexoffers.length <= 0)
         	return res.json(paginatedSearchData);
 
-        ppcModel.saveFlexSearch(flexoffers).then(
-			function(savedSearchIds){
-				if(flexoffers.length === 1 && (savedSearchIds.affectedRows === 1)){
-					//matched one result
-					var startIndex = flexoffers[0].flexoffer_link_content.indexOf("src=");
-	                var lastIndex = flexoffers[0].flexoffer_link_content.indexOf(" ", startIndex);
-	                var url = flexoffers[0].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
-	                var hrefStartIdx = flexoffers[0].flexoffer_link_content.indexOf("href=");
-	                var hrefEndIdx = flexoffers[0].flexoffer_link_content.indexOf(" ", hrefStartIdx);
-	                var link = flexoffers[0].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
-	                var redirectUrl = Util.sanitizeUrl(link);
-	                flexoffers[0].flexSrc = url;
-	                flexoffers[0].flexLink = link;
-	                flexoffers[0].url = config.get('project_url') + 
-	                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
-	                    redirectUrl;
-				}
-				else if(flexoffers.length > 1 && (savedSearchIds.length === flexoffers.length)){
-					//matched multiple results
-					for(var i = 0; i<flexoffers.length; i++){
-                        var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
-		                var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
-		                var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
-		                var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
-		                var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
-		                var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+        //Remove multiple keyword match for one sponsored ad
+		//aka removes duplicate sponsored ad results
+        Util.removeObjDupInArr(flexoffers, "flexoffer_link_id").then(function(flexoffers){
+        	//result with unique flexoffer_link_ids
+        	paginatedSearchData = flexoffers;
+        	ppcModel.saveFlexSearch(flexoffers).then(
+				function(savedSearchIds){
+					if(flexoffers.length === 1 && (savedSearchIds.affectedRows === 1)){
+						//matched one result
+						var startIndex = flexoffers[0].flexoffer_link_content.indexOf("src=");
+		                var lastIndex = flexoffers[0].flexoffer_link_content.indexOf(" ", startIndex);
+		                var url = flexoffers[0].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
+		                var hrefStartIdx = flexoffers[0].flexoffer_link_content.indexOf("href=");
+		                var hrefEndIdx = flexoffers[0].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+		                var link = flexoffers[0].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
 		                var redirectUrl = Util.sanitizeUrl(link);
-		                flexoffers[i].flexSrc = url;
-		                flexoffers[i].flexLink = link;
-		                flexoffers[i].url = config.get('project_url') + 
-		                    '/api/click/flexoffers/' + savedSearchIds[i].insertId  + '/' +
+		                flexoffers[0].flexSrc = url;
+		                flexoffers[0].flexLink = link;
+		                flexoffers[0].url = config.get('project_url') + 
+		                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
 		                    redirectUrl;
-                    }
-				}
-				else {
-					next(new appError('Matched and saved search data inconsistent.'));
-				}
+					}
+					else if(flexoffers.length > 1 && (savedSearchIds.length === flexoffers.length)){
+						//matched multiple results
+						for(var i = 0; i<flexoffers.length; i++){
+	                        var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
+			                var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
+			                var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
+			                var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
+			                var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
+			                var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
+			                var redirectUrl = Util.sanitizeUrl(link);
+			                flexoffers[i].flexSrc = url;
+			                flexoffers[i].flexLink = link;
+			                flexoffers[i].url = config.get('project_url') + 
+			                    '/api/click/flexoffers/' + savedSearchIds[i].insertId  + '/' +
+			                    redirectUrl;
+	                    }
+					}
+					else {
+						next(new appError('Matched and saved search data inconsistent.'));
+					}
 
-				res.json(paginatedSearchData);
+					res.json(paginatedSearchData);
 
-			}, 
-			function(error){
-				next(error);
-			}
-		);
+				}, 
+				function(error){
+					next(error);
+				}
+			);
+        }, function(error){
+        	next(error);
+        })
 
     }, function(error){
         next(error);
@@ -609,59 +678,70 @@ var searchAds = function(req, res, next){
 			if(searchData.length <= 0)
 				return res.json(paginatedSearchData);
 
-			//Save searches
-			ppcModel.saveSponsoredAdSearch(searchData).then(
-				function(savedSearchIds){
-					
-					if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
-						//matched one result
-						searchData[0].search_id = savedSearchIds.insertId;
-						var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-	                            'Categories/listing_microsite/' + searchData[0].ad_id);
-						searchData[0].redirectUrl = config.get('project_url') + 
-	                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
-	                        redirectUrl
-	                        ;
-					}
-					else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
-						//matched multiple results
-						for(var i = 0; i<searchData.length; i++){
-	                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-	                            'Categories/listing_microsite/' + searchData[i].ad_id);
-
-	                        searchData[i].redirectUrl = config.get('project_url') + 
-	                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +
-	                        redirectUrl
-	                        ;
-	                    }
-					}
-					else {
-						next(new appError('Matched and saved search data inconsistent.'));
-					}
-
-					
-					
-
-					var ip = Util.getClientIp(req);
-					var userAgent = Util.getUserAgent(req);
-
-					//Log impression
-					ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
-						function(response){
-							res.json(paginatedSearchData);
-						}, 
-						function(error){
-							next(error);
+			
+			//Remove multiple keyword match for one sponsored ad
+			//aka removes duplicate sponsored ad results
+			Util.removeObjDupInArr(searchData, "ad_id").then(function(searchData){
+				paginatedSearchData.result = searchData;
+				//Save searches
+				ppcModel.saveSponsoredAdSearch(searchData).then(
+					function(savedSearchIds){
+						
+						if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
+							//matched one result
+							searchData[0].search_id = savedSearchIds.insertId;
+							var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+		                            'Categories/listing_microsite/' + searchData[0].ad_id);
+							searchData[0].redirectUrl = config.get('project_url') + 
+		                        '/api/click/ads/' + savedSearchIds.insertId + '/' +
+		                        redirectUrl
+		                        ;
 						}
-					);
+						else if(searchData.length > 1 && (savedSearchIds.length === searchData.length)){
+							//matched multiple results
+							for(var i = 0; i<searchData.length; i++){
+		                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+		                            'Categories/listing_microsite/' + searchData[i].ad_id);
 
-					
-					
-				}, 
-				function(error){
-					next(error);
-				}
-			);
+		                        searchData[i].redirectUrl = config.get('project_url') + 
+		                        '/api/click/ads/' + savedSearchIds[i].insertId + '/' +
+		                        redirectUrl
+		                        ;
+		                    }
+						}
+						else {
+							next(new appError('Matched and saved search data inconsistent.'));
+						}
+
+						
+						
+
+						var ip = Util.getClientIp(req);
+						var userAgent = Util.getUserAgent(req);
+
+						//Log impression
+						ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
+							function(response){
+								res.json(paginatedSearchData);
+							}, 
+							function(error){
+								next(error);
+							}
+						);
+
+						
+						
+					}, 
+					function(error){
+						next(error);
+					}
+				);
+			}, function(error){
+				next(error);
+			});
+
+			
+			
 		}, 
 		function(error){			
 			next(error);
@@ -671,7 +751,8 @@ var searchAds = function(req, res, next){
 
 var searchDeals = function(req, res, next) {
 	var keyword = req.params.keyword;
-	var categoryId = req.params.categoryId;
+	var categoryId = (typeof req.params[0] === "undefined")
+	? req.params.categoryId : req.params[0];
 	var userId = req.params.userId;
 	
 	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
