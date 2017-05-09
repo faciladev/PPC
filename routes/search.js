@@ -226,6 +226,133 @@ router.get('/deals/:keyword', function(req, res, next) {
 });
 
 /**
+ * @api {get} /search/deals/nearest/:lat/:lng/:radius Search Deal By User Location
+ * @apiVersion 0.1.0
+ * @apiName SearchDealByUserLocation
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {Number} lat User Latitude.
+ * @apiParam {Number} lng User Longitude.
+ * @apiParam {Number} radius Radius.
+ *
+ * @apiSuccess {Object[]} result List of Daily Deals in a Category.
+ * @apiSuccess {Number} page  Pagination Page Number.
+ * @apiSuccess {Number} numRowsPerPage  Pagination Number of Rows Per Page.
+ * @apiSuccess {Number} totalPages  Pagination Total Pages.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *		  "result": [
+ *		    {
+ *		      "deal_id": 146,
+ *		      "microsite_id": 165,
+ *		      "company_name": null,
+ *		      "what_you_get": "<ul>\n\t<li>50% off all perfumes</li>\n\t<li>Free Facial</li>\n</ul>\n",
+ *		      "location": "10479 Brown Wolf St",
+ *		      "end_date": "2017-03-29T21:00:00.000Z",
+ *		      "start_date": "2017-03-07T21:00:00.000Z",
+ *		      "discount_daily_description": "",
+ *		      "discount_percentage": 0,
+ *		      "discount_type": "text",
+ *		      "name": "Discount Perfume",
+ *		      "discount_price": null,
+ *		      "image": "image_name",
+ *		      "image_1": "image_name",
+ *		      "image_2": "image_name",
+ *		      "code": "embeddable_code",
+ *		      "date_created": "2017-03-08T16:36:45.000Z",
+ *		      "download_price": 6,
+ *		      "discount_description": "50% off all perfumes",
+ *		      "regular_price": 0,
+ *		      "discount_rate": 0,
+ *		      "coupon_name": "Discount Perfume",
+ *		      "coupon_generated_code": "j016qgqq",
+ *		      "is_approved": 1,
+ *		      "is_deleted": 0,
+ *		      "list_rank": 0,
+ *		      "deal_image": "image_name",
+ *		      "paused": 0,
+ *		      "daily_deal_description": "<p>Discount Perfumes at our following locations:</p>\n\n<ul>\n\t<li>2820 S. Jones Blvd. Las Vegas NV 89146</li>\n\t<li>817 S. Main St. Las Vegas NV 89101</li>\n</ul>\n",
+ *		      "approved_category_id": 3,
+ *		      "url": "http://ppc.l/api/click/deals/146/http%3A%2F%2Fiziphub.com%2FCategories%2Fdaily_deals_microsite%2F146"
+ *		    }
+ *		  ],
+ *		  "page": 1,
+ *		  "numRowsPerPage": 10,
+ *		  "totalRows": 2,
+ *		  "totalPages": 1
+ *		}
+ */
+router.get('/deals/nearest/:lat/:lng/:radius', function(req, res, next) {
+	fetchNearestDeals(req, res, next);
+});
+
+/**
+ * @api {get} /search/deals/nearest/:lat/:lng/:radius/:userId Search Deal By User Location for Members
+ * @apiVersion 0.1.0
+ * @apiName MemberSearchDealByUserLocation
+ * @apiGroup Daily Deals
+ *
+ * @apiParam {Number} lat User Latitude.
+ * @apiParam {Number} lng User Longitude.
+ * @apiParam {Number} radius Radius.
+ * @apiParam {Number} userId User Id.
+ *
+ * @apiSuccess {Object[]} result List of Daily Deals in a Category.
+ * @apiSuccess {Number} page  Pagination Page Number.
+ * @apiSuccess {Number} numRowsPerPage  Pagination Number of Rows Per Page.
+ * @apiSuccess {Number} totalPages  Pagination Total Pages.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *		  "result": [
+ *		    {
+ *		      "deal_id": 146,
+ *		      "microsite_id": 165,
+ *		      "company_name": null,
+ *		      "what_you_get": "<ul>\n\t<li>50% off all perfumes</li>\n\t<li>Free Facial</li>\n</ul>\n",
+ *		      "location": "10479 Brown Wolf St",
+ *		      "end_date": "2017-03-29T21:00:00.000Z",
+ *		      "start_date": "2017-03-07T21:00:00.000Z",
+ *		      "discount_daily_description": "",
+ *		      "discount_percentage": 0,
+ *		      "discount_type": "text",
+ *		      "name": "Discount Perfume",
+ *		      "discount_price": null,
+ *		      "image": "image_name",
+ *		      "image_1": "image_name",
+ *		      "image_2": "image_name",
+ *		      "code": "embeddable_code",
+ *		      "date_created": "2017-03-08T16:36:45.000Z",
+ *		      "download_price": 6,
+ *		      "discount_description": "50% off all perfumes",
+ *		      "regular_price": 0,
+ *		      "discount_rate": 0,
+ *		      "coupon_name": "Discount Perfume",
+ *		      "coupon_generated_code": "j016qgqq",
+ *		      "is_approved": 1,
+ *		      "is_deleted": 0,
+ *		      "list_rank": 0,
+ *		      "deal_image": "image_name",
+ *		      "paused": 0,
+ *		      "daily_deal_description": "<p>Discount Perfumes at our following locations:</p>\n\n<ul>\n\t<li>2820 S. Jones Blvd. Las Vegas NV 89146</li>\n\t<li>817 S. Main St. Las Vegas NV 89101</li>\n</ul>\n",
+ *		      "approved_category_id": 3,
+ *		      "url": "http://ppc.l/api/click/deals/146/http%3A%2F%2Fiziphub.com%2FCategories%2Fdaily_deals_microsite%2F146"
+ *		    }
+ *		  ],
+ *		  "page": 1,
+ *		  "numRowsPerPage": 10,
+ *		  "totalRows": 2,
+ *		  "totalPages": 1
+ *		}
+ */
+router.get('/deals/nearest/:lat/:lng/:radius/:userId', function(req, res, next) {
+	fetchNearestDeals(req, res, next);
+});
+
+/**
  * @api {get} /search/deals/:categoryId/:keyword Non-member Search Deal By Category and Keyword
  * @apiVersion 0.1.0
  * @apiName NonMemberSearchDealByCategoryAndKeyword
@@ -781,7 +908,37 @@ var searchDeals = function(req, res, next) {
 	)
 }
 
+var fetchNearestDeals = function(req, res, next) {
+	const lat = req.params.lat;
+	const lng = req.params.lng;
+	const radius = req.params.radius;
+	var userId = req.params.userId;
+	
+	ppcModel.getNearestDeals(lat, lng, radius, req.query.page).then(
+		function(searchData){
+			var userAgent = Util.getUserAgent(req);
+			var ip = Util.getClientIp(req);
 
+			if(searchData.result.length <= 0)
+				return res.json([]);
+
+			//Log impression
+			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
+				function(response){
+					res.json(searchData);
+				}, 
+				function(error){
+					next(error);
+				}
+			);
+
+			
+		}, 
+		function(error){			
+			next(error);
+		}
+	)
+}
 
 
 
