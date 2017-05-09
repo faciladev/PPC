@@ -225,6 +225,90 @@ var ppcModel = {
         });
     },
 
+    getNearestDeals: (lat, lng, radius, page) => {
+        return new Promise((resolve, reject) => {
+
+            let squareBoundary = Util.getNearestSquareBoundary(lat, lng, radius);
+            if(!squareBoundary) reject(new appError('Cannot resolve square boundary.'));
+
+            const query = 
+            'SELECT ' + 
+            'dd.id AS deal_id, ' +
+            'm.id AS microsite_id, '+
+            'm.company_name, ' +
+            'm.what_you_get, '+
+            'm.location,' +
+            'm.city,' +
+            'm.zip_code,' +
+            'usa_states.usa_state_code,' +
+            'usa_states.usa_state_name,' +
+            'dd.end_date, ' +
+            'dd.start_date, ' +
+            'm.discount_daily_description, '+
+            'm.discount_percentage, '+
+            'dd.discount_type, '+
+            'm.name, '+
+            'dd.discount_price, ' +
+            'm.image, ' +
+            'm.image_1, ' +
+            'm.image_2, ' +
+            'm.code, ' +
+            'dd.date_created, ' +
+            'dd.download_price, ' +
+            'm.discount_description, ' +
+            'dd.regular_price, '+
+            'dd.discount_rate, '+
+            'dd.coupon_name, '+
+            'dd.coupon_generated_code, '+
+            'dd.is_approved, ' +
+            'dd.is_deleted, ' +
+            'dd.list_rank, ' +
+            'dd.deal_image, ' +
+            'dd.paused, ' +
+            'm.discount_description, '+
+            'm.daily_deal_description, '+
+            'dd.approved_category_id '+
+            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+            'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
+            'dd.approved_category_id = cat.category_id ' +
+            'JOIN usa_states ON usa_states.usa_state_id = m.state_id ' +
+            'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 ' +
+            'AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?';
+
+            let queryParams = [
+            squareBoundary.minLat,
+            squareBoundary.maxLat,
+            squareBoundary.minLng,
+            squareBoundary.maxLng
+            ];
+
+            
+            PaginationHelper.paginate(query, page, null, queryParams).then(
+                function(response){
+                    
+                    for(var i = 0; i<response.result.length; i++){
+                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                            'Categories/daily_deals_microsite/' + response.result[i].deal_id);
+
+                        response.result[i].url = config.get('project_url') + 
+                        '/api/click/deals/' + response.result[i].deal_id + '/' +
+                        redirectUrl
+                        ;
+                    }
+                    
+                    //TODO
+                    //Loop results and remove items outside circle.
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
+            
+        });
+    },
+
 
     findDailyDeals : function(keyword, categoryId, page){
 
