@@ -140,6 +140,62 @@ var ppcModel = {
         });
     },
 
+    deleteConsumerAdOffer: (userId, consumerOfferId) => {
+        return new Promise((resolve, reject) => {
+            let query = "DELETE FROM saved_offers WHERE consumer_user_id = ? AND offer_id = ? AND item_type_id = ?";
+            let queryParams = [userId, consumerOfferId, ITEM_SPONSORED_AD];
+
+            DbHelper.getConnection().then(
+                connection => {
+                    connection.query(query, queryParams, (err, rows, fields) => {
+                        if(err) return reject(err);
+
+                        return resolve(rows);
+                    });
+                },
+                error => {
+                    reject(error);
+                }
+            );
+        });
+    },
+
+    findConsumerAdOffer: function(consumerId, page){
+        return new Promise(function(resolve, reject){
+
+            let query = "SELECT " +
+                "saved_offers.id AS offer_consumer_id," +
+                "saved_offers.saved_date," +
+                "ppc_offers.*," +
+                "ppc_ads.id AS ad_id," +
+                "ppc_ad_microsites.id AS microsite_id " +
+            "FROM " +
+                "saved_offers " +
+                    "JOIN " +
+                "ppc_offers ON ppc_offers.id = saved_offers.offer_id " +
+                    "JOIN " +
+                "ppc_ad_offers ON ppc_offers.id = ppc_ad_offers.offer_id " +
+                    "JOIN " +
+                "ppc_ads ON ppc_ad_offers.ad_id = ppc_ads.id " +
+                    "JOIN " +
+                "ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id " +
+            "WHERE " +
+                "saved_offers.consumer_user_id = ? " +
+                    "AND saved_offers.item_type_id = ? " +
+                    "AND ppc_ads.is_deleted = 0";
+
+            PaginationHelper.paginate(query, page, null, [consumerId, ITEM_SPONSORED_AD]).then(
+                function(response){
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+            
+        });
+    },
+
     saveFlexSearch : function(searchData){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
