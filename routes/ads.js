@@ -2,6 +2,7 @@ var express = require('express');
 var config = require('config');
 
 var ads = require('../models/ads');
+var ppcModel = require('../models/ppcModel');
 var UploadHelper = require('../lib/UploadHelper');
 var Util = require('../lib/util');
 
@@ -606,5 +607,65 @@ router.put('/:adId/disapprove', function(req, res, next){
         }
     );
 });
+
+/**
+ * @api {get} /ads/adoffers/:offerId/:userId Member Save Sponsored Ad Offers
+ * @apiVersion 0.1.0
+ * @apiName MemberSaveSponsoredAdOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} offerId  Offer Id.
+ * @apiParam {Number} userId  User Id.
+ */
+router.get('/adoffers/:offerId/:userId', function(req, res, next){
+    ppcModel.saveConsumerAdOffer(req.params.userId, req.params.offerId).then(
+        (response)=>{
+            return res.json({status: true, message: "ad offer saved."});
+        }, 
+        (error)=>{
+            return next(error);
+        }
+    );
+});
+
+/**
+ * @api {get} /ads/adoffers/:userId Member Save Sponsored Ad Offers
+ * @apiVersion 0.1.0
+ * @apiName MemberListSponsoredAdOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} userId  User Id.
+ */
+router.get('/adoffers/:userId', function(req, res, next){
+    ppcModel.findConsumerAdOffer(req.params.userId, req.query.page).then(
+        (response)=>{
+            return res.json(response);
+        }, 
+        (error)=>{
+            return next(error);
+        }
+    );
+});
+
+/**
+ * @api {delete} /ads/adoffers/:userId/:consumerOfferId Delete saved consumer offer
+ * @apiVersion 0.1.0
+ * @apiName DeleteSavedConsumerOffer
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} userId  User Id.
+ * @apiParam {Number} consumerOfferId  Saved consumer offer id.
+ */
+router.delete('/adoffers/:userId/:consumerOfferId', function(req, res, next){
+    ppcModel.deleteConsumerAdOffer(req.params.userId, req.params.consumerOfferId).then(
+        (response)=>{
+            return res.json({status: true, message: "Consumer offer deleted."});
+        }, 
+        (error)=>{
+            return next(error);
+        }
+    );
+});
+
 
 module.exports = router;
