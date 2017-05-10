@@ -609,7 +609,7 @@ router.put('/:adId/disapprove', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/adoffers/:offerId/:userId Member Save Sponsored Ad Offers
+ * @api {post} /ads/adoffers/:offerId/:userId Member Save Sponsored Ad Offers
  * @apiVersion 0.1.0
  * @apiName MemberSaveSponsoredAdOffers
  * @apiGroup Sponsored Ads
@@ -617,7 +617,7 @@ router.put('/:adId/disapprove', function(req, res, next){
  * @apiParam {Number} offerId  Offer Id.
  * @apiParam {Number} userId  User Id.
  */
-router.get('/adoffers/:offerId/:userId', function(req, res, next){
+router.post('/adoffers/:offerId/:userId', function(req, res, next){
     ppcModel.saveConsumerAdOffer(req.params.userId, req.params.offerId).then(
         (response)=>{
             return res.json({status: true, message: "ad offer saved."});
@@ -629,7 +629,7 @@ router.get('/adoffers/:offerId/:userId', function(req, res, next){
 });
 
 /**
- * @api {get} /ads/adoffers/:userId Member Save Sponsored Ad Offers
+ * @api {get} /ads/adoffers/:userId Member List Sponsored Ad Offers
  * @apiVersion 0.1.0
  * @apiName MemberListSponsoredAdOffers
  * @apiGroup Sponsored Ads
@@ -648,7 +648,7 @@ router.get('/adoffers/:userId', function(req, res, next){
 });
 
 /**
- * @api {delete} /ads/adoffers/:userId/:consumerOfferId Delete saved consumer offer
+ * @api {delete} /ads/adoffers/:userId/:consumerOfferId Delete saved consumer sponsored ad offer
  * @apiVersion 0.1.0
  * @apiName DeleteSavedConsumerOffer
  * @apiGroup Sponsored Ads
