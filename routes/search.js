@@ -919,11 +919,11 @@ var fetchNearestDeals = function(req, res, next) {
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
 
-			if(searchData.result.length <= 0)
+			if(searchData.length <= 0)
 				return res.json([]);
 
 			//Log impression
-			ppcModel.trackDailyDealImpression(searchData.result, ip, userAgent, userId).then(
+			ppcModel.trackDailyDealImpression(searchData, ip, userAgent, userId).then(
 				function(response){
 					res.json(searchData);
 				}, 

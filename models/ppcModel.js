@@ -283,6 +283,12 @@ var ppcModel = {
 
     getNearestDeals: (lat, lng, radius, page) => {
         return new Promise((resolve, reject) => {
+            lat = Number(lat);
+            lng = Number(lng);
+            radius = parseInt(radius);//In miles
+
+            if(isNaN(lat) || isNaN(lng) || isNaN(radius)) 
+                return reject(new appError('Invalid input'));
 
             let squareBoundary = Util.getNearestSquareBoundary(lat, lng, radius);
             if(!squareBoundary) return reject(new appError('Cannot resolve square boundary.'));
@@ -339,38 +345,52 @@ var ppcModel = {
             squareBoundary.maxLng
             ];
 
-            
-            PaginationHelper.paginate(query, page, null, queryParams).then(
-                function(response){
-                    
-                    for(var i = 0; i<response.result.length; i++){
-                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-                            'Categories/daily_deals_microsite/' + response.result[i].deal_id);
+            DbHelper.getConnection().then(function(connection){
 
-                        response.result[i].url = config.get('project_url') + 
-                        '/api/click/deals/' + response.result[i].deal_id + '/' +
+                connection.query(query, queryParams, function(err, results, fields){
+                    connection.release();
+
+                    if(err)
+                        return reject(err);
+                    
+                    let finalResult = [];
+
+                    for(var i = 0; i<results.length; i++){
+                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                            'Categories/daily_deals_microsite/' + results[i].deal_id);
+
+                        results[i].url = config.get('project_url') + 
+                        '/api/click/deals/' + results[i].deal_id + '/' +
                         redirectUrl
                         ;
 
                         let distance = Util.getDistanceBtnPoints(
-                            Number(response.result[i].lat),
-                            Number(response.result[i].lng),
+                            Number(results[i].lat),
+                            Number(results[i].lng),
                             Number(lat),
                             Number(lng)
                         );
 
-                        if(distance === false) response.result[i].distance = distance;
-                    }
-                    
-                    //TODO
-                    //Loop results and remove items outside circle.
-                    resolve(response);
-                }, 
-                function(error){
-                    reject(error);
-                }
-            );
+                        if(!isNaN(distance)) {
+                            //Remove items outside circle
+                            if(distance <= radius){
+                                results[i].distance = distance.toFixed(1);
+                                finalResult.push(results[i]);
+                            }
 
+                        }
+
+                        if(i === results.length - 1){
+                            return resolve(finalResult);
+                        }
+                    }
+
+                    
+                });
+
+            },function(error){
+                return reject(error);
+            });
             
         });
     },
