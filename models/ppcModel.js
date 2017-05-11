@@ -285,7 +285,7 @@ var ppcModel = {
         return new Promise((resolve, reject) => {
 
             let squareBoundary = Util.getNearestSquareBoundary(lat, lng, radius);
-            if(!squareBoundary) reject(new appError('Cannot resolve square boundary.'));
+            if(!squareBoundary) return reject(new appError('Cannot resolve square boundary.'));
 
             const query = 
             'SELECT ' + 
@@ -296,6 +296,7 @@ var ppcModel = {
             'm.location,' +
             'm.city,' +
             'm.zip_code,' +
+            'm.lat, m.lng,' +
             'usa_states.usa_state_code,' +
             'usa_states.usa_state_name,' +
             'dd.end_date, ' +
@@ -350,6 +351,15 @@ var ppcModel = {
                         '/api/click/deals/' + response.result[i].deal_id + '/' +
                         redirectUrl
                         ;
+
+                        let distance = Util.getDistanceBtnPoints(
+                            Number(response.result[i].lat),
+                            Number(response.result[i].lng),
+                            Number(lat),
+                            Number(lng)
+                        );
+
+                        if(distance === false) response.result[i].distance = distance;
                     }
                     
                     //TODO
