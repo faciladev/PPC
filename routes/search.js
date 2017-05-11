@@ -913,9 +913,13 @@ var fetchNearestDeals = function(req, res, next) {
 	const lng = req.params.lng;
 	const radius = req.params.radius;
 	var userId = req.params.userId;
-	
+
 	ppcModel.getNearestDeals(lat, lng, radius, req.query.page).then(
 		function(searchData){
+
+			if(req.query.display === "count")
+				return res.json(searchData.length);
+
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
 
