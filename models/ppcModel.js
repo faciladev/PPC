@@ -355,6 +355,9 @@ var ppcModel = {
                     
                     let finalResult = [];
 
+                    if(results.length === 0)
+                        return resolve(results);
+
                     for(var i = 0; i<results.length; i++){
                         var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
                             'Categories/daily_deals_microsite/' + results[i].deal_id);
