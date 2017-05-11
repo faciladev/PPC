@@ -140,6 +140,62 @@ var ppcModel = {
         });
     },
 
+    deleteConsumerAdOffer: (userId, consumerOfferId) => {
+        return new Promise((resolve, reject) => {
+            let query = "DELETE FROM saved_offers WHERE consumer_user_id = ? AND offer_id = ? AND item_type_id = ?";
+            let queryParams = [userId, consumerOfferId, ITEM_SPONSORED_AD];
+
+            DbHelper.getConnection().then(
+                connection => {
+                    connection.query(query, queryParams, (err, rows, fields) => {
+                        if(err) return reject(err);
+
+                        return resolve(rows);
+                    });
+                },
+                error => {
+                    reject(error);
+                }
+            );
+        });
+    },
+
+    findConsumerAdOffer: function(consumerId, page){
+        return new Promise(function(resolve, reject){
+
+            let query = "SELECT " +
+                "saved_offers.id AS offer_consumer_id," +
+                "saved_offers.saved_date," +
+                "ppc_offers.*," +
+                "ppc_ads.id AS ad_id," +
+                "ppc_ad_microsites.id AS microsite_id " +
+            "FROM " +
+                "saved_offers " +
+                    "JOIN " +
+                "ppc_offers ON ppc_offers.id = saved_offers.offer_id " +
+                    "JOIN " +
+                "ppc_ad_offers ON ppc_offers.id = ppc_ad_offers.offer_id " +
+                    "JOIN " +
+                "ppc_ads ON ppc_ad_offers.ad_id = ppc_ads.id " +
+                    "JOIN " +
+                "ppc_ad_microsites ON ppc_ads.id = ppc_ad_microsites.ad_id " +
+            "WHERE " +
+                "saved_offers.consumer_user_id = ? " +
+                    "AND saved_offers.item_type_id = ? " +
+                    "AND ppc_ads.is_deleted = 0";
+
+            PaginationHelper.paginate(query, page, null, [consumerId, ITEM_SPONSORED_AD]).then(
+                function(response){
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+            
+        });
+    },
+
     saveFlexSearch : function(searchData){
         return new Promise(function(resolve, reject){
             DbHelper.getConnection().then(function(connection){
@@ -222,6 +278,90 @@ var ppcModel = {
             },function(error){
                 return reject(error);
             });
+        });
+    },
+
+    getNearestDeals: (lat, lng, radius, page) => {
+        return new Promise((resolve, reject) => {
+
+            let squareBoundary = Util.getNearestSquareBoundary(lat, lng, radius);
+            if(!squareBoundary) reject(new appError('Cannot resolve square boundary.'));
+
+            const query = 
+            'SELECT ' + 
+            'dd.id AS deal_id, ' +
+            'm.id AS microsite_id, '+
+            'm.company_name, ' +
+            'm.what_you_get, '+
+            'm.location,' +
+            'm.city,' +
+            'm.zip_code,' +
+            'usa_states.usa_state_code,' +
+            'usa_states.usa_state_name,' +
+            'dd.end_date, ' +
+            'dd.start_date, ' +
+            'm.discount_daily_description, '+
+            'm.discount_percentage, '+
+            'dd.discount_type, '+
+            'm.name, '+
+            'dd.discount_price, ' +
+            'm.image, ' +
+            'm.image_1, ' +
+            'm.image_2, ' +
+            'm.code, ' +
+            'dd.date_created, ' +
+            'dd.download_price, ' +
+            'm.discount_description, ' +
+            'dd.regular_price, '+
+            'dd.discount_rate, '+
+            'dd.coupon_name, '+
+            'dd.coupon_generated_code, '+
+            'dd.is_approved, ' +
+            'dd.is_deleted, ' +
+            'dd.list_rank, ' +
+            'dd.deal_image, ' +
+            'dd.paused, ' +
+            'm.discount_description, '+
+            'm.daily_deal_description, '+
+            'dd.approved_category_id '+
+            'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
+            'AS m ON dd.daily_deal_microsite_id=m.id LEFT JOIN ppc_daily_deal_categories AS cat ON ' +
+            'dd.approved_category_id = cat.category_id ' +
+            'JOIN usa_states ON usa_states.usa_state_id = m.state_id ' +
+            'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 ' +
+            'AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?';
+
+            let queryParams = [
+            squareBoundary.minLat,
+            squareBoundary.maxLat,
+            squareBoundary.minLng,
+            squareBoundary.maxLng
+            ];
+
+            
+            PaginationHelper.paginate(query, page, null, queryParams).then(
+                function(response){
+                    
+                    for(var i = 0; i<response.result.length; i++){
+                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                            'Categories/daily_deals_microsite/' + response.result[i].deal_id);
+
+                        response.result[i].url = config.get('project_url') + 
+                        '/api/click/deals/' + response.result[i].deal_id + '/' +
+                        redirectUrl
+                        ;
+                    }
+                    
+                    //TODO
+                    //Loop results and remove items outside circle.
+                    resolve(response);
+                }, 
+                function(error){
+                    reject(error);
+                }
+            );
+
+            
         });
     },
 
