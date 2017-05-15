@@ -281,11 +281,12 @@ var ppcModel = {
         });
     },
 
-    getNearestDeals: (lat, lng, radius, page) => {
+    getNearestDeals: (lat, lng, radius, limit) => {
         return new Promise((resolve, reject) => {
             lat = Number(lat);
             lng = Number(lng);
             radius = parseInt(radius);//In miles
+            limit = parseInt(limit);
 
             if(isNaN(lat) || isNaN(lng) || isNaN(radius)) 
                 return reject(new appError('Invalid input'));
@@ -293,7 +294,7 @@ var ppcModel = {
             let squareBoundary = Util.getNearestSquareBoundary(lat, lng, radius);
             if(!squareBoundary) return reject(new appError('Cannot resolve square boundary.'));
 
-            const query = 
+            let query = 
             'SELECT ' + 
             'dd.id AS deal_id, ' +
             'm.id AS microsite_id, '+
@@ -336,7 +337,7 @@ var ppcModel = {
             'dd.approved_category_id = cat.category_id ' +
             'JOIN usa_states ON usa_states.usa_state_id = m.state_id ' +
             'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 ' +
-            'AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?';
+            'AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? ';
 
             let queryParams = [
             squareBoundary.minLat,
@@ -344,6 +345,11 @@ var ppcModel = {
             squareBoundary.minLng,
             squareBoundary.maxLng
             ];
+
+            if(! isNaN(limit)){
+                query += "LIMIT ? ";
+                queryParams.push(limit);
+            }
 
             DbHelper.getConnection().then(function(connection){
 

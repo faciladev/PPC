@@ -914,7 +914,7 @@ var fetchNearestDeals = function(req, res, next) {
 	const radius = req.params.radius;
 	var userId = req.params.userId;
 
-	ppcModel.getNearestDeals(lat, lng, radius, req.query.page).then(
+	ppcModel.getNearestDeals(lat, lng, radius, req.query.limit).then(
 		function(searchData){
 
 			if(req.query.display === "count")
