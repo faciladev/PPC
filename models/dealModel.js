@@ -383,6 +383,7 @@ var dealModel = {
                     mi.name,\
                     dd.budget_limit,\
                     dd.budget_period,\
+                    dd.keywords,\
                     dd.paused,\
                     COUNT(ppc_analytics.id) AS downloads,\
                     dd.budget_limit - (COUNT(ppc_analytics.id) * dd.download_price) AS available_fund,\
@@ -414,6 +415,7 @@ var dealModel = {
                     dd.budget_limit,\
                     dd.budget_period,\
                     dd.paused,\
+                    dd.keywords,\
                     dd.approved_category_id,\
                     dd.download_price,\
                     dd.date_created,\
@@ -472,6 +474,7 @@ var dealModel = {
             'dd.discount_price, ' +
             'dd.budget_limit, ' +
             'dd.budget_period, '+
+            'dd.keywords, ' +
             'm.image, ' +
             'm.image_1, ' +
             'm.image_2, ' +
