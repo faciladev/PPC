@@ -5,6 +5,7 @@ var router = express.Router();
 var subPageModel = require('../models/subPageModel');
 var usaStateModel = require('../models/usaStateModel');
 var advertiserModel = require('../models/advertiserModel');
+var walletModel = require('../models/walletModel');
 var businessModel = require('../models/businessModel');
 var flexModel = require('../models/flexModel');
 var ads = require('../models/ads');
@@ -156,6 +157,26 @@ router.get('/categories', function(req, res, next) {
         res.json(response);
     }, function(error){
         error.message = 'Error';
+        next(error);
+    });
+});
+
+/**
+ * @api {get} /wallets Count items in wallet
+ * @apiVersion 0.1.0
+ * @apiName CountItemsInWallet
+ * @apiGroup Wallet
+ *
+ * @apiSuccess {Object[]} WalletItems  List of items in wallet.
+ *
+ */
+router.get('/wallets/:userId', function(req, res, next) {
+    walletModel.getAllItems(parseInt(req.params.userId)).then(function(response){
+        if(req.query.display === 'count')
+            return res.json(response.length);
+
+        res.json(response);
+    }, function(error){
         next(error);
     });
 });
