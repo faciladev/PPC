@@ -88,7 +88,8 @@ var ppcModel = {
             'ppc_ad_locations ON ppc_ads.id = ppc_ad_locations.ad_id ' +
 
             'JOIN ppc_ads_subpages ON ppc_ads.id = ppc_ads_subpages.ad_id ' +
-
+            'JOIN advertisers ON advertisers.advertizer_id = ppc_ads.advertiser_id ' +
+            'AND advertisers.advertizer_deleted = 0 AND advertizer_status = 4 ' +
 
             'WHERE ' +
             'ppc_keywords.keyword LIKE ? AND (ppc_ad_locations.city LIKE ? ' + 
