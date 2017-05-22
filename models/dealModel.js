@@ -370,7 +370,7 @@ var dealModel = {
         });
     },
 
-    getAllDeals : function(page, include){
+    getAllDeals : function(page, include, numRowsPerPage){
         include = include || null;
 
         return new Promise(function(resolve, reject) {
@@ -433,7 +433,7 @@ var dealModel = {
             PaginationHelper.paginate(
                 query, 
                 page, 
-                null, 
+                numRowsPerPage, 
                 [
                     ppcModel.ITEM_DAILY_DEAL, 
                     ppcModel.ACTIVITY_DOWNLOAD,
@@ -453,7 +453,7 @@ var dealModel = {
         });
     },
 
-    getAllDealsByAdvertiser : function(advertiserId, page){
+    getAllDealsByAdvertiser : function(advertiserId, page, numRowsPerPage){
 
         return new Promise(function(resolve, reject) {
 
@@ -516,7 +516,7 @@ var dealModel = {
             advertiserId
             ];
             
-            PaginationHelper.paginate(query, page, null, queryParams).then(
+            PaginationHelper.paginate(query, page, numRowsPerPage, queryParams).then(
                 function(response){
                     resolve(response);
                 }, 

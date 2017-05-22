@@ -153,7 +153,7 @@ router.delete('/:id', function(req, res, next){
  */
 router.get('/', function(req, res, next){
 
-	dealModel.getAllDeals(req.query.page, req.query.include).then(
+	dealModel.getAllDeals(req.query.page, req.query.include, req.query.numRowsPerPage).then(
 		function(deals){
 			res.json(deals);
 		}, 
@@ -226,7 +226,7 @@ router.get('/', function(req, res, next){
  */
 router.get('/advertisers/:advertiserId', function(req, res, next){
 	var advertiserId = req.params.advertiserId;
-	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page).then(
+	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page, req.query.numRowsPerPage).then(
 		function(paginatedDeals){
 			if(paginatedDeals.result.length === 0)
 				return res.json(paginatedDeals);
