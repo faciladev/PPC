@@ -12,7 +12,7 @@ var router = express.Router();
 router.get('/', function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
-    ads.getAll(req.query.page, search, type).then(function(response){
+    ads.getAll(req.query.page, search, type, req.query.numRowsPerPage).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';
@@ -25,7 +25,7 @@ router.get('/advertiser/:advertiserId', function(req, res, next) {
     var type = req.query.type;
     var advertiserId = req.params.advertiserId;
     var page = req.query.page;
-    ads.getAllByAdvertiser(page, advertiserId, search, type).then(function(response){
+    ads.getAllByAdvertiser(page, advertiserId, search, type, req.query.numRowsPerPage).then(function(response){
         res.json(response);
     }, function(error){
         error.message = 'Error';

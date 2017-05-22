@@ -102,7 +102,7 @@ module.exports = {
         });
     },
 
-    getAll : function(page, search, type){
+    getAll : function(page, search, type, numRowsPerPage){
         return new Promise(function(resolve, reject) {
             var queryParams = [];
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, ' +
@@ -145,7 +145,7 @@ module.exports = {
             query += " GROUP BY ppc_ads.id, ppc_ad_microsites.id ORDER BY ppc_ads.id DESC";
 
 
-            PaginationHelper.paginate(query, page, null, queryParams).then(
+            PaginationHelper.paginate(query, page, numRowsPerPage, queryParams).then(
                 function(result){
                     if(result.result <= 0)
                         return resolve(result);
@@ -299,7 +299,7 @@ module.exports = {
         });
     },
 
-    getAllByAdvertiser : function(page, advertiserId, search, type){
+    getAllByAdvertiser : function(page, advertiserId, search, type, numRowsPerPage){
         return new Promise(function(resolve, reject) {
             var queryParams = [];
             var query = 'SELECT ppc_ads.id, ppc_ads.advertiser_id, '+
@@ -342,7 +342,7 @@ module.exports = {
 
             query += " GROUP BY ppc_ads.id, ppc_ad_microsites.id ORDER BY ppc_ads.id DESC";
             
-            PaginationHelper.paginate(query, page, null, queryParams).then(
+            PaginationHelper.paginate(query, page, numRowsPerPage, queryParams).then(
                 function(result){
                     if(result.result <= 0)
                         return resolve(result);
