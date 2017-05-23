@@ -344,7 +344,7 @@ module.exports = {
             
             PaginationHelper.paginate(query, page, numRowsPerPage, queryParams).then(
                 function(result){
-                    if(result.length <= 0)
+                    if(result.result.length <= 0)
                         return resolve(result);
 
                     var ads = result.result;
