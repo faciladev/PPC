@@ -6,7 +6,7 @@
         "database" : "ziphub_prod"
     },
 
-    "project_url" : "http://54.67.28.43:3000",
+    "project_url" : "https://ppc.ziphub.com:3000",
     "web_portal_url" : "http://ziphub.com",
     "upload_path" : "/var/www/PPC_ASSETS_PROD",
     "log_path": "/var/www/PPC_LOGS_PROD",
