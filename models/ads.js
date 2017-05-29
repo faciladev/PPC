@@ -704,11 +704,20 @@ module.exports = {
 				query += "INSERT INTO ppc_ad_microsites SET ?";
                 connection.query(query, [ad_id, ad_microsite],
                     function (err, rows, fields) {
-						connection.release();
-                        if(err){
-                            reject(err);
+						if(err){
+                            connection.release();
+                            return reject(err);
                         }
-                        resolve(rows);
+
+                        connection.query('SELECT * FROM ppc_ad_microsites where ad_id = ? LIMIT 1', [ad_id],
+                            function(err, rows, fields) {
+                                connection.release();
+                                if(err) {
+                                    return reject(err);
+                                }
+                                resolve(rows);
+                            }
+                        );
                     }
                 );
                 
