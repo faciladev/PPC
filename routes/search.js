@@ -773,11 +773,38 @@ var searchFlex = function(req, res, next){
 						next(new appError('Matched and saved search data inconsistent.'));
 					}
 
-					res.json(paginatedSearchData);
+					if(flexoffers.length === 1){
+						Util.imageUrl2Base64(flexoffers[0].flexSrc).then(
+							function(data){
+								flexoffers[0]['imageBase64'] = data;
+								return res.json(paginatedSearchData);
+							}, function(error){
+								return next(error);
+							}
+						);
+					} else {
+
+						for(var i = 0; i<flexoffers.length; i++){
+							(function(i){
+
+								Util.imageUrl2Base64(flexoffers[i].flexSrc).then(
+									function(data){
+											flexoffers[i]['imageBase64'] = data;
+
+										if(i === flexoffers.length - 1)
+											return res.json(paginatedSearchData);
+
+									}, function(error){
+										return next(error);
+									}
+								);
+							})(i);
+						}
+					}
 
 				}, 
 				function(error){
-					next(error);
+					return next(error);
 				}
 			);
         }, function(error){
