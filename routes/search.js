@@ -776,7 +776,12 @@ var searchFlex = function(req, res, next){
 					if(flexoffers.length === 1){
 						Util.imageUrl2Base64(flexoffers[0].flexSrc).then(
 							function(data){
-								flexoffers[0]['imageBase64'] = data;
+								//Change http image source served through ppc ssl imageserver
+								if(flexoffers[0].flexSrc.indexOf('http://') === 0){
+									flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
+									Util.sanitizeUrl(flexoffers[0].flexSrc);
+						        }
+
 								return res.json(paginatedSearchData);
 							}, function(error){
 								return next(error);
@@ -784,22 +789,16 @@ var searchFlex = function(req, res, next){
 						);
 					} else {
 
-						for(var i = 0; i<flexoffers.length; i++){
-							(function(i){
+						flexoffers.forEach((offer, index, flexoffers) => {
+							if(offer.flexSrc.indexOf('http://') === 0){
+								offer.flexSrc = config.get('project_url') + '/api/imageserver/' + 
+								Util.sanitizeUrl(offer.flexSrc);
+					        }
 
-								Util.imageUrl2Base64(flexoffers[i].flexSrc).then(
-									function(data){
-											flexoffers[i]['imageBase64'] = data;
+					        if(index === flexoffers.length - 1)
+					        	return res.json(paginatedSearchData);
+						});
 
-										if(i === flexoffers.length - 1)
-											return res.json(paginatedSearchData);
-
-									}, function(error){
-										return next(error);
-									}
-								);
-							})(i);
-						}
 					}
 
 				}, 
