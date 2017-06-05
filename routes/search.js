@@ -773,11 +773,37 @@ var searchFlex = function(req, res, next){
 						next(new appError('Matched and saved search data inconsistent.'));
 					}
 
-					res.json(paginatedSearchData);
+					if(flexoffers.length === 1){
+						Util.imageUrl2Base64(flexoffers[0].flexSrc).then(
+							function(data){
+								//Change http image source served through ppc ssl imageserver
+								if(flexoffers[0].flexSrc.indexOf('http://') === 0){
+									flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
+									Util.sanitizeUrl(flexoffers[0].flexSrc);
+						        }
+
+								return res.json(paginatedSearchData);
+							}, function(error){
+								return next(error);
+							}
+						);
+					} else {
+
+						flexoffers.forEach((offer, index, flexoffers) => {
+							if(offer.flexSrc.indexOf('http://') === 0){
+								offer.flexSrc = config.get('project_url') + '/api/imageserver/' + 
+								Util.sanitizeUrl(offer.flexSrc);
+					        }
+
+					        if(index === flexoffers.length - 1)
+					        	return res.json(paginatedSearchData);
+						});
+
+					}
 
 				}, 
 				function(error){
-					next(error);
+					return next(error);
 				}
 			);
         }, function(error){
