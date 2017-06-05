@@ -1,5 +1,6 @@
 var express = require('express');
 var request = require('request');
+const fileType = require('file-type');
 
 var router = express.Router();
 
@@ -464,19 +465,28 @@ router.get('/imageserver/:url', (req, res, next) => {
     var requestSettings = {
         url: Util.decodeUrl(req.params.url),
         method: 'GET',
-        encoding: null,
-        followAllRedirects: true,
-        followOriginalHttpMethod: true
+        encoding: null
     };
+
+    let mime;
 
     request(requestSettings, (error, response, body) => {
         if(error){
             res.status(400).json(error);
         } else {
-            res.set('Content-Type', response.headers['content-type']);
+            
+            res.set('Content-Type', mime);
             res.send(body);
         }
             
+    }).on('data', data => {
+        //Detect filetype from buffer
+        var ImageObj = fileType(data);
+
+        if(ImageObj){
+            mime = ImageObj.mime;
+        }
+
     });
 
 });
