@@ -1,4 +1,5 @@
 var express = require('express');
+var request = require('request');
 
 var router = express.Router();
 
@@ -457,6 +458,27 @@ router.get('/flexoffers/letters', function(req, res, next) {
     }, function(error){
         next(error);
     });
+});
+
+router.get('/imageserver/:url', (req, res, next) => {
+    var requestSettings = {
+        url: Util.decodeUrl(req.params.url),
+        method: 'GET',
+        encoding: null,
+        followAllRedirects: true,
+        followOriginalHttpMethod: true
+    };
+
+    request(requestSettings, (error, response, body) => {
+        if(error){
+            res.status(400).json(error);
+        } else {
+            res.set('Content-Type', response.headers['content-type']);
+            res.send(body);
+        }
+            
+    });
+
 });
 
 module.exports = router;
