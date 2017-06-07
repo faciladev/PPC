@@ -4,14 +4,13 @@ var appError = require('../app_error');
 
 var authorize = (req, res, next) => {
   let token = req.headers['authorization'];
-  console.log(req.headers);
-  console.log(token);
+  
   if(token){
     DbHelper.getConnection().then(function(connection){
                 
         connection.query(
             'SELECT * FROM ci_sessions ' +
-            'WHERE id = ?', [token], 
+            'WHERE id = ? AND user_id != 0', [token], 
             function (err, rows, fields) {
 
                 //release connection
