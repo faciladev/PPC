@@ -3,7 +3,7 @@ var DbHelper = require('../lib/DbHelper');
 var appError = require('../app_error');
 
 var authorize = (req, res, next) => {
-  let token = req.headers['authorization'];
+  let token = req.headers['authorization'] || req.cookies.Authorization;
   
   if(token){
     DbHelper.getConnection().then(function(connection){
