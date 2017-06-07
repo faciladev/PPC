@@ -26,6 +26,7 @@ var analytic = require('./routes/analytic');
 var index = require('./routes/index');
 var logs = require('./routes/logs');
 var flex = require('./routes/flex');
+var authorize = require('./routes/authorize');
 
 var app = express();
 
@@ -69,7 +70,7 @@ app.use(express.static(config.get('upload_path')));
 app.use('/apidoc', express.static(config.get('apidoc')));
 
 //Sponsored ad api
-app.use('/api/ads', ads);
+app.use('/api/ads', authorize, ads);
 
 //Searches sponsored ads and daily deals
 app.use('/api/search', search);
@@ -81,13 +82,13 @@ app.use('/api/click', click);
 app.use('/api/download', download);
 
 //Daily Deals
-app.use('/api/deals', deal);
+app.use('/api/deals', authorize, deal);
 
 //Offer
 app.use('/api/offers', offer);
 
 //Analytics
-app.use('/api/analytics', analytic);
+app.use('/api/analytics', authorize, analytic);
 
 //Flex offers
 app.use('/api/flex', flex);
