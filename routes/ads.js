@@ -445,21 +445,29 @@ router.put('/:adId/unpause', authorize, function(req, res, next){
 router.get('/:subpage/featured', function(req, res, next){
 
     var subPage = parseInt(req.params.subpage);
-
-    ads.getFeatured(subPage).then(
+    var location = req.query.location;
+    ads.getFeatured(subPage, location).then(
         function(featuredAds){
             if(! (featuredAds.length > 0))
                 return res.json([]);
+            Util.removeObjDupInArr(featuredAds, "ad_id").then(
+                function(featuredAds){
+                    for(var i=0; i<featuredAds.length;i++){
+                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                                        'Categories/listing_microsite/' + featuredAds[i].ad_id);
+                        featuredAds[i].redirectUrl = config.get('project_url') + 
+                            '/api/click/f_ads/' + featuredAds[i].ad_id + '/' + subPage + '/' +
+                            redirectUrl;
+                    }
 
-            for(var i=0; i<featuredAds.length;i++){
-                var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-                                'Categories/listing_microsite/' + featuredAds[i].ad_id);
-                featuredAds[i].redirectUrl = config.get('project_url') + 
-                    '/api/click/f_ads/' + featuredAds[i].ad_id + '/' + subPage + '/' +
-                    redirectUrl;
-            }
+                    res.json(featuredAds);
+                },
+                function(error){
+                    next(error);
+                }
+            );
 
-            res.json(featuredAds);
+                
 
         }, function(error){
             next(error);
