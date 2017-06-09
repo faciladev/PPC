@@ -70,7 +70,7 @@ app.use(express.static(config.get('upload_path')));
 app.use('/apidoc', express.static(config.get('apidoc')));
 
 //Sponsored ad api
-app.use('/api/ads', authorize, ads);
+app.use('/api/ads', ads);
 
 //Searches sponsored ads and daily deals
 app.use('/api/search', search);
@@ -82,7 +82,7 @@ app.use('/api/click', click);
 app.use('/api/download', download);
 
 //Daily Deals
-app.use('/api/deals', authorize, deal);
+app.use('/api/deals', deal);
 
 //Offer
 app.use('/api/offers', offer);
