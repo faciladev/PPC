@@ -461,6 +461,14 @@ router.get('/flexoffers/letters', function(req, res, next) {
     });
 });
 
+router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
+    var filter = req.query.filter;
+    var subPage = req.query.subpage;
+    var address = Util.getLatLngCity(req.params.lat, req.params.lng);
+    if(address) return res.json(address);
+    else return res.json('Unsupported parameters');
+});
+
 router.get('/imageserver/:url', (req, res, next) => {
     var requestSettings = {
         url: Util.decodeUrl(req.params.url),

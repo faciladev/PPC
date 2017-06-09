@@ -5,6 +5,7 @@ var config  = require('config');
 var router = express.Router();
 
 var dealModel = require('../models/dealModel');
+var authorize = require('./authorize');
 var Util = require('../lib/util');
 var UploadHelper = require('../lib/UploadHelper');
 var ppcModel = require('../models/ppcModel');
@@ -71,7 +72,7 @@ var appError = require('../app_error');
  *       "id" : 153
  *     }
  */
-router.post('/', function(req, res, next){
+router.post('/', authorize, function(req, res, next){
 	
 	var deal = req.body.daily_deal;
 	var dealMicrosite = req.body.daily_deal_microsite;
@@ -98,7 +99,7 @@ router.post('/', function(req, res, next){
  *     	"status": true
  *     }
  */
-router.delete('/:id', function(req, res, next){
+router.delete('/:id', authorize, function(req, res, next){
     var dealId = req.params.id;
     dealModel.deleteDeal(dealId).then(
         function(affectedRows){
@@ -151,7 +152,7 @@ router.delete('/:id', function(req, res, next){
  *		  "totalPages": 1
  *		}
  */
-router.get('/', function(req, res, next){
+router.get('/', authorize, function(req, res, next){
 
 	dealModel.getAllDeals(req.query.page, req.query.include, req.query.numRowsPerPage).then(
 		function(deals){
@@ -224,7 +225,7 @@ router.get('/', function(req, res, next){
  *		  "totalPages": 1
  *		}
  */
-router.get('/advertisers/:advertiserId', function(req, res, next){
+router.get('/advertisers/:advertiserId', authorize, function(req, res, next){
 	var advertiserId = req.params.advertiserId;
 	dealModel.getAllDealsByAdvertiser(advertiserId, req.query.page, req.query.numRowsPerPage).then(
 		function(paginatedDeals){
@@ -344,7 +345,7 @@ router.get('/categories', function(req, res, next){
  *	      "banner_image_name":"image_name"
  *     }
  */
-router.post('/upload', function(req, res, next){
+router.post('/upload', authorize, function(req, res, next){
 	var uploadType = req.query.type;
 
 	if(Object.keys(req.files).length === 0)
@@ -446,7 +447,7 @@ router.post('/upload', function(req, res, next){
  *       "status" : true
  *     }
  */
-router.put('/:dealId', function(req, res, next){
+router.put('/:dealId', authorize, function(req, res, next){
 	var deal = req.body.daily_deal || {} ;
 	var dealMicrosite = req.body.daily_deal_microsite || {};
 	var dealId = req.params.dealId;
@@ -487,7 +488,7 @@ router.put('/:dealId', function(req, res, next){
  *       "status" : true
  *     }
  */
-router.put('/:dealId/approve', function(req, res, next){
+router.put('/:dealId/approve', authorize, function(req, res, next){
 	
 	var deal = {
 		download_price: req.body.download_price,
@@ -523,7 +524,7 @@ router.put('/:dealId/approve', function(req, res, next){
  *       "status" : true
  *     }
  */
-router.put('/:dealId/disapprove', function(req, res, next){
+router.put('/:dealId/disapprove', authorize, function(req, res, next){
 	
 	var deal = {
 		is_approved: 0
@@ -557,7 +558,7 @@ router.put('/:dealId/disapprove', function(req, res, next){
  *       "status" : true
  *     }
  */
-router.put('/:dealId/pause', function(req, res, next){
+router.put('/:dealId/pause', authorize, function(req, res, next){
 	
 	var deal = {
 		paused: 1
@@ -591,7 +592,7 @@ router.put('/:dealId/pause', function(req, res, next){
  *       "status" : true
  *     }
  */
-router.put('/:dealId/unpause', function(req, res, next){
+router.put('/:dealId/unpause', authorize, function(req, res, next){
 	
 	var deal = {
 		paused: 0
