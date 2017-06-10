@@ -183,7 +183,7 @@ module.exports = {
         });
     },
 
-    getFeatured: function(subPage){
+    getFeatured: function(subPage, location){
         return new Promise(function(resolve, reject){
 
             if(isNaN(subPage))
@@ -194,6 +194,8 @@ module.exports = {
                 'usa_states.usa_state_name, ' +
                 'ppc_ad_microsites.city, ' +
                 'ppc_ad_microsites.zipcode, ' +
+                'ppc_ad_locations.city AS user_city, ' +
+                'ppc_ad_locations.zip_code AS user_zipcode, ' +
                 'ppc_ads.id AS ad_id, ' +
                 'ppc_ads.url, ' +
                 'ppc_ads.title, ' +
@@ -206,6 +208,11 @@ module.exports = {
             'FROM ' +
                 'ppc_ads ' +
                     'JOIN ' +
+                'ppc_ad_locations ON ppc_ad_locations.ad_id = ppc_ads.id ';
+            
+            if(location) query += 'AND ppc_ad_locations.city LIKE ? OR ppc_ad_locations.zip_code LIKE ? ';
+
+            query += 'JOIN ' +
                 'ppc_ad_microsites ON ppc_ad_microsites.ad_id = ppc_ads.id ' +
                     'JOIN ' +
                 '(SELECT DISTINCT ' +
@@ -226,8 +233,13 @@ module.exports = {
                     'AND ppc_ads.paused = 0 ' +
                     'AND ppc_ads_subpages.sub_page_id = ? ';
 
+            
 
-            var queryParams = [subPage];
+            var queryParams = [];
+            if(location) {
+                queryParams.push('%' + location + '%', '%' + location + '%');
+            }
+            queryParams.push(subPage);
 
             DbHelper.getConnection().then(
                 function(connection){

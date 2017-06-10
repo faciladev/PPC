@@ -2,6 +2,7 @@ var express = require('express');
 var config = require('config');
 
 var ads = require('../models/ads');
+var authorize = require('./authorize');
 var ppcModel = require('../models/ppcModel');
 var UploadHelper = require('../lib/UploadHelper');
 var Util = require('../lib/util');
@@ -9,7 +10,7 @@ var Util = require('../lib/util');
 var appError = require('../app_error');
 var router = express.Router();
 
-router.get('/', function(req, res, next) {
+router.get('/', authorize, function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
     ads.getAll(req.query.page, search, type, req.query.numRowsPerPage).then(function(response){
@@ -20,7 +21,7 @@ router.get('/', function(req, res, next) {
     });
 });
 //Gets all ads by advertiser
-router.get('/advertiser/:advertiserId', function(req, res, next) {
+router.get('/advertiser/:advertiserId', authorize, function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
     var advertiserId = req.params.advertiserId;
@@ -32,7 +33,7 @@ router.get('/advertiser/:advertiserId', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id', function(req, res, next) {
+router.get('/:id', authorize, function(req, res, next) {
     ads.get(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -40,7 +41,7 @@ router.get('/:id', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/locations', function(req, res, next) {
+router.get('/:id/locations', authorize, function(req, res, next) {
     ads.getAdLocations(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -48,7 +49,7 @@ router.get('/:id/locations', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/microsite', function(req, res, next) {
+router.get('/:id/microsite', authorize, function(req, res, next) {
     ads.getAdMicrosite(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -56,7 +57,7 @@ router.get('/:id/microsite', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/keywords', function(req, res, next) {
+router.get('/:id/keywords', authorize, function(req, res, next) {
     ads.getAdKeywords(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -65,7 +66,7 @@ router.get('/:id/keywords', function(req, res, next) {
     });
 });
 
-router.get('/:id/subpages', function(req, res, next) {
+router.get('/:id/subpages', authorize, function(req, res, next) {
     ads.getAdSubpages(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -73,7 +74,7 @@ router.get('/:id/subpages', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/offers', function(req, res, next) {
+router.get('/:id/offers', authorize, function(req, res, next) {
     ads.getAdOffers(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -81,7 +82,7 @@ router.get('/:id/offers', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/adFiles', function(req, res, next) {
+router.get('/:id/adFiles', authorize, function(req, res, next) {
     ads.getAdFiles(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -91,7 +92,7 @@ router.get('/:id/adFiles', function(req, res, next) {
 });
 
 //Gets category keywords
-router.get('/keywords/:categoryId', function(req, res, next) {
+router.get('/keywords/:categoryId', authorize, function(req, res, next) {
     ads.getCategoryKeywords(req.params.categoryId).then(function(response){
         res.json(response);
     }, function(error){
@@ -99,7 +100,7 @@ router.get('/keywords/:categoryId', function(req, res, next) {
         next(error);
     });
 });
-router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
+router.get('/advertiserOffers/:advertiserId', authorize, function(req, res, next) {
     ads.getAdvertiserOffers(req.params.advertiserId).then(function(response){
         res.json(response);
     }, function(error) {
@@ -113,7 +114,7 @@ router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
  * POST Request section
  */
 //Ads POST requests
-router.post('/', function(req, res, next) {
+router.post('/', authorize, function(req, res, next) {
     ads.saveAd(req.body).then(function(response) {
             res.json(response);
         }, function(error) {
@@ -123,7 +124,7 @@ router.post('/', function(req, res, next) {
     );
 });
 
-router.put('/:id', function(req, res, next){
+router.put('/:id', authorize, function(req, res, next){
     var adId = req.params.id;
     var newAdData = req.body;
     ads.updateAd(newAdData, adId).then(
@@ -136,7 +137,7 @@ router.put('/:id', function(req, res, next){
     );
 });
 
-router.post('/:id/microsite', function(req, res, next) {
+router.post('/:id/microsite', authorize, function(req, res, next) {
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -156,7 +157,7 @@ router.post('/:id/microsite', function(req, res, next) {
 //        res.json(error);
 //    });
 });
-router.post('/:id/keywords', function(req, res, next) {
+router.post('/:id/keywords', authorize, function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -164,7 +165,7 @@ router.post('/:id/keywords', function(req, res, next) {
         next(error);
     });
 });
-router.post('/:id/subpages', function(req, res, next) {
+router.post('/:id/subpages', authorize, function(req, res, next) {
     ads.saveAdSubPages(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -172,7 +173,7 @@ router.post('/:id/subpages', function(req, res, next) {
         next(error);
     });
 });
-router.post('/:id/locations', function(req, res, next) {
+router.post('/:id/locations', authorize, function(req, res, next) {
     ads.saveAdLocations(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -182,7 +183,7 @@ router.post('/:id/locations', function(req, res, next) {
 });
 
 //Creates Ad offers
-router.post('/:id/offers', function(req, res, next) {
+router.post('/:id/offers', authorize, function(req, res, next) {
     var ad_id = parseInt(req.params.id);
     ads.saveAdOffers(ad_id, req.body).then(function(response){
         res.json(response);
@@ -193,7 +194,7 @@ router.post('/:id/offers', function(req, res, next) {
 });
 
 //Creates Advertiser offer
-router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
+router.post('/advertiserOffers/:advertiserId', authorize, function(req, res, next) {
     if(!req.files){
         res.send('No files were uploaded');
         return;
@@ -212,7 +213,7 @@ router.post('/advertiserOffers/:advertiserId', function(req, res, next) {
     });
 });
 
-router.post('/ziphuboffers', function(req, res, next) {
+router.post('/ziphuboffers', authorize, function(req, res, next) {
     var offer = req.body;
     ads.saveZiphubOffer(offer).then(function(response){
         res.json(response);
@@ -222,7 +223,7 @@ router.post('/ziphuboffers', function(req, res, next) {
 });
 
 //Save keyword and keyword category
-router.post('/keywords/:categoryId', function(req, res, next) {
+router.post('/keywords/:categoryId', authorize, function(req, res, next) {
     ads.saveKeywords(req.params.categoryId, req.body).then(function(response){
         res.json(response);
     }, function(error) {
@@ -232,7 +233,7 @@ router.post('/keywords/:categoryId', function(req, res, next) {
 });
 
 //Creates Advertiser files
-router.post('/advertiserFiles/:advertiserId', function(req, res, next) {
+router.post('/advertiserFiles/:advertiserId', authorize, function(req, res, next) {
     if(!req.files){
         res.send('No files were uploaded');
         return;
@@ -252,7 +253,7 @@ router.post('/advertiserFiles/:advertiserId', function(req, res, next) {
 });
 
 //Upload ad files
-router.post('/:id/adFiles', function(req, res, next) {
+router.post('/:id/adFiles', authorize, function(req, res, next) {
     var ad_id = parseInt(req.params.id);
     ads.saveAdFiles(ad_id, req.body).then(function(response){
         res.json(response);
@@ -262,7 +263,7 @@ router.post('/:id/adFiles', function(req, res, next) {
 });
 
 //Approve Ads
-router.post('/manageAds', function(req, res, next) {
+router.post('/manageAds', authorize, function(req, res, next) {
     ads.manageAd(req.body).then(function(response) {
             res.json(response);
         }, function(error) {
@@ -273,7 +274,7 @@ router.post('/manageAds', function(req, res, next) {
 });
 
 //Upload web offer image
-router.post('/weboffers', function(req, res, next){
+router.post('/weboffers', authorize, function(req, res, next){
     var url = req.body.url;
 
     if(typeof req.files.offerBanner === 'undefined' || req.files.offerBanner === null)
@@ -301,7 +302,7 @@ router.post('/weboffers', function(req, res, next){
 /**
  * DELETE Request section
  */
-router.delete('/:id', function(req, res, next){
+router.delete('/:id', authorize, function(req, res, next){
     var adId = req.params.id;
     ads.deleteAd(adId).then(
         function(response){
@@ -313,7 +314,7 @@ router.delete('/:id', function(req, res, next){
     );
 });
 
-router.delete('/offers/:offerId', function(req, res, next){
+router.delete('/offers/:offerId', authorize, function(req, res, next){
     var offerId = req.params.offerId;
     ads.deleteAdOffer(offerId).then(
         function(response){
@@ -342,7 +343,7 @@ router.delete('/offers/:offerId', function(req, res, next){
  *     }
  *       
  */
-router.put('/:adId/pause', function(req, res, next){
+router.put('/:adId/pause', authorize, function(req, res, next){
     
     var ad = {
         paused: 1
@@ -375,7 +376,7 @@ router.put('/:adId/pause', function(req, res, next){
  *     }
  *       
  */
-router.put('/:adId/unpause', function(req, res, next){
+router.put('/:adId/unpause', authorize, function(req, res, next){
     
     var ad = {
         paused: 0
@@ -444,21 +445,29 @@ router.put('/:adId/unpause', function(req, res, next){
 router.get('/:subpage/featured', function(req, res, next){
 
     var subPage = parseInt(req.params.subpage);
-
-    ads.getFeatured(subPage).then(
+    var location = req.query.location;
+    ads.getFeatured(subPage, location).then(
         function(featuredAds){
             if(! (featuredAds.length > 0))
                 return res.json([]);
+            Util.removeObjDupInArr(featuredAds, "ad_id").then(
+                function(featuredAds){
+                    for(var i=0; i<featuredAds.length;i++){
+                        var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
+                                        'Categories/listing_microsite/' + featuredAds[i].ad_id);
+                        featuredAds[i].redirectUrl = config.get('project_url') + 
+                            '/api/click/f_ads/' + featuredAds[i].ad_id + '/' + subPage + '/' +
+                            redirectUrl;
+                    }
 
-            for(var i=0; i<featuredAds.length;i++){
-                var redirectUrl = Util.sanitizeUrl(config.get('web_portal_url') + '/' + 
-                                'Categories/listing_microsite/' + featuredAds[i].ad_id);
-                featuredAds[i].redirectUrl = config.get('project_url') + 
-                    '/api/click/f_ads/' + featuredAds[i].ad_id + '/' + subPage + '/' +
-                    redirectUrl;
-            }
+                    res.json(featuredAds);
+                },
+                function(error){
+                    next(error);
+                }
+            );
 
-            res.json(featuredAds);
+                
 
         }, function(error){
             next(error);
@@ -483,7 +492,7 @@ router.get('/:subpage/featured', function(req, res, next){
  *     }
  *       
  */
-router.put('/:adId/featured', function(req, res, next){
+router.put('/:adId/featured', authorize, function(req, res, next){
     
     var ad = {
         is_featured: 1
@@ -518,7 +527,7 @@ router.put('/:adId/featured', function(req, res, next){
  *     }
  *       
  */
-router.put('/:adId/notfeatured', function(req, res, next){
+router.put('/:adId/notfeatured', authorize, function(req, res, next){
     
     var ad = {
         is_featured: 0
@@ -555,7 +564,7 @@ router.put('/:adId/notfeatured', function(req, res, next){
  *       
  */
 
-router.put('/:adId/approve', function(req, res, next){
+router.put('/:adId/approve', authorize, function(req, res, next){
     
     var ad = {
         is_approved: 1
@@ -590,7 +599,7 @@ router.put('/:adId/approve', function(req, res, next){
  *     }
  *       
  */
-router.put('/:adId/disapprove', function(req, res, next){
+router.put('/:adId/disapprove', authorize, function(req, res, next){
     
     var ad = {
         is_approved: 0
@@ -617,7 +626,7 @@ router.put('/:adId/disapprove', function(req, res, next){
  * @apiParam {Number} offerId  Offer Id.
  * @apiParam {Number} userId  User Id.
  */
-router.post('/adoffers/:offerId/:userId', function(req, res, next){
+router.post('/adoffers/:offerId/:userId', authorize, function(req, res, next){
     ppcModel.saveConsumerAdOffer(req.params.userId, req.params.offerId).then(
         (response)=>{
             return res.json({status: true, message: "ad offer saved."});
@@ -636,7 +645,7 @@ router.post('/adoffers/:offerId/:userId', function(req, res, next){
  *
  * @apiParam {Number} userId  User Id.
  */
-router.get('/adoffers/:userId', function(req, res, next){
+router.get('/adoffers/:userId', authorize, function(req, res, next){
     ppcModel.findConsumerAdOffer(req.params.userId, req.query.page).then(
         (response)=>{
             return res.json(response);
@@ -656,7 +665,7 @@ router.get('/adoffers/:userId', function(req, res, next){
  * @apiParam {Number} userId  User Id.
  * @apiParam {Number} consumerOfferId  Saved consumer offer id.
  */
-router.delete('/adoffers/:userId/:consumerOfferId', function(req, res, next){
+router.delete('/adoffers/:userId/:consumerOfferId', authorize, function(req, res, next){
     ppcModel.deleteConsumerAdOffer(req.params.userId, req.params.consumerOfferId).then(
         (response)=>{
             return res.json({status: true, message: "Consumer offer deleted."});
