@@ -1,5 +1,7 @@
 var express = require('express');
 var config = require('config');
+var cheerio = require('cheerio');
+var request = require('request');
 
 var router = express.Router();
 var ppcModel = require('../models/ppcModel');
@@ -738,70 +740,134 @@ var searchFlex = function(req, res, next){
         	ppcModel.saveFlexSearch(flexoffers).then(
 				function(savedSearchIds){
 					if(flexoffers.length === 1 && (savedSearchIds.affectedRows === 1)){
-						//matched one result
-						var startIndex = flexoffers[0].flexoffer_link_content.indexOf("src=");
-		                var lastIndex = flexoffers[0].flexoffer_link_content.indexOf(" ", startIndex);
-		                var url = flexoffers[0].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
-		                var hrefStartIdx = flexoffers[0].flexoffer_link_content.indexOf("href=");
-		                var hrefEndIdx = flexoffers[0].flexoffer_link_content.indexOf(" ", hrefStartIdx);
-		                var link = flexoffers[0].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
-		                var redirectUrl = Util.sanitizeUrl(link);
-		                flexoffers[0].flexSrc = url;
-		                flexoffers[0].flexLink = link;
-		                flexoffers[0].url = config.get('project_url') + 
-		                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
-		                    redirectUrl;
+						//Matched one result
+						
+						let $ = cheerio.load(flexoffers[0].flexoffer_link_content);
+						let link, redirectUrl, url;
+
+						if($('a').attr('href')){
+							link = $('a').attr('href');
+							url = $('img').attr('src');
+							redirectUrl = Util.sanitizeUrl(link);
+
+							//Change http image source served through ppc ssl imageserver
+							if(url.indexOf('http://') === 0){
+								flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
+								Util.sanitizeUrl(url);
+					        } else {
+					        	flexoffers[0].flexSrc = url;
+					        }
+				                
+			                flexoffers[0].flexLink = link;
+			                flexoffers[0].url = config.get('project_url') + 
+			                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
+			                    redirectUrl;
+
+		                    return res.json(paginatedSearchData);
+
+						} else if($('iframe').attr('src')) {
+						    let iframeSrc = $('iframe').attr('src'); 
+						    request('http:' + iframeSrc, function (error, response, body) {
+							  if(response && response.statusCode === 200){
+							  	let $iframe = cheerio.load(body);
+							  	link = $iframe('area').eq(1).attr('href');
+								url = $iframe('img').attr('src');
+								redirectUrl = Util.sanitizeUrl(link);
+
+								//Change http image source served through ppc ssl imageserver
+								if(url.indexOf('http://') === 0){
+									flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
+									Util.sanitizeUrl(url);
+						        } else {
+						        	flexoffers[0].flexSrc = url;
+						        }
+					                
+				                flexoffers[0].flexLink = link;
+				                flexoffers[0].url = config.get('project_url') + 
+				                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
+				                    redirectUrl;
+							  } 
+
+							  return res.json(paginatedSearchData);
+							});
+							
+						} else {
+							return res.json(paginatedSearchData);
+						}
+						   
 					}
 					else if(flexoffers.length > 1 && (savedSearchIds.length === flexoffers.length)){
 						//matched multiple results
 						for(var i = 0; i<flexoffers.length; i++){
-	                        var startIndex = flexoffers[i].flexoffer_link_content.indexOf("src=");
-			                var lastIndex = flexoffers[i].flexoffer_link_content.indexOf(" ", startIndex);
-			                var url = flexoffers[i].flexoffer_link_content.substring(startIndex + 5, lastIndex - 1);
-			                var hrefStartIdx = flexoffers[i].flexoffer_link_content.indexOf("href=");
-			                var hrefEndIdx = flexoffers[i].flexoffer_link_content.indexOf(" ", hrefStartIdx);
-			                var link = flexoffers[i].flexoffer_link_content.substring(hrefStartIdx + 6, hrefEndIdx - 1);
-			                var redirectUrl = Util.sanitizeUrl(link);
-			                flexoffers[i].flexSrc = url;
-			                flexoffers[i].flexLink = link;
-			                flexoffers[i].url = config.get('project_url') + 
-			                    '/api/click/flexoffers/' + savedSearchIds[i].insertId  + '/' +
-			                    redirectUrl;
+							let $ = cheerio.load(flexoffers[i].flexoffer_link_content);
+							let link, redirectUrl, url;
+
+							if($('a').attr('href')){
+								link = $('a').attr('href');
+								url = $('img').attr('src');
+								redirectUrl = Util.sanitizeUrl(link);
+
+				                //Change http image source served through ppc ssl imageserver
+								if(url.indexOf('http://') === 0){
+									flexoffers[i].flexSrc = config.get('project_url') + '/api/imageserver/' + 
+									Util.sanitizeUrl(url);
+						        } else {
+						        	flexoffers[i].flexSrc = url;
+						        }
+
+				                flexoffers[i].flexLink = link;
+				                flexoffers[i].url = config.get('project_url') + 
+				                    '/api/click/flexoffers/' + savedSearchIds[i].insertId  + '/' +
+				                    redirectUrl;
+
+			                    if(i === flexoffers.length - 1)
+			                    	return res.json(paginatedSearchData);
+
+							} else if($('iframe').attr('src'))  {
+								let iframeSrc = $('iframe').attr('src'); 
+								let j = i; //Save current index locally
+							    request('http:' + iframeSrc, function (error, response, body) {
+							  		if(response && response.statusCode === 200){
+									  	let $iframe = cheerio.load(body);
+									  	link = $iframe('area').eq(1).attr('href');
+										url = $iframe('img').attr('src');
+										redirectUrl = Util.sanitizeUrl(link);
+
+										//Change http image source served through ppc ssl imageserver
+										if(url.indexOf('http://') === 0){
+											flexoffers[j].flexSrc = config.get('project_url') + '/api/imageserver/' + 
+											Util.sanitizeUrl(url);
+								        } else {
+								        	flexoffers[j].flexSrc = url;
+								        }
+							                
+						                flexoffers[j].flexLink = link;
+						                flexoffers[j].url = config.get('project_url') + 
+						                    '/api/click/flexoffers/' + savedSearchIds.insertId  + '/' +
+						                    redirectUrl;
+
+						  			}
+
+							  		if(j === flexoffers.length - 1)
+			                    		return res.json(paginatedSearchData);
+						  		});
+
+								
+							} else {
+
+								if(i === flexoffers.length - 1)
+			                    	return res.json(paginatedSearchData);
+							}
 	                    }
 					}
 					else {
-						next(new appError('Matched and saved search data inconsistent.'));
+						return next(new appError('Matched and saved search data inconsistent.'));
 					}
 
-					if(flexoffers.length === 1){
-						Util.imageUrl2Base64(flexoffers[0].flexSrc).then(
-							function(data){
-								//Change http image source served through ppc ssl imageserver
-								if(flexoffers[0].flexSrc.indexOf('http://') === 0){
-									flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
-									Util.sanitizeUrl(flexoffers[0].flexSrc);
-						        }
-
-								return res.json(paginatedSearchData);
-							}, function(error){
-								return next(error);
-							}
-						);
-					} else {
-
-						flexoffers.forEach((offer, index, flexoffers) => {
-							if(offer.flexSrc.indexOf('http://') === 0){
-								offer.flexSrc = config.get('project_url') + '/api/imageserver/' + 
-								Util.sanitizeUrl(offer.flexSrc);
-					        }
-
-					        if(index === flexoffers.length - 1)
-					        	return res.json(paginatedSearchData);
-						});
-
-					}
+					
 
 				}, 
+
 				function(error){
 					return next(error);
 				}
