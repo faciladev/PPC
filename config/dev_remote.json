@@ -6,15 +6,17 @@
         "database" : "dev_ziphub"
     },
 
-    "project_url" : "http://54.67.28.43:8081",
-    "web_portal_url" : "http://iziphub.com",
+    "project_url" : "https://ppc.iziphub.com:8081",
+    "web_portal_url" : "https://iziphub.com",
     "upload_path" : "/var/www/PPC_ASSETS",
     "log_path": "/var/www/PPC_LOGS",
     "upload_relative_path" : "/../PPC_ASSETS",
     "numRowsPerPage" : 10,
     "cors_whitelist" : [
-    	"http://ziphub.com", 
-    	"http://iziphub.com",
+    	"https://ziphub.com", 
+    	"https://iziphub.com",
+        "http://ziphub.com", 
+        "http://iziphub.com",
     	"http://localhost",
         "http://localhost:8012",
         "http://localhost:8000"
