@@ -391,6 +391,11 @@ var ppcModel = {
                         }
 
                         if(i === results.length - 1){
+                            //Sort in ascending order
+                            finalResult.sort(function(a, b){
+                                return parseFloat(a.distance) - parseFloat(b.distance);
+                            });
+
                             return resolve(finalResult);
                         }
                     }
