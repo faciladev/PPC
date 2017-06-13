@@ -470,6 +470,7 @@ router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
 });
 
 router.get('/iplocation', (req, res, next) => {
+    console.log(Util.getClientIp(req));
     res.json(Util.ipToLocation(Util.getClientIp(req)));
 });
 
