@@ -469,6 +469,10 @@ router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
     else return res.json('Unsupported parameters');
 });
 
+router.get('/iplocation', (req, res, next) => {
+    res.json(Util.ipToLocation(Util.getClientIp(req)));
+});
+
 router.get('/imageserver/:url', (req, res, next) => {
     var requestSettings = {
         url: Util.decodeUrl(req.params.url),
