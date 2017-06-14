@@ -470,8 +470,7 @@ router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
 });
 
 router.get('/iplocation', (req, res, next) => {
-    console.log(req.headers);
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = Util.getClientIp(req);
     console.log(ip);
     res.json(Util.ipToLocation(ip));
 });
