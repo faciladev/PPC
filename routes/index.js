@@ -465,7 +465,7 @@ router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
     const ip = Util.getClientIp(req);
     const ipAddress = Util.ipToLocation(ip);
     let address;
-    if(address.country === 'US'){
+    if(ipAddress.country === 'US'){
         address = Util.getLatLngCity(req.params.lat, req.params.lng);
         if(address) {
             address.country = ipAddress.country;
