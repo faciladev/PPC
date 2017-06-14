@@ -163,7 +163,16 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
  *		}
  */
 router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
-	searchDeals(req, res, next);
+	let location = req.query.location;
+	if(location) searchDeals(req, res, next);
+	else {
+		const ip = Util.getClientIp(req);
+		const ipAddress = Util.ipToLocation(ip);
+		if(ipAddress.country === 'US'){
+			req.query.location = ipAddress.zip;
+		}
+		searchDeals(req, res, next);
+	}
 });
 
 /**
@@ -563,7 +572,17 @@ router.get('/deals', function(req, res, next) {
 	if(typeof limit === 'undefined' || limit === null)
 		limit = config.get('numRowsPerPage');
 
-	ppcModel.getDealsFromEachCategory(limit).then(
+	let location = req.query.location;
+	if( ! location) 
+	{
+		const ip = Util.getClientIp(req);
+		const ipAddress = Util.ipToLocation(ip);
+		if(ipAddress.country === 'US'){
+			location = ipAddress.zip;
+		}
+	}
+
+	ppcModel.getDealsFromEachCategory(limit, location).then(
 		function(deals){
 			res.json(deals);
 		}, 
@@ -973,8 +992,10 @@ var searchDeals = function(req, res, next) {
 	var categoryId = (typeof req.params[0] === "undefined")
 	? req.params.categoryId : req.params[0];
 	var userId = req.params.userId;
+	var location = req.query.location;
+
 	
-	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
+	ppcModel.findDailyDeals(keyword, categoryId, req.query.page, location).then(
 		function(searchData){
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
