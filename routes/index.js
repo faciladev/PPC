@@ -462,16 +462,25 @@ router.get('/flexoffers/letters', function(req, res, next) {
 });
 
 router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
-    var filter = req.query.filter;
-    var subPage = req.query.subpage;
-    var address = Util.getLatLngCity(req.params.lat, req.params.lng);
-    if(address) return res.json(address);
-    else return res.json('Unsupported parameters');
+    const ip = Util.getClientIp(req);
+    const ipAddress = Util.ipToLocation(ip);
+    let address;
+    if(address.country === 'US'){
+        address = Util.getLatLngCity(req.params.lat, req.params.lng);
+        if(address) {
+            address.country = ipAddress.country;
+            return res.json(address);
+        }
+        else return res.json({status: false, message: 'Unsupported parameters'});
+    } else {
+        res.json({status: false, message: 'Location outside the USA.'})
+    }
+
+    
 });
 
 router.get('/iplocation', (req, res, next) => {
     const ip = Util.getClientIp(req);
-    console.log(ip);
     res.json(Util.ipToLocation(ip));
 });
 
