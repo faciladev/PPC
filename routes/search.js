@@ -777,7 +777,7 @@ var searchFlex = function(req, res, next){
 							redirectUrl = Util.sanitizeUrl(link);
 
 							//Change http image source served through ppc ssl imageserver
-							if(url.indexOf('http://') === 0){
+							if(url && url.indexOf('http://') === 0){
 								flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 								Util.sanitizeUrl(url);
 					        } else {
@@ -801,7 +801,7 @@ var searchFlex = function(req, res, next){
 								redirectUrl = Util.sanitizeUrl(link);
 
 								//Change http image source served through ppc ssl imageserver
-								if(url.indexOf('http://') === 0){
+								if(url && url.indexOf('http://') === 0){
 									flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 									Util.sanitizeUrl(url);
 						        } else {
@@ -834,7 +834,7 @@ var searchFlex = function(req, res, next){
 								redirectUrl = Util.sanitizeUrl(link);
 
 				                //Change http image source served through ppc ssl imageserver
-								if(url.indexOf('http://') === 0){
+								if(url && url.indexOf('http://') === 0){
 									flexoffers[i].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 									Util.sanitizeUrl(url);
 						        } else {
@@ -860,7 +860,7 @@ var searchFlex = function(req, res, next){
 										redirectUrl = Util.sanitizeUrl(link);
 
 										//Change http image source served through ppc ssl imageserver
-										if(url.indexOf('http://') === 0){
+										if(url && url.indexOf('http://') === 0){
 											flexoffers[j].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 											Util.sanitizeUrl(url);
 								        } else {
