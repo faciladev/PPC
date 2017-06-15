@@ -711,8 +711,8 @@ var ppcModel = {
                         response[i].category_id;
 
                         if(location){
-                            query += ' AND m.city LIKE %' + DbHelper.escape(location) + '% OR ';
-                            query += ' m.zip_code LIKE %' + DbHelper.escape(location) + '% ';
+                            query += ' AND m.city LIKE ' + DbHelper.escape('%' + location + '%') + ' OR ';
+                            query += ' m.zip_code LIKE ' + DbHelper.escape('%' + location + '%');
                         }
 
                         query += ' LIMIT ' + limit + ')';
