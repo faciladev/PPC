@@ -168,7 +168,7 @@ router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
 	else {
 		const ip = Util.getClientIp(req);
 		const ipAddress = Util.ipToLocation(ip);
-		if(ipAddress.country === 'US'){
+		if(ipAddress.country && ipAddress.country === 'US'){
 			req.query.location = ipAddress.zip;
 		} else {
             return res.json({status: false, message: 'Location not in the USA'});
@@ -579,10 +579,8 @@ router.get('/deals', function(req, res, next) {
 	if( ! location) 
 	{
 		const ip = Util.getClientIp(req);
-		console.log(ip);
 		const ipAddress = Util.ipToLocation(ip);
-		console.log(ipAddress);
-		if(ipAddress.country === 'US'){
+		if(ipAddress.country && ipAddress.country === 'US'){
 			location = ipAddress.zip;
 		} else {
             return res.json({status: false, message: 'Location not in the USA'});
@@ -1001,7 +999,6 @@ var searchDeals = function(req, res, next) {
 	var userId = req.params.userId;
 	var location = req.query.location;
 
-	console.log(location);
 	ppcModel.findDailyDeals(keyword, categoryId, req.query.page, location).then(
 		function(searchData){
 			var userAgent = Util.getUserAgent(req);
