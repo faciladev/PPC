@@ -168,7 +168,7 @@ router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
 	else {
 		const ip = Util.getClientIp(req);
 		const ipAddress = Util.ipToLocation(ip);
-		if(ipAddress.country && ipAddress.country === 'US'){
+		if(ipAddress && ipAddress.country === 'US'){
 			req.query.location = ipAddress.zip;
 		} else {
             return res.json({status: false, message: 'Location not in the USA'});
