@@ -720,7 +720,7 @@ var ppcModel = {
                         if(i < response.length - 1)
                             query += 'UNION ALL';
                     }
-                    console.log(query);
+
                     DbHelper.getConnection().then(
                         function(connection){
                             //Run query
