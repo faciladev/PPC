@@ -580,7 +580,7 @@ router.get('/deals', function(req, res, next) {
 	{
 		const ip = Util.getClientIp(req);
 		const ipAddress = Util.ipToLocation(ip);
-		if(ipAddress.country && ipAddress.country === 'US'){
+		if(ipAddress && ipAddress.country === 'US'){
 			location = ipAddress.zip;
 		} else {
             return res.json({status: false, message: 'Location not in the USA'});
