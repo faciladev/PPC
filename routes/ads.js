@@ -445,7 +445,20 @@ router.put('/:adId/unpause', authorize, function(req, res, next){
 router.get('/:subpage/featured', function(req, res, next){
 
     var subPage = parseInt(req.params.subpage);
-    var location = req.query.location;
+    let location = req.query.location;
+    if(! location)
+    {
+        const ip = Util.getClientIp(req);
+        const ipAddress = Util.ipToLocation(ip);
+        if(ipAddress.country === 'US'){
+            location = ipAddress.zip;
+        } else {
+            return res.json({status: false, message: 'Location not in the USA'});
+        }
+
+        
+    }
+
     ads.getFeatured(subPage, location).then(
         function(featuredAds){
             if(! (featuredAds.length > 0))

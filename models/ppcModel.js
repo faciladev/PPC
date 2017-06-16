@@ -411,7 +411,7 @@ var ppcModel = {
     },
 
 
-    findDailyDeals : function(keyword, categoryId, page){
+    findDailyDeals : function(keyword, categoryId, page, location){
 
         return new Promise(function(resolve, reject) {
             const NUM_ROWS_PER_PAGE = 32;
@@ -449,6 +449,7 @@ var ppcModel = {
             'dd.is_approved, ' +
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
+            'dd.keywords, ' +
             'dd.deal_image, ' +
             'dd.paused, ' +
             'm.discount_description, '+
@@ -460,6 +461,8 @@ var ppcModel = {
             'JOIN usa_states ON usa_states.usa_state_id = m.state_id ' +
             'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 ';
 
+            
+
             var queryParams = []; 
             if(! isNaN(parseInt(categoryId))){
                 query += 'AND dd.approved_category_id = ? ';
@@ -467,10 +470,20 @@ var ppcModel = {
             }
             
             if(typeof keyword !== "undefined" || keyword != null){
-                query += 'AND m.name LIKE ? || dd.keywords LIKE ?';
+                query += 'AND (m.name LIKE ? OR dd.keywords LIKE ? )';
                 queryParams.push('%' + keyword + '%', '%' + keyword + '%');
             }            
             
+            // if(location){
+            //     query += ' AND m.zip_code LIKE ? OR m.city LIKE ? ';
+            //     queryParams.push('%' + location + '%', '%' + location + '%');
+            // }
+
+            if(location){
+                query += ' AND (m.city LIKE ' + DbHelper.escape('%' + location + '%') + ' OR ';
+                query += ' m.zip_code LIKE ' + DbHelper.escape('%' + location + '%') + ')';
+            }
+
             PaginationHelper.paginate(query, page, NUM_ROWS_PER_PAGE, queryParams).then(
                 function(response){
                     
@@ -656,7 +669,7 @@ var ppcModel = {
         });
     },
 
-    getDealsFromEachCategory : function(limit){
+    getDealsFromEachCategory : function(limit, location){
 
         return new Promise(function(resolve, reject) {
 
@@ -701,7 +714,14 @@ var ppcModel = {
                         'FROM ppc_daily_deal AS dd LEFT JOIN ppc_deal_microsites ' +
                         'AS m ON dd.daily_deal_microsite_id=m.id ' +
                         'WHERE dd.is_deleted=0 AND dd.paused=0 AND dd.is_approved=1 AND dd.approved_category_id=' +
-                        response[i].category_id + ' LIMIT ' + limit + ')';
+                        response[i].category_id;
+
+                        if(location){
+                            query += ' AND (m.city LIKE ' + DbHelper.escape('%' + location + '%') + ' OR ';
+                            query += ' m.zip_code LIKE ' + DbHelper.escape('%' + location + '%') + ')';
+                        }
+
+                        query += ' LIMIT ' + limit + ')';
 
                         if(i < response.length - 1)
                             query += 'UNION ALL';
@@ -1188,7 +1208,8 @@ var ppcModel = {
                                         ip_address: ip,
                                         user_agent: userAgent.user_agent,
                                         device_version: userAgent.device_version,
-                                        fraudulent: searchData.fraudulent
+                                        fraudulent: searchData.fraudulent,
+                                        ppc_analytics_status: searchData.ppc_analytics_status
                                     } : 
                                     {
                                         ad_id: searchData.ad_id,
@@ -1216,7 +1237,8 @@ var ppcModel = {
                                             ip_address: ip,
                                             user_agent: userAgent.user_agent,
                                             device_version: userAgent.device_version,
-                                            fraudulent: searchData.fraudulent
+                                            fraudulent: searchData.fraudulent,
+                                            ppc_analytics_status: searchData.ppc_analytics_status
                                         };
 
                     DbHelper.getConnection().then(function(connection){

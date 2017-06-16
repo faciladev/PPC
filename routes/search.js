@@ -163,7 +163,19 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
  *		}
  */
 router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
-	searchDeals(req, res, next);
+	let location = req.query.location;
+	if(location) searchDeals(req, res, next);
+	else {
+		const ip = Util.getClientIp(req);
+		const ipAddress = Util.ipToLocation(ip);
+		if(ipAddress && ipAddress.country === 'US'){
+			req.query.location = ipAddress.zip;
+		} else {
+            return res.json({status: false, message: 'Location not in the USA'});
+        }
+
+		searchDeals(req, res, next);
+	}
 });
 
 /**
@@ -563,7 +575,19 @@ router.get('/deals', function(req, res, next) {
 	if(typeof limit === 'undefined' || limit === null)
 		limit = config.get('numRowsPerPage');
 
-	ppcModel.getDealsFromEachCategory(limit).then(
+	let location = req.query.location;
+	if( ! location) 
+	{
+		const ip = Util.getClientIp(req);
+		const ipAddress = Util.ipToLocation(ip);
+		if(ipAddress && ipAddress.country === 'US'){
+			location = ipAddress.zip;
+		} else {
+            return res.json({status: false, message: 'Location not in the USA'});
+        }
+	}
+
+	ppcModel.getDealsFromEachCategory(limit, location).then(
 		function(deals){
 			res.json(deals);
 		}, 
@@ -751,7 +775,7 @@ var searchFlex = function(req, res, next){
 							redirectUrl = Util.sanitizeUrl(link);
 
 							//Change http image source served through ppc ssl imageserver
-							if(url.indexOf('http://') === 0){
+							if(url && url.indexOf('http://') === 0){
 								flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 								Util.sanitizeUrl(url);
 					        } else {
@@ -775,7 +799,7 @@ var searchFlex = function(req, res, next){
 								redirectUrl = Util.sanitizeUrl(link);
 
 								//Change http image source served through ppc ssl imageserver
-								if(url.indexOf('http://') === 0){
+								if(url && url.indexOf('http://') === 0){
 									flexoffers[0].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 									Util.sanitizeUrl(url);
 						        } else {
@@ -808,7 +832,7 @@ var searchFlex = function(req, res, next){
 								redirectUrl = Util.sanitizeUrl(link);
 
 				                //Change http image source served through ppc ssl imageserver
-								if(url.indexOf('http://') === 0){
+								if(url && url.indexOf('http://') === 0){
 									flexoffers[i].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 									Util.sanitizeUrl(url);
 						        } else {
@@ -834,7 +858,7 @@ var searchFlex = function(req, res, next){
 										redirectUrl = Util.sanitizeUrl(link);
 
 										//Change http image source served through ppc ssl imageserver
-										if(url.indexOf('http://') === 0){
+										if(url && url.indexOf('http://') === 0){
 											flexoffers[j].flexSrc = config.get('project_url') + '/api/imageserver/' + 
 											Util.sanitizeUrl(url);
 								        } else {
@@ -973,8 +997,9 @@ var searchDeals = function(req, res, next) {
 	var categoryId = (typeof req.params[0] === "undefined")
 	? req.params.categoryId : req.params[0];
 	var userId = req.params.userId;
-	
-	ppcModel.findDailyDeals(keyword, categoryId, req.query.page).then(
+	var location = req.query.location;
+
+	ppcModel.findDailyDeals(keyword, categoryId, req.query.page, location).then(
 		function(searchData){
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
