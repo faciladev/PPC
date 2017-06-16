@@ -293,6 +293,7 @@ var clickSponsoredAd = function(req, res, next){
 					if(! hasPassed){
 						//Set fraudulent flag to 1
 						searchData.fraudulent = 1;
+						searchData.ppc_analytics_status = "FRAUDULENT";
 					} else {
 						//Set fraudulent flag to 0
 						searchData.fraudulent = 0;
