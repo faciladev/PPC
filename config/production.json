@@ -13,8 +13,10 @@
     "upload_relative_path" : "/../PPC_ASSETS_PROD",
     "numRowsPerPage" : 10,
     "cors_whitelist" : [
-    	"http://ziphub.com",    	
-    	"https://ziphub.com"
+    	"http://ziphub.com", 
+        "http://www.ziphub.com",    	
+    	"https://ziphub.com",   
+        "https://www.ziphub.com"
     ],
     "google_map_api_key": "AIzaSyCScrZhqgWrCJACbnr_frSVCaEQoBCLRM8",
     "apidoc" : "apidoc",

@@ -14,9 +14,13 @@
     "numRowsPerPage" : 10,
     "cors_whitelist" : [
     	"https://ziphub.com", 
+    	"https://www.ziphub.com", 
     	"https://iziphub.com",
+    	"https://www.iziphub.com",
         "http://ziphub.com", 
+        "http://www.ziphub.com", 
         "http://iziphub.com",
+        "http://www.iziphub.com",
     	"http://localhost",
         "http://localhost:8012",
         "http://localhost:8000"
