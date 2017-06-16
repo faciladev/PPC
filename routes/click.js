@@ -297,6 +297,7 @@ var clickSponsoredAd = function(req, res, next){
 					} else {
 						//Set fraudulent flag to 0
 						searchData.fraudulent = 0;
+						searchData.ppc_analytics_status = "APPROVED";
 					}
 
 					//Checks if ad has available budget for its budget period

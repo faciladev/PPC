@@ -1208,7 +1208,8 @@ var ppcModel = {
                                         ip_address: ip,
                                         user_agent: userAgent.user_agent,
                                         device_version: userAgent.device_version,
-                                        fraudulent: searchData.fraudulent
+                                        fraudulent: searchData.fraudulent,
+                                        ppc_analytics_status: searchData.ppc_analytics_status
                                     } : 
                                     {
                                         ad_id: searchData.ad_id,
@@ -1236,7 +1237,8 @@ var ppcModel = {
                                             ip_address: ip,
                                             user_agent: userAgent.user_agent,
                                             device_version: userAgent.device_version,
-                                            fraudulent: searchData.fraudulent
+                                            fraudulent: searchData.fraudulent,
+                                            ppc_analytics_status: searchData.ppc_analytics_status
                                         };
 
                     DbHelper.getConnection().then(function(connection){
