@@ -449,6 +449,7 @@ var ppcModel = {
             'dd.is_approved, ' +
             'dd.is_deleted, ' +
             'dd.list_rank, ' +
+            'dd.keywords, ' +
             'dd.deal_image, ' +
             'dd.paused, ' +
             'm.discount_description, '+
@@ -469,13 +470,18 @@ var ppcModel = {
             }
             
             if(typeof keyword !== "undefined" || keyword != null){
-                query += 'AND m.name LIKE ? || dd.keywords LIKE ?';
+                query += 'AND (m.name LIKE ? OR dd.keywords LIKE ? )';
                 queryParams.push('%' + keyword + '%', '%' + keyword + '%');
             }            
             
+            // if(location){
+            //     query += ' AND m.zip_code LIKE ? OR m.city LIKE ? ';
+            //     queryParams.push('%' + location + '%', '%' + location + '%');
+            // }
+
             if(location){
-                query += ' AND m.zip_code LIKE ? OR m.city LIKE ? ';
-                queryParams.push('%' + location + '%', '%' + location + '%');
+                query += ' AND (m.city LIKE ' + DbHelper.escape('%' + location + '%') + ' OR ';
+                query += ' m.zip_code LIKE ' + DbHelper.escape('%' + location + '%') + ')';
             }
 
             PaginationHelper.paginate(query, page, NUM_ROWS_PER_PAGE, queryParams).then(
