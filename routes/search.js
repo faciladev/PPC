@@ -929,7 +929,6 @@ var searchAds = function(req, res, next){
 				//Save searches
 				ppcModel.saveSponsoredAdSearch(searchData).then(
 					function(response){
-
 						let savedSearchIds = response.results;
 						let advertiserIds = response.advertiser_ids;
 

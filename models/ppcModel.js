@@ -261,7 +261,7 @@ var ppcModel = {
 
                 for (var i = 0; i < searchData.length; i++) {
                     //save advertiser id of each ad
-                    advertiser_ids.push(searchData.advertiser_id);
+                    advertiser_ids.push(searchData[i].advertiser_id);
 
                     query += 'INSERT INTO ppc_ad_searches (ad_id, keyword_id, ' + 
                     'keyword_category_id, ad_location_id, ad_subpage_id, price, ' +
@@ -815,7 +815,7 @@ var ppcModel = {
                 var query = 'SELECT COUNT(id) AS count FROM ' + 
                 TWENTY_FOUR_HOUR_POLICY + ' ' +
                 'WHERE activity_type_id = ? AND item_type_id = ? ' +
-                'item_id = ? ' +
+                'AND item_id = ? ' +
                 'AND ip_address =  ? ' +
                 'AND user_agent = ? ' +
                 'AND device_version = ? ';
@@ -1355,7 +1355,7 @@ var ppcModel = {
                         ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
                         userAgent.device_version + '\',' + advertiserIds[0] +');';
                     }
-
+                    console.log(query)
                     DbHelper.getConnection().then(function(connection){
                         connection.query(query, function(err, results, fields){
                             connection.release();
@@ -1431,7 +1431,7 @@ var ppcModel = {
     },
 
     trackDealClick : function(deal, ip, userAgent, userId){
-
+        console.log(deal)
         return new Promise(function(resolve, reject){
 
             userModel.getUserGroup(userId).then(
@@ -1646,7 +1646,7 @@ var ppcModel = {
 
                         if(rows.length <= 0)
                             return reject(new appError('No deal found.'));
-
+                        console.log(rows);
                         resolve(rows[0]);
                     }
                 );
