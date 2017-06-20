@@ -153,7 +153,7 @@ var clickFeaturedAd = function(req, res, next){
 
 		var data = {
 			activity_type_id: ppcModel.ACTIVITY_CLICK,
-			item_type_id: ppcModel.ITEM_SPONSORED_AD,
+			item_type_id: ppcModel.ITEM_SPONSORED_AD
 		};
 
 		if(! isNaN(userId))
@@ -182,7 +182,6 @@ var clickFeaturedAd = function(req, res, next){
 				// to allow trackable clicks
 				ppcModel.adBudgetLimitCheck(searchData).then(
 					function(response){
-
 						//No available fund remains
 						if(response.has_passed === 0){
 							
@@ -277,6 +276,7 @@ var clickSponsoredAd = function(req, res, next){
 			var data = {
 				activity_type_id: ppcModel.ACTIVITY_CLICK,
 				item_type_id: ppcModel.ITEM_SPONSORED_AD,
+				item_id: parseInt(searchId)
 			};
 
 			if(! isNaN(userId))

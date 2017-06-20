@@ -822,8 +822,8 @@ var ppcModel = {
 
                 var queryParams = [
                     data.activity_type_id,
-                    data.item_id,
                     data.item_type_id,
+                    data.item_id,
                     ip,
                     userAgent.user_agent,
                     userAgent.device_version
@@ -833,7 +833,7 @@ var ppcModel = {
                     queryParams.push(data.actor_id);
                     query += ' AND actor_id = ? ';
                 }
-
+               
                 connection.query(query, 
                     queryParams,
                     function(err, results, fields){
@@ -1231,7 +1231,8 @@ var ppcModel = {
                                         keyword_category_id: searchData.keyword_category_id,
                                         price: searchData.price,
                                         ad_subpage_id: searchData.ad_subpage_id,
-                                        clicked: 1
+                                        clicked: 1,
+                                        advertiser_id: searchData.advertiser_id
                                     };
 
 
@@ -1355,7 +1356,7 @@ var ppcModel = {
                         ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
                         userAgent.device_version + '\',' + advertiserIds[0] +');';
                     }
-                    console.log(query)
+
                     DbHelper.getConnection().then(function(connection){
                         connection.query(query, function(err, results, fields){
                             connection.release();
@@ -1431,7 +1432,6 @@ var ppcModel = {
     },
 
     trackDealClick : function(deal, ip, userAgent, userId){
-        console.log(deal)
         return new Promise(function(resolve, reject){
 
             userModel.getUserGroup(userId).then(
@@ -1510,7 +1510,8 @@ var ppcModel = {
                                 device_version: userAgent.device_version,
                                 activity_type_id: ACTIVITY_DOWNLOAD,
                                 item_type_id: ITEM_DAILY_DEAL,
-                                fraudulent: deal.fraudulent
+                                fraudulent: deal.fraudulent,
+                                ppc_analytics_status: deal.ppc_analytics_status
                             }, 
                             function(err, results, fields){
                                 connection.release();
@@ -1646,7 +1647,7 @@ var ppcModel = {
 
                         if(rows.length <= 0)
                             return reject(new appError('No deal found.'));
-                        console.log(rows);
+
                         resolve(rows[0]);
                     }
                 );

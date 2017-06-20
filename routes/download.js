@@ -62,6 +62,7 @@ var downloadDeal = function(req, res, next){
 			var data = {
 				activity_type_id: ppcModel.ACTIVITY_DOWNLOAD,
 				item_type_id: ppcModel.ITEM_DAILY_DEAL,
+				item_id: parseInt(dealId)
 			};
 
 			if(! isNaN(userId))
@@ -70,7 +71,6 @@ var downloadDeal = function(req, res, next){
 			//Make sure if click meets click policy
 			ppcModel.requestMeetsClickPolicy(ip, userAgent, data, userId).then(
 				function(hasPassed){
-
 					//Check if click failed click policy.
 					if(! hasPassed){
 						//Set fraudulent flag to 1
