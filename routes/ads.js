@@ -450,7 +450,7 @@ router.get('/:subpage/featured', function(req, res, next){
         const ip = Util.getClientIp(req);
         const ipAddress = Util.ipToLocation(ip);
         if(ipAddress.country === 'US'){
-            location = ipAddress.zip;
+            location = ipAddress.city;
         } else {
             return res.json({status: false, message: 'Location not in the USA'});
         }
