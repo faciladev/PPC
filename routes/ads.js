@@ -10,7 +10,7 @@ var Util = require('../lib/util');
 var appError = require('../app_error');
 var router = express.Router();
 
-router.get('/', authorize, function(req, res, next) {
+router.get('/', function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
     ads.getAll(req.query.page, search, type, req.query.numRowsPerPage).then(function(response){
@@ -33,7 +33,7 @@ router.get('/advertiser/:advertiserId', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id', authorize, function(req, res, next) {
+router.get('/:id', function(req, res, next) {
     ads.get(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -41,7 +41,7 @@ router.get('/:id', authorize, function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/locations', authorize, function(req, res, next) {
+router.get('/:id/locations', function(req, res, next) {
     ads.getAdLocations(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -57,7 +57,7 @@ router.get('/:id/microsite', function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/keywords', authorize, function(req, res, next) {
+router.get('/:id/keywords', function(req, res, next) {
     ads.getAdKeywords(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -66,7 +66,7 @@ router.get('/:id/keywords', authorize, function(req, res, next) {
     });
 });
 
-router.get('/:id/subpages', authorize, function(req, res, next) {
+router.get('/:id/subpages', function(req, res, next) {
     ads.getAdSubpages(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -92,7 +92,7 @@ router.get('/:id/adFiles', function(req, res, next) {
 });
 
 //Gets category keywords
-router.get('/keywords/:categoryId', authorize, function(req, res, next) {
+router.get('/keywords/:categoryId', function(req, res, next) {
     ads.getCategoryKeywords(req.params.categoryId).then(function(response){
         res.json(response);
     }, function(error){
@@ -100,7 +100,7 @@ router.get('/keywords/:categoryId', authorize, function(req, res, next) {
         next(error);
     });
 });
-router.get('/advertiserOffers/:advertiserId', authorize, function(req, res, next) {
+router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
     ads.getAdvertiserOffers(req.params.advertiserId).then(function(response){
         res.json(response);
     }, function(error) {
@@ -141,7 +141,6 @@ router.post('/:id/microsite', authorize, function(req, res, next) {
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         res.json(response);
     }, function(error) {
-        error.message = 'Error';
         next(error);
     });
 
@@ -658,7 +657,7 @@ router.post('/adoffers/:offerId/:userId', authorize, function(req, res, next){
  *
  * @apiParam {Number} userId  User Id.
  */
-router.get('/adoffers/:userId', authorize, function(req, res, next){
+router.get('/adoffers/:userId', function(req, res, next){
     ppcModel.findConsumerAdOffer(req.params.userId, req.query.page).then(
         (response)=>{
             return res.json(response);
