@@ -1452,6 +1452,7 @@ var ppcModel = {
                                 actor_type_id: actor_type_id,
                                 item_id: deal.deal_id,
                                 advertiser_id: deal.advertiser_id,
+                                ppc_analytics_status: deal.ppc_analytics_status,
                                 actor_id: userId,
                                 ip_address: ip,
                                 user_agent: userAgent.user_agent,

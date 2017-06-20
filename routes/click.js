@@ -393,7 +393,7 @@ var clickDeal = function(req, res, next){
 			var data = {
 				activity_type_id: ppcModel.ACTIVITY_CLICK,
 				item_type_id: ppcModel.ITEM_DAILY_DEAL,
-				item_id: dealId
+				item_id: parseInt(dealId)
 			};
 
 			if(! isNaN(userId))
