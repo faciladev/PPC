@@ -197,6 +197,7 @@ module.exports = {
                 'ppc_ad_locations.city AS user_city, ' +
                 'ppc_ad_locations.zip_code AS user_zipcode, ' +
                 'ppc_ads.id AS ad_id, ' +
+                'ppc_ads.advertiser_id, ' +
                 'ppc_ads.url, ' +
                 'ppc_ads.title, ' +
                 'ppc_ads.address, ' +
@@ -268,6 +269,7 @@ module.exports = {
                 function(connection){
                     var query = 'SELECT '+
                                     'ppc_ads.id AS ad_id, '+
+                                    'ppc_ads.advertiser_id, ' +
                                     'high_keywords.price, '+
                                     'high_keywords.keyword_id, '+
                                     'available_ad_keywords.keyword_category_id, '+
