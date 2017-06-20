@@ -928,8 +928,11 @@ var searchAds = function(req, res, next){
 				paginatedSearchData.result = searchData;
 				//Save searches
 				ppcModel.saveSponsoredAdSearch(searchData).then(
-					function(savedSearchIds){
-						
+					function(response){
+
+						let savedSearchIds = response.results;
+						let advertiserIds = response.advertiser_ids;
+
 						if(searchData.length === 1 && (savedSearchIds.affectedRows === 1)){
 							//matched one result
 							searchData[0].search_id = savedSearchIds.insertId;
@@ -963,7 +966,7 @@ var searchAds = function(req, res, next){
 						var userAgent = Util.getUserAgent(req);
 
 						//Log impression
-						ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId).then(
+						ppcModel.trackSponsoredAdImpression(savedSearchIds, ip, userAgent, userId, advertiserIds).then(
 							function(response){
 								res.json(paginatedSearchData);
 							}, 

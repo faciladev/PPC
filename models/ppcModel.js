@@ -24,6 +24,9 @@ const WEEKLY_BUDGET_PERIOD = 'weekly';
 const DAILY_BUDGET_PERIOD = 'daily';
 const MONTHLY_BUDGET_PERIOD = 'monthly';
 
+const FRAUDULENT_ANALYTICS_STATUS = 'FRAUDULENT';
+const APPROVED_ANALYTICS_STATUS = 'APPROVED';
+
 
 
 var ppcModel = {
@@ -44,6 +47,8 @@ var ppcModel = {
     WEEKLY_BUDGET_PERIOD : WEEKLY_BUDGET_PERIOD,
     DAILY_BUDGET_PERIOD : DAILY_BUDGET_PERIOD,
     MONTHLY_BUDGET_PERIOD : MONTHLY_BUDGET_PERIOD,
+    FRAUDULENT_ANALYTICS_STATUS: FRAUDULENT_ANALYTICS_STATUS,
+    APPROVED_ANALYTICS_STATUS: APPROVED_ANALYTICS_STATUS,
 
     findSponsoredAds : function(keyword, location, subPage, page, filter){
         return new Promise(function(resolve, reject) {
@@ -63,6 +68,7 @@ var ppcModel = {
             'ppc_ads.url, ' +
             'ppc_ads.title, ' +
             'ppc_ads.address, ' +
+            'ppc_ads.advertiser_id, ' +
             'ppc_ads.lat, ' +
             'ppc_ads.lng, ' +
             'ppc_ads.phone_no, ' +
@@ -251,18 +257,22 @@ var ppcModel = {
                     return reject(new appError('Cannot save empty search result.'));
 
                 var query = '';
+                let advertiser_ids = [];
 
                 for (var i = 0; i < searchData.length; i++) {
+                    //save advertiser id of each ad
+                    advertiser_ids.push(searchData.advertiser_id);
+
                     query += 'INSERT INTO ppc_ad_searches (ad_id, keyword_id, ' + 
                     'keyword_category_id, ad_location_id, ad_subpage_id, price, ' +
-                    'url, title, address, lat, lng, phone_no, ad_text, ad_keyword_id) ' +
+                    'url, title, address, lat, lng, phone_no, ad_text, ad_keyword_id, advertiser_id) ' +
                     'VALUES ('+ connection.escape(searchData[i].ad_id) +', '+ connection.escape(searchData[i].keyword_id) +
                     ', '+ connection.escape(searchData[i].keyword_category_id) +', '+ 
                     connection.escape(searchData[i].ad_location_id) +','+ connection.escape(searchData[i].ad_subpage_id) +','+ 
                     connection.escape(searchData[i].price) +', '+ connection.escape(searchData[i].url) +','+ connection.escape(searchData[i].title) + 
                     ','+ connection.escape(searchData[i].address) +', '+ connection.escape(searchData[i].lat) +', '+ connection.escape(searchData[i].lng) + 
                     ','+ connection.escape(searchData[i].phone_no) +','+ connection.escape(searchData[i].ad_text) +',' + 
-                    connection.escape(searchData[i].ad_keyword_id) +');';
+                    connection.escape(searchData[i].ad_keyword_id) + ',' + connection.escape(searchData[i].advertiser_id) +');';
                 }
 
 
@@ -273,7 +283,7 @@ var ppcModel = {
                     if(err)
                         return reject(err);
 
-                    resolve(results);
+                    resolve({results, advertiser_ids});
                 });
 
             },function(error){
@@ -420,6 +430,7 @@ var ppcModel = {
             var query = 
             'SELECT ' + 
             'dd.id AS deal_id, ' +
+            'dd.advertiser_id, ' +
             'm.id AS microsite_id, '+
             'm.company_name, ' +
             'm.what_you_get, '+
@@ -804,12 +815,14 @@ var ppcModel = {
                 var query = 'SELECT COUNT(id) AS count FROM ' + 
                 TWENTY_FOUR_HOUR_POLICY + ' ' +
                 'WHERE activity_type_id = ? AND item_type_id = ? ' +
+                'item_id = ? ' +
                 'AND ip_address =  ? ' +
                 'AND user_agent = ? ' +
                 'AND device_version = ? ';
 
                 var queryParams = [
                     data.activity_type_id,
+                    data.item_id,
                     data.item_type_id,
                     ip,
                     userAgent.user_agent,
@@ -1209,6 +1222,7 @@ var ppcModel = {
                                         user_agent: userAgent.user_agent,
                                         device_version: userAgent.device_version,
                                         fraudulent: searchData.fraudulent,
+                                        advertiser_id: searchData.advertiser_id,
                                         ppc_analytics_status: searchData.ppc_analytics_status
                                     } : 
                                     {
@@ -1238,6 +1252,7 @@ var ppcModel = {
                                             user_agent: userAgent.user_agent,
                                             device_version: userAgent.device_version,
                                             fraudulent: searchData.fraudulent,
+                                            advertiser_id: searchData.advertiser_id,
                                             ppc_analytics_status: searchData.ppc_analytics_status
                                         };
 
@@ -1306,7 +1321,7 @@ var ppcModel = {
         });
     },
 
-    trackSponsoredAdImpression : function(savedSearchIds, ip, userAgent, userId){
+    trackSponsoredAdImpression : function(savedSearchIds, ip, userAgent, userId, advertiserIds){
         return new Promise(function(resolve, reject){
 
             userModel.getUserGroup(userId).then(
@@ -1326,19 +1341,19 @@ var ppcModel = {
                     if(savedSearchIds instanceof Array){
                         for(var i = 0; i<savedSearchIds.length; i++){
                             query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
-                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
+                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version, advertiser_id) ' +
                         'VALUES ('+ ITEM_SPONSORED_AD +', '+ ACTIVITY_IMPRESSION +
                         ', '+ actor_type_id +', '+ savedSearchIds[i].insertId +
                         ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
-                        userAgent.device_version +'\');';
+                        userAgent.device_version + '\',' + advertiserIds[i] +');';
                         }
                     } else {
                         query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
-                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
+                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version, advertiser_id) ' +
                         'VALUES ('+ ITEM_SPONSORED_AD +', '+ ACTIVITY_IMPRESSION +
                         ', '+ actor_type_id +', '+ savedSearchIds.insertId +
                         ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
-                        userAgent.device_version +'\');';
+                        userAgent.device_version + '\',' + advertiserIds[0] +');';
                     }
 
                     DbHelper.getConnection().then(function(connection){
@@ -1383,11 +1398,11 @@ var ppcModel = {
                     for(var i = 0; i<deals.length; i++){
                         
                         query += 'INSERT INTO ppc_analytics (item_type_id, activity_type_id, ' + 
-                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version) ' +
+                        'actor_type_id, item_id, actor_id, ip_address, user_agent, device_version, advertiser_id) ' +
                         'VALUES ('+ ITEM_DAILY_DEAL +', '+ ACTIVITY_IMPRESSION +
                         ', '+ actor_type_id +', '+ deals[i].deal_id +
                         ', '+ userId +',\''+ ip +'\',\''+ userAgent.user_agent +'\',\''+ 
-                        userAgent.device_version +'\');';
+                        userAgent.device_version + '\',' + deals[i].advertiser_id +');';
                     }
 
 
@@ -1436,6 +1451,7 @@ var ppcModel = {
                             {
                                 actor_type_id: actor_type_id,
                                 item_id: deal.deal_id,
+                                advertiser_id: deal.advertiser_id,
                                 actor_id: userId,
                                 ip_address: ip,
                                 user_agent: userAgent.user_agent,
@@ -1487,6 +1503,7 @@ var ppcModel = {
                             {
                                 actor_type_id: actor_type_id,
                                 item_id: deal.deal_id,
+                                advertiser_id: deal.advertiser_id,
                                 actor_id: userId,
                                 ip_address: ip,
                                 user_agent: userAgent.user_agent,
@@ -1581,6 +1598,7 @@ var ppcModel = {
                 var query = 
                 'SELECT ' + 
                 'dd.id AS deal_id, ' +
+                'dd.advertiser_id, ' +
                 'm.id AS microsite_id, '+
                 'm.company_name, ' +
                 'm.what_you_get, '+
