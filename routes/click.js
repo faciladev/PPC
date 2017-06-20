@@ -153,7 +153,7 @@ var clickFeaturedAd = function(req, res, next){
 
 		var data = {
 			activity_type_id: ppcModel.ACTIVITY_CLICK,
-			item_type_id: ppcModel.ITEM_SPONSORED_AD,
+			item_type_id: ppcModel.ITEM_SPONSORED_AD
 		};
 
 		if(! isNaN(userId))
@@ -171,16 +171,17 @@ var clickFeaturedAd = function(req, res, next){
 				if(! hasPassed){
 					//Set fraudulent flag to 1
 					searchData.fraudulent = 1;
+					searchData.ppc_analytics_status = ppcModel.FRAUDULENT_ANALYTICS_STATUS;
 				} else {
 					//Set fraudulent flag to 0
 					searchData.fraudulent = 0;
+					searchData.ppc_analytics_status = ppcModel.APPROVED_ANALYTICS_STATUS;
 				}
 
 				//Checks if ad has available budget for its budget period
 				// to allow trackable clicks
 				ppcModel.adBudgetLimitCheck(searchData).then(
 					function(response){
-
 						//No available fund remains
 						if(response.has_passed === 0){
 							
@@ -275,6 +276,7 @@ var clickSponsoredAd = function(req, res, next){
 			var data = {
 				activity_type_id: ppcModel.ACTIVITY_CLICK,
 				item_type_id: ppcModel.ITEM_SPONSORED_AD,
+				item_id: parseInt(searchId)
 			};
 
 			if(! isNaN(userId))
@@ -293,11 +295,11 @@ var clickSponsoredAd = function(req, res, next){
 					if(! hasPassed){
 						//Set fraudulent flag to 1
 						searchData.fraudulent = 1;
-						searchData.ppc_analytics_status = "FRAUDULENT";
+						searchData.ppc_analytics_status = ppcModel.FRAUDULENT_ANALYTICS_STATUS;
 					} else {
 						//Set fraudulent flag to 0
 						searchData.fraudulent = 0;
-						searchData.ppc_analytics_status = "APPROVED";
+						searchData.ppc_analytics_status = ppcModel.APPROVED_ANALYTICS_STATUS;
 					}
 
 					//Checks if ad has available budget for its budget period
@@ -388,15 +390,45 @@ var clickDeal = function(req, res, next){
 		function(deal){
 			var userAgent = Util.getUserAgent(req);
 			var ip = Util.getClientIp(req);
+			var data = {
+				activity_type_id: ppcModel.ACTIVITY_CLICK,
+				item_type_id: ppcModel.ITEM_DAILY_DEAL,
+				item_id: dealId
+			};
 
-			ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
-				function(response){
-					res.redirect(Util.decodeUrl(redirectUrl));
-				},
-				function(error){
+			if(! isNaN(userId))
+				data.actor_id = parseInt(userId);
+				
+			//Make sure if click meets click policy
+			ppcModel.requestMeetsClickPolicy(
+				ip, 
+				userAgent, 
+				data, 
+				userId).then(
+				function(hasPassed){
+
+					//Check if click failed click policy.
+					if(! hasPassed){
+						//Set fraudulent flag to 1
+						deal.fraudulent = 1;
+						deal.ppc_analytics_status = ppcModel.FRAUDULENT_ANALYTICS_STATUS;
+					} else {
+						//Set fraudulent flag to 0
+						deal.fraudulent = 0;
+						deal.ppc_analytics_status = ppcModel.APPROVED_ANALYTICS_STATUS;
+					}
+
+					ppcModel.trackDealClick(deal, ip, userAgent, userId).then(
+						function(response){
+							res.redirect(Util.decodeUrl(redirectUrl));
+						},
+						function(error){
+							next(error);
+						}
+					);
+				}, function(error){
 					next(error);
-				}
-			);
+				});
 
 		}, 
 		function(error){
