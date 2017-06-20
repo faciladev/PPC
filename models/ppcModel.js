@@ -683,7 +683,7 @@ var ppcModel = {
     getDealsFromEachCategory : function(limit, location){
 
         return new Promise(function(resolve, reject) {
-
+            console.log(location)
             ppcModel.findAllDealCategories().then(function(response){
                 if(response.length > 0){
                     //Build Query
