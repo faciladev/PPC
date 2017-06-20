@@ -21,7 +21,7 @@ router.get('/', authorize, function(req, res, next) {
     });
 });
 //Gets all ads by advertiser
-router.get('/advertiser/:advertiserId', authorize, function(req, res, next) {
+router.get('/advertiser/:advertiserId', function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
     var advertiserId = req.params.advertiserId;
@@ -49,7 +49,7 @@ router.get('/:id/locations', authorize, function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/microsite', authorize, function(req, res, next) {
+router.get('/:id/microsite', function(req, res, next) {
     ads.getAdMicrosite(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -74,7 +74,7 @@ router.get('/:id/subpages', authorize, function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/offers', authorize, function(req, res, next) {
+router.get('/:id/offers', function(req, res, next) {
     ads.getAdOffers(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
@@ -82,7 +82,7 @@ router.get('/:id/offers', authorize, function(req, res, next) {
         next(error);
     });
 });
-router.get('/:id/adFiles', authorize, function(req, res, next) {
+router.get('/:id/adFiles', function(req, res, next) {
     ads.getAdFiles(req.params.id).then(function(response){
         res.json(response);
     }, function(error){
