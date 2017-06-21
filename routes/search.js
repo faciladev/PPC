@@ -163,19 +163,20 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
  *		}
  */
 router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
-	let location = req.query.location;
-	if(location) searchDeals(req, res, next);
-	else {
-		const ip = Util.getClientIp(req);
-		const ipAddress = Util.ipToLocation(ip);
-		if(ipAddress && ipAddress.country === 'US'){
-			req.query.location = ipAddress.city;
-		} else {
-            return res.json({status: false, message: 'Location not in the USA'});
-        }
+	// let location = req.query.location;
+	// if(location) searchDeals(req, res, next);
+	// else {
+	// 	const ip = Util.getClientIp(req);
+	// 	const ipAddress = Util.ipToLocation(ip);
+	// 	if(ipAddress && ipAddress.country === 'US'){
+	// 		req.query.location = ipAddress.city;
+	// 	} else {
+ //            return res.json({status: false, message: 'Location not in the USA'});
+ //        }
 
-		searchDeals(req, res, next);
-	}
+	// 	searchDeals(req, res, next);
+	// }
+	searchDeals(req, res, next);
 });
 
 /**
@@ -576,17 +577,21 @@ router.get('/deals', function(req, res, next) {
 		limit = config.get('numRowsPerPage');
 
 	let location = req.query.location;
-	if( ! location) 
-	{
-		const ip = Util.getClientIp(req);
-		const ipAddress = Util.ipToLocation(ip);
-		if(ipAddress && ipAddress.country === 'US'){
-			location = ipAddress.city;
-		} else {
-            return res.json({status: false, message: 'Location not in the USA'});
-        }
-	}
+	// if( ! location) 
+	// {
+	// 	const ip = Util.getClientIp(req);
+	// 	const ipAddress = Util.ipToLocation(ip);
+	// 	if(ipAddress && ipAddress.country === 'US'){
+	// 		location = ipAddress.city;
+	// 	} else {
+ //            return res.json({status: false, message: 'Location not in the USA'});
+ //        }
+	// }
+	
 
+	//Temporarily turn off location feature
+	location = false;
+	
 	ppcModel.getDealsFromEachCategory(limit, location).then(
 		function(deals){
 			res.json(deals);
@@ -1000,6 +1005,9 @@ var searchDeals = function(req, res, next) {
 	? req.params.categoryId : req.params[0];
 	var userId = req.params.userId;
 	var location = req.query.location;
+
+	//Temporarily turn off location feature
+	location = false;
 
 	ppcModel.findDailyDeals(keyword, categoryId, req.query.page, location).then(
 		function(searchData){
