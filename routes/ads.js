@@ -973,20 +973,23 @@ router.get('/:subpage/featured', function(req, res, next){
 
     var subPage = parseInt(req.params.subpage);
     let location = req.query.location;
-    if(! location)
-    {
-        const ip = Util.getClientIp(req);
-        const ipAddress = Util.ipToLocation(ip);
+    // if(! location)
+    // {
+    //     const ip = Util.getClientIp(req);
+    //     const ipAddress = Util.ipToLocation(ip);
 
-        if(ipAddress && ipAddress.country === 'US'){
-            location = ipAddress.zip;
-        } else {
-            return res.json({status: false, message: 'Location not in the USA'});
-        }
+    //     if(ipAddress && ipAddress.country === 'US'){
+    //         location = ipAddress.zip;
+    //     } else {
+    //         return res.json({status: false, message: 'Location not in the USA'});
+    //     }
 
         
-    }
+    // }
 
+    //Temporarily turn off location feature
+    location = false;
+    
     ads.getFeatured(subPage, location).then(
         function(featuredAds){
             if(! (featuredAds.length > 0))
