@@ -84,7 +84,7 @@ router.post('/', authorize, function(req, res, next){
 });
 
 /**
- * @api {delete} /deals/:id Delete Deal
+ * @api {delete} /deals/:id Delete Deal  (Protected)
  * @apiVersion 0.1.0
  * @apiName DeleteDeal
  * @apiGroup Daily Deals

@@ -396,15 +396,58 @@ router.get('/businesses/advertisers/:advertiserId', function(req, res, next){
     );
 });
 
-
+/**
+ * @api {post} /categories Save/Update Category
+ * @apiVersion 0.1.0
+ * @apiName SaveUpdateCategory
+ * @apiGroup Miscellaneous
+ *
+ * @apiSuccess {Object} response  Insert data, number of changed rows, number of changed rows
+ *
+ * @apiSuccessExample Success-Response:
+ *     Save Response
+ *     HTTP/1.1 200 OK
+ *      {
+ *        "insertId": 399,
+ *        "affectedRows": 1
+ *      }
+ *
+ *     Update Response
+ *     HTTP/1.1 200 OK
+ *      {
+ *        "changedRows": 1
+ *      }
+ */
 router.post('/categories', function(req, res, next) {
     ads.saveCategory(req.body).then(function(response){
         res.json(response);
     }, function(error){
-        error.message = 'Error';
         next(error);
     });
 });
+
+/**
+ * @api {post} /keywords Save/Update Keyword
+ * @apiVersion 0.1.0
+ * @apiName SaveUpdateKeyword
+ * @apiGroup Miscellaneous
+ *
+ * @apiSuccess {Object} response  Insert data, number of changed rows
+ *
+ * @apiSuccessExample Success-Response:
+ *     Save Response
+ *     HTTP/1.1 200 OK
+ *      {
+ *        "insertId": 399,
+ *        "affectedRows": 1
+ *      }
+ *
+ *     Update Response
+ *     HTTP/1.1 200 OK
+ *      {
+ *        "changedRows": 1
+ *      }
+ */
 router.post('/keywords', function(req, res, next) {
     ads.saveKeyword(req.body).then(function(response){
         res.json(response);
@@ -414,11 +457,18 @@ router.post('/keywords', function(req, res, next) {
     });
 });
 
+/**
+ * @api {post} /keywords Save Category Keywords
+ * @apiVersion 0.1.0
+ * @apiName SaveCategoryKeyword
+ * @apiGroup Miscellaneous
+ *
+ * @apiSuccess {Object} response  Insert data
+ */
 router.post('/categoryKeywords', function(req, res, next) {
     ads.saveCategoryKeywords(req.body).then(function(response){
         res.json(response);
     }, function(error){
-        error.message = 'Error';
         next(error);
     });
 });
@@ -461,11 +511,23 @@ router.get('/flexoffers/letters', function(req, res, next) {
     });
 });
 
+/**
+ * @api {get} /latlngaddress/:lat/:lng Get US Location from Longitude and Latitude
+ * @apiVersion 0.1.0
+ * @apiName GetUSLocationFromLatLng
+ * @apiGroup Miscellaneous
+ *
+ * @apiParam {Number} lat Latitude
+ * @apiParam {Number} lng Longitude
+ *
+ * @apiSuccess {Object} response  US location data
+ *
+ */
 router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
     const ip = Util.getClientIp(req);
     const ipAddress = Util.ipToLocation(ip);
     let address;
-    if(ipAddress.country === 'US'){
+    if(ipAddress && ipAddress.country === 'US'){
         address = Util.getLatLngCity(req.params.lat, req.params.lng);
         if(address) {
             address.country = ipAddress.country;
@@ -479,11 +541,31 @@ router.get('/latlngaddress/:lat/:lng', function(req, res, next) {
     
 });
 
+/**
+ * @api {get} /iplocation Get IP Request's Physical Location
+ * @apiVersion 0.1.0
+ * @apiName GetIPRequestPhysicalLocation
+ * @apiGroup Miscellaneous
+ *
+ * @apiSuccess {Object} response  Location data
+ *
+ */
 router.get('/iplocation', (req, res, next) => {
     const ip = Util.getClientIp(req);
     res.json(Util.ipToLocation(ip));
 });
 
+/**
+ * @api {get} /imageserver/:url Proxy Image Server
+ * @apiVersion 0.1.0
+ * @apiName ProxyImageServer
+ * @apiGroup Miscellaneous
+ *
+ *
+ * @apiParam {String} url Encoded url string
+ * @apiSuccess {Image} response Image Response
+ *
+ */
 router.get('/imageserver/:url', (req, res, next) => {
     var requestSettings = {
         url: Util.decodeUrl(req.params.url),

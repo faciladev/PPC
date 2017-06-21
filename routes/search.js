@@ -9,7 +9,7 @@ var Util = require('../lib/util');
 
 var appError = require('../app_error');
 /**
- * @api {get} /search/ads/:keyword/:location/:subPage Non-member Sponsored Ad Search
+ * @api {get} /search/ads/:keyword/:location/:subPage Non-member Sponsored Ad Search (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName NonMemberSponsoredAdSearch
  * @apiGroup Sponsored Ads
@@ -57,7 +57,7 @@ router.get('/ads/:keyword/:location/:subPage', function(req, res, next){
 });
 
 /**
- * @api {get} /search/ads/:keyword/:location/:subPage/:userId Member Sponsored Ad Search
+ * @api {get} /search/ads/:keyword/:location/:subPage/:userId Member Sponsored Ad Search (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName MemberSponsoredAdSearch
  * @apiGroup Sponsored Ads
@@ -106,7 +106,7 @@ router.get('/ads/:keyword/:location/:subPage/:userId', function(req, res, next) 
 });
 
 /**
- * @api {get} /search/deals/:categoryId Search Deal By Category
+ * @api {get} /search/deals/:categoryId Search Deal By Category (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName SearchDealByCategory
  * @apiGroup Daily Deals
@@ -179,7 +179,7 @@ router.get(/^\/deals\/(\d+)$/, function(req, res, next) {
 });
 
 /**
- * @api {get} /search/deals/:keyword Search Deal By Keyword
+ * @api {get} /search/deals/:keyword Search Deal By Keyword (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName SearchDealByKeyword
  * @apiGroup Daily Deals
@@ -240,7 +240,7 @@ router.get('/deals/:keyword', function(req, res, next) {
 });
 
 /**
- * @api {get} /search/deals/nearest/:lat/:lng/:radius Search Deal By User Location
+ * @api {get} /search/deals/nearest/:lat/:lng/:radius Search Deal By User Location (Mobile)
  * @apiVersion 0.1.0
  * @apiName SearchDealByUserLocation
  * @apiGroup Daily Deals
@@ -303,7 +303,7 @@ router.get('/deals/nearest/:lat/:lng/:radius', function(req, res, next) {
 });
 
 /**
- * @api {get} /search/deals/nearest/:lat/:lng/:radius/:userId Search Deal By User Location for Members
+ * @api {get} /search/deals/nearest/:lat/:lng/:radius/:userId Search Deal By User Location for Members (Mobile)
  * @apiVersion 0.1.0
  * @apiName MemberSearchDealByUserLocation
  * @apiGroup Daily Deals
@@ -367,7 +367,7 @@ router.get('/deals/nearest/:lat/:lng/:radius/:userId', function(req, res, next) 
 });
 
 /**
- * @api {get} /search/deals/:categoryId/:keyword Non-member Search Deal By Category and Keyword
+ * @api {get} /search/deals/:categoryId/:keyword Non-member Search Deal By Category and Keyword (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName NonMemberSearchDealByCategoryAndKeyword
  * @apiGroup Daily Deals
@@ -429,7 +429,7 @@ router.get('/deals/:categoryId/:keyword', function(req, res, next){
 });
 
 /**
- * @api {get} /search/deals/:categoryId/:keyword/:userId Member Search Deal By Category and Keyword
+ * @api {get} /search/deals/:categoryId/:keyword/:userId Member Search Deal By Category and Keyword (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName MemberSearchDealByCategoryAndKeyword
  * @apiGroup Daily Deals
@@ -492,7 +492,7 @@ router.get('/deals/:categoryId/:keyword/:userId', function(req, res, next){
 });
 
 /**
- * @api {get} /search/deals?limit=:limit Get Deals from Each Category
+ * @api {get} /search/deals?limit=:limit Get Deals from Each Category (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName GetDealsFromEachCategory
  * @apiGroup Daily Deals
@@ -600,7 +600,7 @@ router.get('/deals', function(req, res, next) {
 });
 
 /**
- * @api {get} /search/flexoffers/:subpageId Get Flex Offers By Subpage Id
+ * @api {get} /search/flexoffers/:subpageId Get Flex Offers By Subpage Id (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName GetFlexOffersBySubpageId
  * @apiGroup Flex Offers
@@ -647,7 +647,7 @@ router.get(/^\/flexoffers\/(\d+)$/,
 );
 
 /**
- * @api {get} /search/flexoffers/:keyword Get Flex Offers By Keyword
+ * @api {get} /search/flexoffers/:keyword Get Flex Offers By Keyword (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName GetFlexOffersByKeyword
  * @apiGroup Flex Offers
@@ -694,7 +694,7 @@ router.get('/flexoffers/:keyword',
 );
 
 /**
- * @api {get} /search/flexoffers/:subpageId/:keyword Get Flex Offers By SubpageId and Keyword
+ * @api {get} /search/flexoffers/:subpageId/:keyword Get Flex Offers By SubpageId and Keyword (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName GetFlexOffersBySubpageIdAndKeyword
  * @apiGroup Flex Offers
