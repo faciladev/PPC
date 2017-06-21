@@ -10,17 +10,142 @@ var Util = require('../lib/util');
 var appError = require('../app_error');
 var router = express.Router();
 
+/**
+ * @api {get} /ads Get All Sponsored Ads
+ * @apiVersion 0.1.0
+ * @apiName GetAllAds
+ * @apiGroup Sponsored Ads
+ * @apiSuccess {Object[]} result List of Sponsored Ads
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ *     {
+ *        "result": [
+ *          {
+ *            "id": 1,
+ *            "advertiser_id": 192,
+ *            "advertizer_business_name": "ABC",
+ *            "budget_limit": 2000,
+ *            "usa_state_name": "Nevada",
+ *            "city": "Las Vegas",
+ *            "zipcode": "1234",
+ *            "ad_id": 144,
+ *            "url": "www.facilo.com",
+ *            "title": "Facilo's Ad",
+ *            "address": "817 S Main St, Las Vegas, NV 89101",
+ *            "lat": null,
+ *            "lng": null,
+ *            "phone_no": "251911448404",
+ *            "ad_text": "Facilo's ad",
+ *            "locations": [
+ *                {
+ *                    "id": 1,
+ *                    "ad_id": 1,
+ *                    "state_id": 1,
+ *                    "city": "Las Vegas",
+ *                    "zip_code": 1234
+ *                },
+ *            ],
+ *            "keywords": [
+ *                {
+ *                    "id": 1,
+ *                    "ad_id": 1,
+ *                    "keyword_id": 1,
+ *                    "category_id": 1,
+ *                    "keyword": "test",
+ *                    "price": 2,
+ *                    "created_by": 1
+ *                },
+ *            ],
+ *            "subpages": [
+ *                {
+ *                    "id": 1,
+ *                    "ad_id": 1,
+ *                    "sub_page_id": 1,
+ *                },
+ *            ]
+ *          }
+ *        ],
+ *        "page": 1,
+ *        "numRowsPerPage": 10,
+ *        "totalRows": 1,
+ *        "totalPages": 1
+ *      }
+ */
 router.get('/', function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
     ads.getAll(req.query.page, search, type, req.query.numRowsPerPage).then(function(response){
         res.json(response);
     }, function(error){
-        error.message = 'Error';
         next(error);
     });
 });
-//Gets all ads by advertiser
+
+/**
+ * @api {get} /ads/advertiser/:advertiserId Get Sponsor Ads By Advertiser Id
+ * @apiVersion 0.1.0
+ * @apiName GetAdsByAdvertiser
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} advertiserId  Advertiser Id
+ * @apiSuccess {Object[]} result List of Advertiser Sponsored Ads.
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ *     {
+ *        "result": [
+ *          {
+ *            "id": 1,
+ *            "advertiser_id": 192,
+ *            "advertizer_business_name": "ABC",
+ *            "budget_limit": 2000,
+ *            "usa_state_name": "Nevada",
+ *            "city": "Las Vegas",
+ *            "zipcode": "1234",
+ *            "ad_id": 144,
+ *            "url": "www.facilo.com",
+ *            "title": "Facilo's Ad",
+ *            "address": "817 S Main St, Las Vegas, NV 89101",
+ *            "lat": null,
+ *            "lng": null,
+ *            "phone_no": "251911448404",
+ *            "ad_text": "Facilo's ad",
+ *            "locations": [
+ *                {
+ *                    "id": 1,
+ *                    "ad_id": 1,
+ *                    "state_id": 1,
+ *                    "city": "Las Vegas",
+ *                    "zip_code": 1234
+ *                },
+ *            ],
+ *            "keywords": [
+ *                {
+ *                    "id": 1,
+ *                    "ad_id": 1,
+ *                    "keyword_id": 1,
+ *                    "category_id": 1,
+ *                    "keyword": "test",
+ *                    "price": 2,
+ *                    "created_by": 1
+ *                },
+ *            ],
+ *            "subpages": [
+ *                {
+ *                    "id": 1,
+ *                    "ad_id": 1,
+ *                    "sub_page_id": 1,
+ *                },
+ *            ]
+ *          }
+ *        ],
+ *        "page": 1,
+ *        "numRowsPerPage": 10,
+ *        "totalRows": 1,
+ *        "totalPages": 1
+ *      }
+ */
 router.get('/advertiser/:advertiserId', function(req, res, next) {
     var search = req.query.search;
     var type = req.query.type;
@@ -33,6 +158,63 @@ router.get('/advertiser/:advertiserId', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/:adId Get Sponsor Ad By Id
+ * @apiVersion 0.1.0
+ * @apiName GetAdById
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId  Sponsored Ad Id
+ * @apiSuccess {Object} result Ad information
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ *   "id": 1,
+ *   "advertiser_id": 192,
+ *   "advertizer_business_name": "ABC",
+ *   "budget_limit": 2000,
+ *   "usa_state_name": "Nevada",
+ *   "city": "Las Vegas",
+ *   "zipcode": "1234",
+ *   "ad_id": 144,
+ *   "url": "www.facilo.com",
+ *    "title": "Facilo's Ad",
+ *    "address": "817 S Main St, Las Vegas, NV 89101",
+ *    "lat": null,
+ *    "lng": null,
+ *    "phone_no": "251911448404",
+ *    "ad_text": "Facilo's ad",
+ *    "locations": [
+ *       {
+ *           "id": 1,
+ *           "ad_id": 1,
+ *           "state_id": 1,
+ *           "city": "Las Vegas",
+ *           "zip_code": 1234
+ *       },
+ *     ],
+ *     "keywords": [
+ *         {
+ *             "id": 1,
+ *             "ad_id": 1,
+ *             "keyword_id": 1,
+ *             "category_id": 1,
+ *             "keyword": "test",
+ *             "price": 2,
+ *             "created_by": 1
+ *         },
+ *     ],
+ *     "subpages": [
+ *         {
+ *             "id": 1,
+ *             "ad_id": 1,
+ *             "sub_page_id": 1,
+ *         },
+ *     ]
+ * }
+ */
 router.get('/:id', function(req, res, next) {
     ads.get(req.params.id).then(function(response){
         res.json(response);
@@ -41,6 +223,28 @@ router.get('/:id', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/:adId/locations Get Sponsor Ad Locaction
+ * @apiVersion 0.1.0
+ * @apiName GetAdLocation
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiSuccess {Object[]} result List of Locations
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 156,
+ *     "ad_id": 144,
+ *     "state_id": 29,
+ *     "city": "los angeles",
+ *     "zip_code": "9826"
+ *   },
+ * ]
+ */
 router.get('/:id/locations', function(req, res, next) {
     ads.getAdLocations(req.params.id).then(function(response){
         res.json(response);
@@ -49,6 +253,45 @@ router.get('/:id/locations', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/:adId/microsite Get Sponsor Ad Microsite
+ * @apiVersion 0.1.0
+ * @apiName GetAdMicrosite
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiSuccess {Object[]} result Microsite information
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 97,
+ *     "ad_id": 144,
+ *     "name": "Facilo's Microsite",
+ *     "business_name": "Facilo",
+ *     "image": "path/to/xyz.jpg",
+ *     "address_1": "817 S Main St, Las Vegas, NV 89101",
+ *     "address_2": null,
+ *     "state": "29",
+ *     "city": "Las Vegas",
+ *     "zipcode": "1234",
+ *     "phone_number": null,
+ *     "start_day": "Tue",
+ *     "end_day": "Thur",
+ *     "start_hour": "3am",
+ *     "end_hour": "2:30am",
+ *     "weekend_start_day": "Not Available",
+ *     "weekend_end_day": "Not Available",
+ *     "weekend_start_hour": "Not Available",
+ *     "weekend_end_hour": "undefinedam",
+ *     "date_created": "2017-03-09T15:25:36.000Z",
+ *     "business_type": "business_type.name ",
+ *     "business_info": null
+ *   }
+ * ]
+ */
 router.get('/:id/microsite', function(req, res, next) {
     ads.getAdMicrosite(req.params.id).then(function(response){
         res.json(response);
@@ -57,6 +300,30 @@ router.get('/:id/microsite', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/:adId/keywords Get Sponsor Ad Keywords
+ * @apiVersion 0.1.0
+ * @apiName GetAdKeywords
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiSuccess {Object[]} result List of keywords
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 191,
+ *     "ad_id": 144,
+ *     "keyword_id": 2862,
+ *     "category_id": 8,
+ *     "keyword": "Elegant",
+ *     "price": 1,
+ *     "created_by": 0
+ *   },
+ * ]
+ */
 router.get('/:id/keywords', function(req, res, next) {
     ads.getAdKeywords(req.params.id).then(function(response){
         res.json(response);
@@ -66,6 +333,25 @@ router.get('/:id/keywords', function(req, res, next) {
     });
 });
 
+/**
+ * @api {get} /ads/:adId/subpages Get Sponsor Ad Subpages
+ * @apiVersion 0.1.0
+ * @apiName GetAdSubPages
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiSuccess {Object[]} result List of sub pages
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 191,
+ *     "ad_id": 144,
+ *     "subpage_id": 2862
+ *   },
+ * ]
+ */
 router.get('/:id/subpages', function(req, res, next) {
     ads.getAdSubpages(req.params.id).then(function(response){
         res.json(response);
@@ -74,6 +360,38 @@ router.get('/:id/subpages', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/:adId/offers Get Sponsor Ad Offers
+ * @apiVersion 0.1.0
+ * @apiName GetAdSubOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiSuccess {Object[]} result List of Offers
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 122,
+ *     "advertiser_id": 232,
+ *     "name": null,
+ *     "offer_type": "ziphub",
+ *     "image": "1489073160489294278.jpeg",
+ *     "url": "www.fasil.com",
+ *     "code": "<embeddable code>",
+ *     "deal_description": "description",
+ *     "regular_price": 23,
+ *     "discount": 2,
+ *     "category_id": 1,
+ *     "is_approved": 0,
+ *     "start_date": "2017-01-12",
+ *     "end_date": "2017-01-12",
+ *     "ad_id": 144
+ *   }
+ * ]
+ */
 router.get('/:id/offers', function(req, res, next) {
     ads.getAdOffers(req.params.id).then(function(response){
         res.json(response);
@@ -82,6 +400,28 @@ router.get('/:id/offers', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/:adId/adFiles Get Sponsor Ad Files
+ * @apiVersion 0.1.0
+ * @apiName GetAdFiles
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiSuccess {Object[]} result List of Files
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 1133,
+ *     "advertiser_id": 1206,
+ *     "type": "image",
+ *     "file_name": "1498004760115584629.png",
+ *     "ad_id": 756
+ *   }
+ * ]
+ */
 router.get('/:id/adFiles', function(req, res, next) {
     ads.getAdFiles(req.params.id).then(function(response){
         res.json(response);
@@ -91,7 +431,27 @@ router.get('/:id/adFiles', function(req, res, next) {
     });
 });
 
-//Gets category keywords
+/**
+ * @api {get} /ads/keywords/:categoryId Get Keywords By Category
+ * @apiVersion 0.1.0
+ * @apiName GetKeywordsByCategory
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} categoryId Category Id
+ * @apiSuccess {Object[]} result List of keywords
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 1133,
+ *     "category_id": 1206,
+ *     "keyword": "test",
+ *     "price": 1,
+ *     "created_by": 2
+ *   },
+ * ]
+ */
 router.get('/keywords/:categoryId', function(req, res, next) {
     ads.getCategoryKeywords(req.params.categoryId).then(function(response){
         res.json(response);
@@ -100,6 +460,37 @@ router.get('/keywords/:categoryId', function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {get} /ads/advertiserOffers/:advertiserId Get Advertiser Offers
+ * @apiVersion 0.1.0
+ * @apiName GetAdvertiserOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Number} advertiserid Advertiser Id
+ * @apiSuccess {Object[]} result List of Advertiser Offers
+ *
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "id": 93,
+ *     "advertiser_id": 232,
+ *     "name": "1 Hacker Way, Menlo Park, 94025",
+ *     "offer_type": "in store",
+ *     "image": "148890447561269538.jpeg",
+ *     "url": "http://www.google.com",
+ *     "code": "izzr9t03",
+ *     "deal_description": "1 Hacker Way, Menlo Park, 94025",
+ *     "regular_price": "2222",
+ *     "discount": "10",
+ *     "category_id": 3,
+ *     "is_approved": 1,
+ *     "start_date": "2017-01-09",
+ *     "end_date": "2017-01-30"
+ *   },
+ * ]
+ */
 router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
     ads.getAdvertiserOffers(req.params.advertiserId).then(function(response){
         res.json(response);
@@ -111,9 +502,14 @@ router.get('/advertiserOffers/:advertiserId', function(req, res, next) {
 
 
 /**
- * POST Request section
+ * @api {post} /ads/ Save Sponsored Ad (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAd
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} ad Sponsored Ad Object
+ * 
  */
-//Ads POST requests
 router.post('/', authorize, function(req, res, next) {
     ads.saveAd(req.body).then(function(response) {
             res.json(response);
@@ -124,6 +520,16 @@ router.post('/', authorize, function(req, res, next) {
     );
 });
 
+/**
+ * @api {put} /ads/:id Update Sponsored Ad (Protected)
+ * @apiVersion 0.1.0
+ * @apiName UpdateAd
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} ad Sponsored Ad Object
+ * @apiParam {Number} id Sponsored Ad Id
+ * 
+ */
 router.put('/:id', authorize, function(req, res, next){
     var adId = req.params.id;
     var newAdData = req.body;
@@ -137,6 +543,16 @@ router.put('/:id', authorize, function(req, res, next){
     );
 });
 
+/**
+ * @api {post} /ads/:id/microsite Save Ad Microsite (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdMicrosite
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} microsite Microsite Object
+ * @apiParam {Number} id Sponsored Ad Id
+ * 
+ */
 router.post('/:id/microsite', authorize, function(req, res, next) {
     ads.saveAdMicrosite(req.params.id, req.body).then(function(response){
         res.json(response);
@@ -144,18 +560,18 @@ router.post('/:id/microsite', authorize, function(req, res, next) {
         next(error);
     });
 
-//    if(!req.files){
-//        res.send('No files were uploaded');
-//        return;
-//    }
-//
-//    UploadHelper.uploadFiles(req.files, "microsite").then(function(response){
-//        req.body.image = response.length === 1 ? response[0] : response;
-//
-//    }, function(error){
-//        res.json(error);
-//    });
 });
+
+/**
+ * @api {post} /ads/:id/keywords Save Ad Keywords (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdKeywords
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} object Ad Keyword Object
+ * @apiParam {Number} id Sponsored Ad Id
+ * 
+ */
 router.post('/:id/keywords', authorize, function(req, res, next) {
     ads.saveAdKeywords(req.params.id, req.body).then(function(response){
         res.json(response);
@@ -164,6 +580,17 @@ router.post('/:id/keywords', authorize, function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {post} /ads/:id/subpages Save Ad Sub Pages (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdSubpages
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} object Ad Subpage Object
+ * @apiParam {Number} id Sponsored Ad Id
+ * 
+ */
 router.post('/:id/subpages', authorize, function(req, res, next) {
     ads.saveAdSubPages(req.params.id, req.body).then(function(response){
         res.json(response);
@@ -172,6 +599,17 @@ router.post('/:id/subpages', authorize, function(req, res, next) {
         next(error);
     });
 });
+
+/**
+ * @api {post} /ads/:id/locations Save Ad Locations (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdLocations
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} object Ad Location Object
+ * @apiParam {Number} id Sponsored Ad Id
+ * 
+ */
 router.post('/:id/locations', authorize, function(req, res, next) {
     ads.saveAdLocations(req.params.id, req.body).then(function(response){
         res.json(response);
@@ -181,7 +619,16 @@ router.post('/:id/locations', authorize, function(req, res, next) {
     });
 });
 
-//Creates Ad offers
+/**
+ * @api {post} /ads/:id/offers Save Ad Offers (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} object Ad Offer Object
+ * @apiParam {Number} id Sponsored Ad Id
+ * 
+ */
 router.post('/:id/offers', authorize, function(req, res, next) {
     var ad_id = parseInt(req.params.id);
     ads.saveAdOffers(ad_id, req.body).then(function(response){
@@ -192,7 +639,17 @@ router.post('/:id/offers', authorize, function(req, res, next) {
     });
 });
 
-//Creates Advertiser offer
+/**
+ * @api {post} /ads/:id/offers Save Advertiser Offers (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdvertiserOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {File} file Adveriser Offer Image
+ * @apiParam {Number} advertiserId Advertiser Id
+ * @apiParam {Object} object Advertiser Offer Object
+ * 
+ */
 router.post('/advertiserOffers/:advertiserId', authorize, function(req, res, next) {
     if(!req.files){
         res.send('No files were uploaded');
@@ -212,6 +669,15 @@ router.post('/advertiserOffers/:advertiserId', authorize, function(req, res, nex
     });
 });
 
+/**
+ * @api {post} /ads/ziphuboffers Save Ziphub Offers (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveZiphubOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {Object} object Offer Object
+ * 
+ */
 router.post('/ziphuboffers', authorize, function(req, res, next) {
     var offer = req.body;
     ads.saveZiphubOffer(offer).then(function(response){
@@ -221,7 +687,17 @@ router.post('/ziphuboffers', authorize, function(req, res, next) {
     });
 });
 
-//Save keyword and keyword category
+/**
+ * @api {post} /ads/:id/offers Save Advertiser Offers (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdvertiserOffers
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {File} file Adveriser Offer Image
+ * @apiParam {Number} advertiserId Advertiser Id
+ * @apiParam {Object} object Advertiser Offer Object
+ * 
+ */
 router.post('/keywords/:categoryId', authorize, function(req, res, next) {
     ads.saveKeywords(req.params.categoryId, req.body).then(function(response){
         res.json(response);
@@ -231,7 +707,17 @@ router.post('/keywords/:categoryId', authorize, function(req, res, next) {
     });
 });
 
-//Creates Advertiser files
+/**
+ * @api {post} /ads/advertiserFiles/:advertiserId Save Advertiser File (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdvertiserFile
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {File} file Adveriser File
+ * @apiParam {Number} advertiserId Advertiser Id
+ * @apiParam {Object} object Advertiser File Object
+ * 
+ */
 router.post('/advertiserFiles/:advertiserId', authorize, function(req, res, next) {
     if(!req.files){
         res.send('No files were uploaded');
@@ -251,7 +737,17 @@ router.post('/advertiserFiles/:advertiserId', authorize, function(req, res, next
     });
 });
 
-//Upload ad files
+/**
+ * @api {post} /ads/:adId/adFiles Save Ad Files (Protected)
+ * @apiVersion 0.1.0
+ * @apiName SaveAdFiles
+ * @apiGroup Sponsored Ads
+ *
+ * @apiParam {File} file Adveriser File
+ * @apiParam {Number} adId Sponsored Ad Id
+ * @apiParam {Object} object Ad File Object
+ * 
+ */
 router.post('/:id/adFiles', authorize, function(req, res, next) {
     var ad_id = parseInt(req.params.id);
     ads.saveAdFiles(ad_id, req.body).then(function(response){
@@ -261,7 +757,15 @@ router.post('/:id/adFiles', authorize, function(req, res, next) {
     });
 });
 
-//Approve Ads
+/**
+ * @api {post} /ads/manageAds Manage Ads (Protected)
+ * @apiVersion 0.1.0
+ * @apiName ManageAds
+ * @apiGroup Sponsored Ads
+ * 
+ * @apiParam {Object} object Ad Object
+ * 
+ */
 router.post('/manageAds', authorize, function(req, res, next) {
     ads.manageAd(req.body).then(function(response) {
             res.json(response);
@@ -272,7 +776,16 @@ router.post('/manageAds', authorize, function(req, res, next) {
     );
 });
 
-//Upload web offer image
+/**
+ * @api {post} /ads/weboffers Upload Web Offers (Protected)
+ * @apiVersion 0.1.0
+ * @apiName UploadWebOffers
+ * @apiGroup Sponsored Ads
+ * 
+ * @apiParam {File} file Web Offer Image
+ * @apiParam {String} url Web Offer Url
+ * 
+ */
 router.post('/weboffers', authorize, function(req, res, next){
     var url = req.body.url;
 
@@ -299,7 +812,13 @@ router.post('/weboffers', authorize, function(req, res, next){
 
 
 /**
- * DELETE Request section
+ * @api {delete} /ads/:adId Delete Sponsored Ads (Protected)
+ * @apiVersion 0.1.0
+ * @apiName DeleteAds
+ * @apiGroup Sponsored Ads
+ * 
+ * @apiParam {Number} adId Sponsored Ad Id
+ * 
  */
 router.delete('/:id', authorize, function(req, res, next){
     var adId = req.params.id;
@@ -313,6 +832,15 @@ router.delete('/:id', authorize, function(req, res, next){
     );
 });
 
+/**
+ * @api {delete} /ads/offers/:offerId Delete Ads Offers (Protected)
+ * @apiVersion 0.1.0
+ * @apiName DeleteAdOfferss
+ * @apiGroup Sponsored Ads
+ * 
+ * @apiParam {Number} offerId Ad Offer Id
+ * 
+ */
 router.delete('/offers/:offerId', authorize, function(req, res, next){
     var offerId = req.params.offerId;
     ads.deleteAdOffer(offerId).then(
@@ -326,7 +854,7 @@ router.delete('/offers/:offerId', authorize, function(req, res, next){
 });
 
 /**
- * @api {put} /ads/:adId/pause Pause A Sponsored Ad.
+ * @api {put} /ads/:adId/pause Pause A Sponsored Ad. (Protected)
  * @apiVersion 0.1.0
  * @apiName pauseASponsoredAd
  * @apiGroup Sponsored Ads
@@ -359,7 +887,7 @@ router.put('/:adId/pause', authorize, function(req, res, next){
 });
 
 /**
- * @api {put} /ads/:adId/unpause Unpause A Sponsored Ad.
+ * @api {put} /ads/:adId/unpause Unpause A Sponsored Ad. (Protected)
  * @apiVersion 0.1.0
  * @apiName UnpauseASponsoredAd
  * @apiGroup Sponsored Ads
@@ -445,20 +973,23 @@ router.get('/:subpage/featured', function(req, res, next){
 
     var subPage = parseInt(req.params.subpage);
     let location = req.query.location;
-    if(! location)
-    {
-        const ip = Util.getClientIp(req);
-        const ipAddress = Util.ipToLocation(ip);
+    // if(! location)
+    // {
+    //     const ip = Util.getClientIp(req);
+    //     const ipAddress = Util.ipToLocation(ip);
 
-        if(ipAddress && ipAddress.country === 'US'){
-            location = ipAddress.zip;
-        } else {
-            return res.json({status: false, message: 'Location not in the USA'});
-        }
+    //     if(ipAddress && ipAddress.country === 'US'){
+    //         location = ipAddress.zip;
+    //     } else {
+    //         return res.json({status: false, message: 'Location not in the USA'});
+    //     }
 
         
-    }
+    // }
 
+    //Temporarily turn off location feature
+    location = false;
+    
     ads.getFeatured(subPage, location).then(
         function(featuredAds){
             if(! (featuredAds.length > 0))
@@ -489,7 +1020,7 @@ router.get('/:subpage/featured', function(req, res, next){
 });
 
 /**
- * @api {put} /ads/:adId/featured Make A Sponsored Ad featured.
+ * @api {put} /ads/:adId/featured Make A Sponsored Ad featured. (Protected)
  * @apiVersion 0.1.0
  * @apiName FeaturedponsoredAds
  * @apiGroup Sponsored Ads
@@ -524,7 +1055,7 @@ router.put('/:adId/featured', authorize, function(req, res, next){
 });
 
 /**
- * @api {put} /ads/:adId/notfeatured Make A Sponsored Ad not featured.
+ * @api {put} /ads/:adId/notfeatured Make A Sponsored Ad not featured. (Protected)
  * @apiVersion 0.1.0
  * @apiName NotFeaturedponsoredAds
  * @apiGroup Sponsored Ads
@@ -560,7 +1091,7 @@ router.put('/:adId/notfeatured', authorize, function(req, res, next){
 });
 
 /**
- * @api {put} /ads/:adId/approve Approve Sponsored Ads
+ * @api {put} /ads/:adId/approve Approve Sponsored Ads (Protected)
  * @apiVersion 0.1.0
  * @apiName ApproveSponsoredAds
  * @apiGroup Sponsored Ads
@@ -596,7 +1127,7 @@ router.put('/:adId/approve', authorize, function(req, res, next){
 });
 
 /**
- * @api {put} /ads/:adId/disapprove Disapprove Sponsored Ads
+ * @api {put} /ads/:adId/disapprove Disapprove Sponsored Ads (Protected)
  * @apiVersion 0.1.0
  * @apiName DisapproveSponsoredAds
  * @apiGroup Sponsored Ads
@@ -631,7 +1162,7 @@ router.put('/:adId/disapprove', authorize, function(req, res, next){
 });
 
 /**
- * @api {post} /ads/adoffers/:offerId/:userId Member Save Sponsored Ad Offers
+ * @api {post} /ads/adoffers/:offerId/:userId Member Save Sponsored Ad Offers (Protected)
  * @apiVersion 0.1.0
  * @apiName MemberSaveSponsoredAdOffers
  * @apiGroup Sponsored Ads
@@ -670,7 +1201,7 @@ router.get('/adoffers/:userId', function(req, res, next){
 });
 
 /**
- * @api {delete} /ads/adoffers/:userId/:consumerOfferId Delete saved consumer sponsored ad offer
+ * @api {delete} /ads/adoffers/:userId/:consumerOfferId Delete saved consumer sponsored ad offer (Protected)
  * @apiVersion 0.1.0
  * @apiName DeleteSavedConsumerOffer
  * @apiGroup Sponsored Ads

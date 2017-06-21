@@ -5,7 +5,7 @@ var userModel = require('../models/userModel');
 var Util = require('../lib/util');
 
 /**
- * @api {get} /download/deals/:dealId Track Non-member Deal Download
+ * @api {get} /download/deals/:dealId Track Non-member Deal Download (Web and Mobile)
  * @apiVersion 0.1.0
  * @apiName TrackNonMemberDealDownload
  * @apiGroup Daily Deals

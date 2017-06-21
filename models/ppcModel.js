@@ -308,6 +308,7 @@ var ppcModel = {
             let query = 
             'SELECT ' + 
             'dd.id AS deal_id, ' +
+            'dd.advertiser_id, ' +
             'm.id AS microsite_id, '+
             'm.company_name, ' +
             'm.what_you_get, '+
@@ -361,7 +362,6 @@ var ppcModel = {
                 query += "LIMIT ? ";
                 queryParams.push(limit);
             }
-
             DbHelper.getConnection().then(function(connection){
 
                 connection.query(query, queryParams, function(err, results, fields){
@@ -683,7 +683,6 @@ var ppcModel = {
     getDealsFromEachCategory : function(limit, location){
 
         return new Promise(function(resolve, reject) {
-            console.log(location)
             ppcModel.findAllDealCategories().then(function(response){
                 if(response.length > 0){
                     //Build Query

@@ -1068,14 +1068,14 @@ module.exports = {
     saveCategory: function(category) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                if(category.id == 0 ) {
+                if(!category.id || category.id == 0 ) {
                     connection.query('INSERT INTO ppc_keyword_categories SET ?', [category],
                         function (err, rows, fields) {
                             connection.release();
                             if(err){
                                 return reject(err);
                             }
-                            resolve(rows);
+                            resolve({insertId: rows.insertId, affectedRows: rows.affectedRows});
                         }
                     );
                 } else {
@@ -1085,7 +1085,7 @@ module.exports = {
                             if(err){
                                 return reject(err);
                             }
-                            resolve(rows);
+                            resolve({changedRows: rows.changedRows});
                         }
                     );
                 }
@@ -1099,7 +1099,7 @@ module.exports = {
     saveKeyword: function(keyword) {
         return new Promise(function(resolve, reject) {
             DbHelper.getConnection().then(function(connection){
-                if(keyword.id == 0 ) {
+                if(!keyword.id || keyword.id == 0 ) {
                     connection.query('INSERT INTO ppc_keywords SET ?', [keyword],
                         function (err, rows, fields) {
                             connection.release();
