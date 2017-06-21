@@ -576,6 +576,7 @@ router.get('/deals', function(req, res, next) {
 		limit = config.get('numRowsPerPage');
 
 	let location = req.query.location;
+
 	if( ! location) 
 	{
 		const ip = Util.getClientIp(req);
@@ -586,6 +587,7 @@ router.get('/deals', function(req, res, next) {
             return res.json({status: false, message: 'Location not in the USA'});
         }
 	}
+
 
 	ppcModel.getDealsFromEachCategory(limit, location).then(
 		function(deals){
@@ -1035,7 +1037,6 @@ var fetchNearestDeals = function(req, res, next) {
 
 	ppcModel.getNearestDeals(lat, lng, radius, req.query.limit).then(
 		function(searchData){
-
 			if(req.query.display === "count")
 				return res.json(searchData.length);
 
